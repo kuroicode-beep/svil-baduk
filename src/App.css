@@ -1,0 +1,343 @@
+.app {
+  max-width: 1100px;
+  margin: 0 auto;
+  padding: 24px 20px 48px;
+}
+
+.home .hero {
+  margin-bottom: 32px;
+}
+
+.brand {
+  margin: 0 0 8px;
+  font-size: 2.4rem;
+  font-weight: 400;
+  color: var(--accent-strong);
+  letter-spacing: 0.04em;
+}
+
+.tagline {
+  margin: 0;
+  color: var(--text-sub);
+  font-size: 1.15rem;
+}
+
+.main-nav {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  max-width: 420px;
+}
+
+.btn {
+  min-height: 50px;
+  padding: 12px 20px;
+  border: 2px solid var(--border-strong);
+  border-radius: 12px;
+  background: var(--surface-2);
+  color: var(--text);
+  cursor: pointer;
+  text-align: center;
+}
+
+.btn:hover:not(:disabled) {
+  border-color: var(--accent);
+  color: var(--accent-strong);
+}
+
+.btn:disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+}
+
+.btn-primary {
+  background: var(--accent-strong);
+  color: #000;
+  border-color: var(--accent-strong);
+}
+
+.btn-primary:hover:not(:disabled) {
+  background: var(--accent-max);
+  border-color: var(--accent-max);
+  color: #000;
+}
+
+.btn-danger {
+  border-color: var(--negative);
+  color: var(--negative);
+}
+
+.nav-btn {
+  font-size: 1.15rem;
+}
+
+.screen-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  margin-bottom: 20px;
+}
+
+.screen-head h2 {
+  margin: 0;
+  font-size: 1.7rem;
+  font-weight: 400;
+}
+
+.field {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin-bottom: 18px;
+}
+
+.field select,
+.field input {
+  min-height: 50px;
+  padding: 10px 14px;
+  border: 2px solid var(--border-strong);
+  border-radius: 12px;
+  background: var(--surface-2);
+}
+
+.field legend {
+  margin-bottom: 8px;
+}
+
+.radio,
+.check {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  min-height: 50px;
+  margin-right: 16px;
+}
+
+.radio input,
+.check input {
+  width: 22px;
+  height: 22px;
+}
+
+.btn-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  align-items: center;
+  margin-top: 16px;
+}
+
+.lesson-card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 16px;
+  padding: 22px 24px;
+}
+
+.lesson-card h4 {
+  margin: 0 0 10px;
+  font-size: 1.35rem;
+  font-weight: 400;
+  color: var(--accent-strong);
+}
+
+.hint-badge {
+  margin: 16px 0 0;
+  padding: 12px 14px;
+  border: 1.5px solid var(--warning);
+  border-radius: 999px;
+  color: var(--warning);
+}
+
+.hint-badge .label {
+  margin-right: 8px;
+}
+
+.lesson-toc {
+  list-style: none;
+  padding: 0;
+  margin: 28px 0 0;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.toc-btn {
+  width: 100%;
+  min-height: 50px;
+  text-align: left;
+  padding: 10px 16px;
+  border: 2px solid var(--border);
+  border-radius: 12px;
+  background: transparent;
+  cursor: pointer;
+}
+
+.toc-btn.is-active {
+  border-color: var(--accent);
+  color: var(--accent-strong);
+  box-shadow: inset 0 -3px 0 var(--accent);
+}
+
+.game-layout {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 24px;
+  align-items: flex-start;
+}
+
+.board-wrap {
+  overflow: auto;
+  max-width: 100%;
+  border: 2px solid var(--border-strong);
+  border-radius: 12px;
+  background: #000;
+}
+
+.board-svg:focus-visible {
+  outline: 3px solid var(--focus);
+  outline-offset: 4px;
+}
+
+.legal-dot {
+  cursor: pointer;
+  pointer-events: none;
+}
+
+.legal-dot--blink {
+  animation: blink-dot 1s steps(2, jump-none) infinite;
+}
+
+.legal-dot--focus {
+  animation: none;
+  fill: #fff59a;
+}
+
+html[data-reduce-motion='1'] .legal-dot--blink {
+  animation: none;
+  opacity: 1;
+}
+
+@keyframes blink-dot {
+  50% {
+    opacity: 0.15;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .legal-dot--blink {
+    animation: none;
+  }
+}
+
+.hit-target {
+  cursor: pointer;
+}
+
+.panel {
+  flex: 1;
+  min-width: 240px;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 16px;
+  padding: 22px;
+}
+
+.status-line {
+  margin: 0 0 8px;
+  font-size: 1.25rem;
+  color: var(--accent-strong);
+}
+
+.stats {
+  display: grid;
+  gap: 12px;
+  margin: 16px 0;
+}
+
+.stats div {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+  border-bottom: 1px solid var(--border);
+  padding-bottom: 8px;
+}
+
+.stats dt {
+  color: var(--text-sub);
+}
+
+.stats dd {
+  margin: 0;
+}
+
+.error {
+  color: var(--negative);
+  border: 1.5px solid var(--negative);
+  border-radius: 12px;
+  padding: 12px 14px;
+}
+
+.sr-help {
+  color: var(--text-sub);
+  margin-bottom: 12px;
+}
+
+.id-row {
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+.id-box {
+  display: inline-flex;
+  align-items: center;
+  min-height: 50px;
+  padding: 0 14px;
+  background: var(--surface-2);
+  border: 2px solid var(--border-strong);
+  border-radius: 12px;
+  flex: 1;
+}
+
+.details {
+  margin-top: 20px;
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 12px 16px;
+}
+
+.hint-block {
+  white-space: pre-wrap;
+  color: var(--text-sub);
+  font-size: 0.95rem;
+}
+
+.changelog {
+  padding-left: 20px;
+}
+
+.changelog h4 {
+  margin: 0 0 6px;
+  font-weight: 400;
+}
+
+.changelog h4 span {
+  color: var(--text-sub);
+  margin-left: 8px;
+}
+
+.ai-status {
+  color: var(--warning);
+}
+
+.done-msg {
+  color: var(--positive);
+}
+
+.meta,
+.hint,
+.lesson-progress {
+  color: var(--text-sub);
+}

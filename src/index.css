@@ -1,0 +1,66 @@
+:root {
+  --bg: #0d0d12;
+  --surface: #16161d;
+  --surface-2: #1f1f2a;
+  --border: #3a3a48;
+  --border-strong: #6b6b82;
+  --text: #f5f5f7;
+  --text-sub: #c9c9d4;
+  --accent: #7ec8ff;
+  --accent-strong: #b3ddff;
+  --accent-max: #d6ecff;
+  --positive: #7ee2a8;
+  --warning: #ffd479;
+  --negative: #ff9b9b;
+  --focus: #ffd479;
+  --font-ui: "KyoboHandwriting2019", "Segoe UI", "Malgun Gothic", sans-serif;
+  --font-base: 18px;
+}
+
+@font-face {
+  font-family: "KyoboHandwriting2019";
+  src: local("KyoboHandwriting2019"), local("Kyobo Handwriting 2019");
+  font-display: swap;
+}
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+html,
+body,
+#root {
+  min-height: 100%;
+}
+
+body {
+  margin: 0;
+  background:
+    radial-gradient(ellipse at 20% 0%, #1a2438 0%, transparent 50%),
+    radial-gradient(ellipse at 80% 100%, #1a1828 0%, transparent 45%),
+    var(--bg);
+  color: var(--text);
+  font-family: var(--font-ui);
+  font-size: var(--font-base);
+  line-height: 1.8;
+  letter-spacing: 0.02em;
+  word-break: keep-all;
+}
+
+button,
+input,
+select {
+  font: inherit;
+  color: inherit;
+}
+
+:focus-visible {
+  outline: 3px solid var(--focus);
+  outline-offset: 2px;
+}
+
+.mono {
+  font-family: Consolas, "Courier New", monospace;
+}

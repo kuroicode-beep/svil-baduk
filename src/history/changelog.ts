@@ -6,6 +6,13 @@ export interface HistoryEntry {
 
 export const CHANGELOG: HistoryEntry[] = [
   {
+    version: '0.7.4',
+    date: '2026-07-24',
+    lines: [
+      '직전 수·AI 힌트: 두꺼운 동심원(검정+강조색) 퍼짐 강화',
+    ],
+  },
+  {
     version: '0.7.3',
     date: '2026-07-24',
     lines: [

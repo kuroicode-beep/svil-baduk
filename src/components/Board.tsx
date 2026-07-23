@@ -95,21 +95,43 @@ export function Board({
     tone: 'last' | 'hint'
     fast?: boolean
   }) {
-    if (reduceMotion) return null
-    const stroke = tone === 'hint' ? '#7ee2a8' : '#ffd479'
+    const bright = tone === 'hint' ? '#7ee2a8' : '#ffd479'
+    const thick = Math.max(10, cell * 0.22)
+    if (reduceMotion) {
+      return (
+        <g pointerEvents="none" aria-hidden>
+          <circle cx={cx} cy={cy} r={baseR * 1.15} fill="none" stroke="#000" strokeWidth={thick + 4} />
+          <circle cx={cx} cy={cy} r={baseR * 1.15} fill="none" stroke={bright} strokeWidth={thick} />
+        </g>
+      )
+    }
     return (
-      <g className={`pulse-rings pulse-rings--${tone}${fast ? ' pulse-rings--fast' : ''}`} pointerEvents="none">
-        {[0, 1, 2].map((i) => (
-          <circle
-            key={i}
-            className={`pulse-ring pulse-ring--${i}`}
-            cx={cx}
-            cy={cy}
-            r={baseR}
-            fill="none"
-            stroke={stroke}
-            strokeWidth={tone === 'hint' ? 3 : 3.5}
-          />
+      <g
+        className={`pulse-rings pulse-rings--${tone}${fast ? ' pulse-rings--fast' : ''}`}
+        pointerEvents="none"
+        aria-hidden
+      >
+        {[0, 1, 2, 3].map((i) => (
+          <g key={i} className={`pulse-ring pulse-ring--${i}`}>
+            <circle
+              cx={cx}
+              cy={cy}
+              r={baseR}
+              fill="none"
+              stroke="#000000"
+              strokeWidth={thick + 5}
+              strokeLinecap="round"
+            />
+            <circle
+              cx={cx}
+              cy={cy}
+              r={baseR}
+              fill="none"
+              stroke={bright}
+              strokeWidth={thick}
+              strokeLinecap="round"
+            />
+          </g>
         ))}
       </g>
     )
@@ -331,7 +353,29 @@ export function Board({
                   strokeWidth={2}
                 />
               )}
-              {blinkStone && <PulseRings cx={cx} cy={cy} baseR={stoneR * 0.95} tone="last" />}
+              {blinkStone && (
+                <>
+                  <circle
+                    cx={cx}
+                    cy={cy}
+                    r={stoneR * 1.08}
+                    fill="none"
+                    stroke="#000"
+                    strokeWidth={Math.max(6, cell * 0.12)}
+                    opacity={0.9}
+                  />
+                  <circle
+                    className="stone-halo-last"
+                    cx={cx}
+                    cy={cy}
+                    r={stoneR * 1.08}
+                    fill="none"
+                    stroke="#ffd479"
+                    strokeWidth={Math.max(5, cell * 0.1)}
+                  />
+                  <PulseRings cx={cx} cy={cy} baseR={stoneR * 1.05} tone="last" />
+                </>
+              )}
             </g>
           )
         })}
@@ -356,7 +400,10 @@ export function Board({
                 opacity={0.55}
               />
               {!reduceMotion && (
-                <PulseRings cx={cx} cy={cy} baseR={stoneR * 0.95} tone="hint" fast />
+                <PulseRings cx={cx} cy={cy} baseR={stoneR * 1.05} tone="hint" fast />
+              )}
+              {reduceMotion && (
+                <PulseRings cx={cx} cy={cy} baseR={stoneR * 1.05} tone="hint" />
               )}
               <text
                 x={cx}

@@ -13,12 +13,19 @@ import {
   saveSettings,
   type Settings,
 } from './settings/store'
+import { loadSoloSnapshot } from './solo/snapshot'
 import './App.css'
 
 type Screen = 'home' | 'learn' | 'solo' | 'multi' | 'settings' | 'profile'
 
+function initialScreen(): Screen {
+  const snap = loadSoloSnapshot()
+  if (snap && !snap.state.ended) return 'solo'
+  return 'home'
+}
+
 export default function App() {
-  const [screen, setScreen] = useState<Screen>('home')
+  const [screen, setScreen] = useState<Screen>(() => initialScreen())
   const [settings, setSettings] = useState<Settings>(() => loadSettings())
 
   useEffect(() => {

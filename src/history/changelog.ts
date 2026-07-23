@@ -6,6 +6,14 @@ export interface HistoryEntry {
 
 export const CHANGELOG: HistoryEntry[] = [
   {
+    version: '0.7.3',
+    date: '2026-07-24',
+    lines: [
+      '미종료 대국: 앱/대국 재진입 시 바로 스냅샷 복원',
+      '직전 수·AI 힌트: 돌 전체 깜빡임 + 동심원 퍼짐',
+    ],
+  },
+  {
     version: '0.7.2',
     date: '2026-07-24',
     lines: [

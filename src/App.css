@@ -853,6 +853,84 @@ html[data-reduce-motion='1'] .last-move-mark--blink {
   }
 }
 
+/* 직전 수 / 힌트: 돌 전체 깜빡임 */
+.stone-flash--last .stone-flash-body {
+  animation: stone-body-blink 0.65s ease-in-out infinite;
+}
+
+.stone-flash--hint .stone-flash-body {
+  animation: stone-body-blink 0.38s ease-in-out infinite;
+}
+
+@keyframes stone-body-blink {
+  0%,
+  100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.2;
+  }
+}
+
+html[data-reduce-motion='1'] .stone-flash-body {
+  animation: none !important;
+  opacity: 1;
+}
+
+/* 동심원 퍼짐 */
+.pulse-ring {
+  transform-box: fill-box;
+  transform-origin: center;
+  animation: pulse-expand 1.15s ease-out infinite;
+}
+
+.pulse-rings--fast .pulse-ring {
+  animation-duration: 0.7s;
+}
+
+.pulse-ring--1 {
+  animation-delay: 0s;
+}
+
+.pulse-ring--2 {
+  animation-delay: 0.38s;
+}
+
+.pulse-ring--3 {
+  animation-delay: 0.76s;
+}
+
+.pulse-rings--fast .pulse-ring--2 {
+  animation-delay: 0.22s;
+}
+
+.pulse-rings--fast .pulse-ring--3 {
+  animation-delay: 0.44s;
+}
+
+@keyframes pulse-expand {
+  0% {
+    transform: scale(1);
+    opacity: 0.95;
+  }
+  100% {
+    transform: scale(2.35);
+    opacity: 0;
+  }
+}
+
+html[data-reduce-motion='1'] .pulse-ring {
+  animation: none !important;
+  opacity: 0;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .stone-flash-body,
+  .pulse-ring {
+    animation: none !important;
+  }
+}
+
 .last-move-box {
   display: flex;
   flex-direction: column;

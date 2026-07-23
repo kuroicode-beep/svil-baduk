@@ -16,7 +16,7 @@ import { hasCharacter, loadProfile, saveProfile } from '../profile/store'
 import { enterFullscreen, exitFullscreen } from '../platform/fullscreen'
 import { BOARD_CELL_PX, LINE_STROKE, type Settings } from '../settings/store'
 import { decodeSgf, replayTo } from '../sgf/sgf'
-import { clearSoloSnapshot, loadSoloSnapshot, saveSoloSnapshot } from '../solo/snapshot'
+import { clearSoloSnapshot, loadSoloSnapshot, saveSoloSnapshot, type SoloSnapshot } from '../solo/snapshot'
 
 const SOLO_PREFS_KEY = 'svil-baduk-solo-prefs'
 
@@ -42,6 +42,31 @@ function saveSoloPrefs(p: SoloPrefs) {
   localStorage.setItem(SOLO_PREFS_KEY, JSON.stringify(p))
 }
 
+/** 미종료 스냅샷이 있으면 대국 화면으로 바로 복원 */
+function bootSolo(): {
+  phase: 'setup' | 'play'
+  prefs: SoloPrefs
+  snap: SoloSnapshot | null
+  live: GameState
+} {
+  const snap = loadSoloSnapshot()
+  const prefs = loadSoloPrefs()
+  if (snap && !snap.state.ended) {
+    return {
+      phase: 'play',
+      prefs: { rankId: snap.rankId, size: snap.size, myColor: snap.myColor },
+      snap,
+      live: snap.state,
+    }
+  }
+  return {
+    phase: 'setup',
+    prefs,
+    snap: snap && snap.state.ended ? snap : null,
+    live: createGame(prefs.size),
+  }
+}
+
 interface SoloProps {
   lang: Lang
   settings: Settings
@@ -49,20 +74,20 @@ interface SoloProps {
 }
 
 export function Solo({ lang, settings, onBack }: SoloProps) {
-  const prefs = loadSoloPrefs()
-  const [phase, setPhase] = useState<'setup' | 'play'>('setup')
-  const [size, setSize] = useState<BoardSize>(prefs.size)
-  const [rankId, setRankId] = useState<RankId>(prefs.rankId)
-  const [myColor, setMyColor] = useState<Player>(prefs.myColor)
-  const [live, setLive] = useState<GameState>(() => createGame(9))
+  const boot = useMemo(() => bootSolo(), [])
+  const [phase, setPhase] = useState<'setup' | 'play'>(boot.phase)
+  const [size, setSize] = useState<BoardSize>(boot.prefs.size)
+  const [rankId, setRankId] = useState<RankId>(boot.prefs.rankId)
+  const [myColor, setMyColor] = useState<Player>(boot.prefs.myColor)
+  const [live, setLive] = useState<GameState>(() => boot.live)
   const [tree, setTree] = useState<Move[] | null>(null)
-  const [ply, setPly] = useState(0)
+  const [ply, setPly] = useState(() => boot.live.history.length)
   const [error, setError] = useState('')
   const [aiBusy, setAiBusy] = useState(false)
   const [hintPts, setHintPts] = useState<Array<Point & { label?: string }>>([])
   const [hintBusy, setHintBusy] = useState(false)
   const [progressNote, setProgressNote] = useState('')
-  const [snapshotMeta, setSnapshotMeta] = useState(() => loadSoloSnapshot())
+  const [snapshotMeta, setSnapshotMeta] = useState<SoloSnapshot | null>(() => boot.snap)
   const recordedEndRef = useRef(false)
   /** AI 착수 요청 세대 — aiBusy를 deps에 넣으면 setAiBusy(true)가 effect를 취소해 영구 정지됨 */
   const aiTurnGenRef = useRef(0)

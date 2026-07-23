@@ -80,6 +80,40 @@ export function Board({
   const blackStyle = blackStoneStyle(blackStone)
   const whiteStyle = whiteStoneStyle(whiteStone)
   const focusPoint = legal[focusIdx] ?? null
+  const hintStyle = state.toPlay === 1 ? blackStyle : whiteStyle
+
+  function PulseRings({
+    cx,
+    cy,
+    baseR,
+    tone,
+    fast,
+  }: {
+    cx: number
+    cy: number
+    baseR: number
+    tone: 'last' | 'hint'
+    fast?: boolean
+  }) {
+    if (reduceMotion) return null
+    const stroke = tone === 'hint' ? '#7ee2a8' : '#ffd479'
+    return (
+      <g className={`pulse-rings pulse-rings--${tone}${fast ? ' pulse-rings--fast' : ''}`} pointerEvents="none">
+        {[0, 1, 2].map((i) => (
+          <circle
+            key={i}
+            className={`pulse-ring pulse-ring--${i}`}
+            cx={cx}
+            cy={cy}
+            r={baseR}
+            fill="none"
+            stroke={stroke}
+            strokeWidth={tone === 'hint' ? 3 : 3.5}
+          />
+        ))}
+      </g>
+    )
+  }
 
   function handleKey(e: React.KeyboardEvent) {
     if (!interactive || legal.length === 0) return
@@ -263,9 +297,11 @@ export function Board({
           const isLast = lastMove && lastMove.x === x && lastMove.y === y
           const style = stone === 1 ? blackStyle : whiteStyle
           const label = stone === 1 ? '흑' : '백'
+          const blinkStone = Boolean(isLast && blinkLastMove && !reduceMotion)
           return (
-            <g key={`stone-${i}`}>
+            <g key={`stone-${i}`} className={blinkStone ? 'stone-flash stone-flash--last' : undefined}>
               <circle
+                className={blinkStone ? 'stone-flash-body' : undefined}
                 cx={cx}
                 cy={cy}
                 r={stoneR}
@@ -274,6 +310,7 @@ export function Board({
                 strokeWidth={3}
               />
               <text
+                className={blinkStone ? 'stone-flash-body' : undefined}
                 x={cx}
                 y={cy + 5}
                 textAnchor="middle"
@@ -284,46 +321,57 @@ export function Board({
               >
                 {label}
               </text>
-              {isLast && (
+              {isLast && !blinkLastMove && (
                 <circle
-                  className={[
-                    'last-move-mark',
-                    blinkLastMove && !reduceMotion ? 'last-move-mark--blink' : '',
-                  ].join(' ')}
                   cx={cx}
                   cy={cy}
-                  r={stoneR * (blinkLastMove ? 0.38 : 0.28)}
+                  r={stoneR * 0.28}
                   fill="#ffd479"
                   stroke="#000"
-                  strokeWidth={blinkLastMove ? 3 : 2}
+                  strokeWidth={2}
                 />
               )}
+              {blinkStone && <PulseRings cx={cx} cy={cy} baseR={stoneR * 0.95} tone="last" />}
             </g>
           )
         })}
-        {markers.map((p) => (
-          <g key={`mark-${p.x}-${p.y}`}>
-            <circle
-              cx={pad + p.x * cell}
-              cy={pad + p.y * cell}
-              r={14}
-              fill="rgba(0,0,0,0.65)"
-              stroke="#7ee2a8"
-              strokeWidth={3}
-            />
-            <text
-              x={pad + p.x * cell}
-              y={pad + p.y * cell + 5}
-              textAnchor="middle"
-              fill="#7ee2a8"
-              fontSize={p.label && p.label.length > 3 ? 10 : 12}
-              fontFamily="Consolas, monospace"
-              fontWeight={700}
+        {markers.map((p, mi) => {
+          const cx = pad + p.x * cell
+          const cy = pad + p.y * cell
+          const primary = mi === 0
+          return (
+            <g
+              key={`mark-${p.x}-${p.y}`}
+              className={reduceMotion ? undefined : 'stone-flash stone-flash--hint'}
+              pointerEvents="none"
             >
-              {p.label ?? (markers.length === 1 ? '힌트' : '정답')}
-            </text>
-          </g>
-        ))}
+              <circle
+                className={reduceMotion ? undefined : 'stone-flash-body'}
+                cx={cx}
+                cy={cy}
+                r={stoneR}
+                fill={hintStyle.fill}
+                stroke={primary ? '#7ee2a8' : hintStyle.stroke}
+                strokeWidth={primary ? 4 : 3}
+                opacity={0.55}
+              />
+              {!reduceMotion && (
+                <PulseRings cx={cx} cy={cy} baseR={stoneR * 0.95} tone="hint" fast />
+              )}
+              <text
+                x={cx}
+                y={cy + 5}
+                textAnchor="middle"
+                fill={primary ? '#7ee2a8' : hintStyle.label}
+                fontSize={primary ? 14 : 12}
+                fontFamily="Consolas, monospace"
+                fontWeight={700}
+              >
+                {p.label ?? (markers.length === 1 ? '힌트' : '정답')}
+              </text>
+            </g>
+          )
+        })}
         {interactive &&
           Array.from({ length: state.size * state.size }, (_, i) => {
             const x = i % state.size

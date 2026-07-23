@@ -1,12 +1,16 @@
 import { useEffect, useRef, useState } from 'react'
+import { playMoveSound } from '../audio/moveSound'
 import { Board } from '../components/Board'
 import { GamePanel } from '../components/GamePanel'
-import { createGame, pass, tryPlay } from '../engine/board'
+import { MoveAnnouncer } from '../components/MoveAnnouncer'
+import { RoomQr } from '../components/RoomQr'
+import { createGame, pass, resign, tryPlay } from '../engine/board'
+import { estimateScore } from '../engine/scoring'
 import type { BoardSize, GameState, Move, Player, Point } from '../engine/types'
 import type { Lang } from '../i18n/dict'
 import { t } from '../i18n/dict'
-import { BadukP2P, type P2PMessage } from '../p2p/session'
-import type { Settings } from '../settings/store'
+import { BadukP2P, friendlyP2PError, type P2PMessage } from '../p2p/session'
+import { BOARD_CELL_PX, LINE_STROKE, type Settings } from '../settings/store'
 
 interface MultiProps {
   lang: Lang
@@ -17,6 +21,10 @@ interface MultiProps {
 export function Multi({ lang, settings, onBack }: MultiProps) {
   const p2pRef = useRef<BadukP2P | null>(null)
   const lobbyRef = useRef({ amHost: true, size: 9 as BoardSize, hostColor: 1 as Player })
+  const langRef = useRef(lang)
+  const phaseRef = useRef<'lobby' | 'play'>('lobby')
+  const soundRef = useRef(settings.moveSound)
+  const onMsgRef = useRef<(msg: P2PMessage) => void>(() => {})
 
   const [myId, setMyId] = useState('')
   const [peerInput, setPeerInput] = useState('')
@@ -28,26 +36,57 @@ export function Multi({ lang, settings, onBack }: MultiProps) {
   const [state, setState] = useState<GameState>(() => createGame(9))
   const [phase, setPhase] = useState<'lobby' | 'play'>('lobby')
   const [error, setError] = useState('')
+  const [peerReady, setPeerReady] = useState(false)
 
+  langRef.current = lang
+  phaseRef.current = phase
+  soundRef.current = settings.moveSound
   lobbyRef.current = { amHost, size, hostColor }
 
-  useEffect(() => {
+  function returnToLobby(message?: string) {
+    setConnected(false)
+    setPhase('lobby')
+    setState(createGame(lobbyRef.current.size))
+    if (message) setError(message)
+  }
+
+  function bootPeer() {
+    p2pRef.current?.destroy()
+    setMyId('')
+    setPeerReady(false)
+    setConnected(false)
+
     const session = new BadukP2P({
-      onReady: (id) => setMyId(id),
-      onClose: () => {
-        setConnected(false)
-        setError('연결이 끊어졌습니다')
+      onReady: (id) => {
+        setMyId(id)
+        setPeerReady(true)
       },
-      onError: (err) => setError(err.message),
-      onMessage: (msg) => onPeerMessage(msg),
+      onClose: () => {
+        returnToLobby(t(langRef.current, 'disconnected'))
+      },
+      onError: (err) => {
+        setError(friendlyP2PError(err.message, t(langRef.current, 'connectFailed')))
+        if (phaseRef.current === 'play') {
+          setConnected(false)
+        }
+      },
+      onMessage: (msg) => onMsgRef.current(msg),
     })
     p2pRef.current = session
-    session.start().catch((e: Error) => setError(e.message))
-    return () => session.destroy()
+    session.start().catch((e: Error) => {
+      setError(friendlyP2PError(e.message, t(langRef.current, 'connectFailed')))
+      setPeerReady(false)
+    })
+  }
+
+  useEffect(() => {
+    bootPeer()
+    return () => p2pRef.current?.destroy()
+    // mount once
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
 
-  function onPeerMessage(msg: P2PMessage) {
+  onMsgRef.current = (msg: P2PMessage) => {
     const lobby = lobbyRef.current
 
     if (msg.type === 'sync-request' && lobby.amHost) {
@@ -60,6 +99,7 @@ export function Multi({ lang, settings, onBack }: MultiProps) {
       setMyColor(lobby.hostColor)
       setState(createGame(lobby.size))
       setConnected(true)
+      setError('')
       setPhase('play')
       return
     }
@@ -70,6 +110,7 @@ export function Multi({ lang, settings, onBack }: MultiProps) {
       setSize(msg.size)
       setState(createGame(msg.size))
       setConnected(true)
+      setError('')
       setPhase('play')
       p2pRef.current?.send({ type: 'accept', name: 'guest' })
       return
@@ -77,29 +118,27 @@ export function Multi({ lang, settings, onBack }: MultiProps) {
 
     if (msg.type === 'accept') {
       setConnected(true)
+      setError('')
       setPhase('play')
       return
     }
 
     if (msg.type === 'move') {
-      applyRemoteMove(msg.move)
+      setState((s) => {
+        if (msg.move.pass) {
+          const r = pass(s)
+          return r.ok ? r.state : s
+        }
+        const r = tryPlay(s, msg.move.x, msg.move.y)
+        if (r.ok) playMoveSound(soundRef.current)
+        return r.ok ? r.state : s
+      })
       return
     }
 
     if (msg.type === 'resign') {
-      setState((s) => ({ ...s, ended: true }))
+      setState((s) => resign(s, msg.player))
     }
-  }
-
-  function applyRemoteMove(move: Move) {
-    setState((s) => {
-      if (move.pass) {
-        const r = pass(s)
-        return r.ok ? r.state : s
-      }
-      const r = tryPlay(s, move.x, move.y)
-      return r.ok ? r.state : s
-    })
   }
 
   function createRoom() {
@@ -112,11 +151,18 @@ export function Multi({ lang, settings, onBack }: MultiProps) {
   async function joinRoom() {
     setAmHost(false)
     setError('')
+    if (!peerReady) {
+      setError(t(lang, 'connectFailed'))
+      return
+    }
     try {
       await p2pRef.current?.connect(peerInput.trim())
       p2pRef.current?.send({ type: 'sync-request' })
     } catch (e) {
-      setError(e instanceof Error ? e.message : 'join failed')
+      const code = e instanceof Error ? e.message : 'join failed'
+      setError(friendlyP2PError(code, t(lang, 'connectFailed')))
+      setConnected(false)
+      setPhase('lobby')
     }
   }
 
@@ -138,12 +184,23 @@ export function Multi({ lang, settings, onBack }: MultiProps) {
     if (!humanTurn) return
     const r = tryPlay(state, x, y)
     if (!r.ok) {
-      setError(t(lang, 'illegal'))
+      setError(r.reason === 'superko' || r.reason === 'ko' ? t(lang, 'superko') : t(lang, 'illegal'))
       return
     }
     setError('')
     setState(r.state)
     sendMove(r.move)
+    playMoveSound(settings.moveSound)
+  }
+
+  function goLobbyFromGame() {
+    try {
+      p2pRef.current?.destroy()
+    } catch {
+      /* ignore */
+    }
+    returnToLobby()
+    bootPeer()
   }
 
   if (phase === 'lobby') {
@@ -153,7 +210,7 @@ export function Multi({ lang, settings, onBack }: MultiProps) {
           <h2>{t(lang, 'multi')}</h2>
           <button type="button" className="btn" onClick={onBack}>{t(lang, 'back')}</button>
         </header>
-        <p className="hint">서버리스 WebRTC P2P (PeerJS 시그널링)</p>
+        <p className="hint">{t(lang, 'p2pHint')}</p>
         {error && <p className="error" role="alert">{error}</p>}
         <label className="field">
           <span>{t(lang, 'yourId')}</span>
@@ -169,6 +226,7 @@ export function Multi({ lang, settings, onBack }: MultiProps) {
             </button>
           </div>
         </label>
+        {myId && <RoomQr value={myId} label="방 ID QR — 상대가 스캔하거나 ID를 입력" />}
         <label className="field">
           <span>{t(lang, 'boardSize')}</span>
           <select value={size} onChange={(e) => setSize(Number(e.target.value) as BoardSize)}>
@@ -178,7 +236,7 @@ export function Multi({ lang, settings, onBack }: MultiProps) {
           </select>
         </label>
         <fieldset className="field">
-          <legend>{t(lang, 'playAs')} (호스트)</legend>
+          <legend>{t(lang, 'playAs')} ({t(lang, 'hostLabel')})</legend>
           <label className="radio">
             <input type="radio" checked={hostColor === 1} onChange={() => setHostColor(1)} />
             {t(lang, 'black')}
@@ -200,9 +258,14 @@ export function Multi({ lang, settings, onBack }: MultiProps) {
             autoComplete="off"
           />
         </label>
-        <button type="button" className="btn btn-primary" onClick={joinRoom}>
-          {t(lang, 'joinRoom')}
-        </button>
+        <div className="btn-row">
+          <button type="button" className="btn btn-primary" onClick={joinRoom} disabled={!peerReady}>
+            {t(lang, 'joinRoom')}
+          </button>
+          <button type="button" className="btn" onClick={bootPeer}>
+            {t(lang, 'reinitPeer')}
+          </button>
+        </div>
         <p className="meta">{connected ? t(lang, 'connected') : t(lang, 'waiting')}</p>
       </section>
     )
@@ -211,7 +274,15 @@ export function Multi({ lang, settings, onBack }: MultiProps) {
   return (
     <section className="screen game-screen">
       <p className="sr-help">{t(lang, 'blinkHelp')}</p>
-      {error && <p className="error" role="alert">{error}</p>}
+      <MoveAnnouncer lang={lang} state={state} />
+      {error && (
+        <div className="error-block">
+          <p className="error" role="alert">{error}</p>
+          <button type="button" className="btn" onClick={goLobbyFromGame}>
+            {t(lang, 'returnLobby')}
+          </button>
+        </div>
+      )}
       <div className="game-layout">
         <Board
           state={state}
@@ -220,6 +291,9 @@ export function Multi({ lang, settings, onBack }: MultiProps) {
           maxContrast={settings.maxContrastBoard}
           reduceMotion={settings.reduceMotion}
           lastMove={lastMove}
+          ownership={state.ended ? estimateScore(state).ownership : undefined}
+          cellSize={BOARD_CELL_PX[settings.boardScale]}
+          lineWidth={LINE_STROKE[settings.lineWeight]}
           onPlay={onPlay}
           ariaLabel={t(lang, 'multi')}
         />
@@ -228,7 +302,7 @@ export function Multi({ lang, settings, onBack }: MultiProps) {
           state={state}
           statusText={
             state.ended
-              ? t(lang, 'gameOver')
+              ? `${t(lang, 'gameOver')} · ${t(lang, 'score')}`
               : humanTurn
                 ? t(lang, 'yourTurn')
                 : t(lang, 'waiting')
@@ -243,12 +317,9 @@ export function Multi({ lang, settings, onBack }: MultiProps) {
           }}
           onResign={() => {
             p2pRef.current?.send({ type: 'resign', player: myColor })
-            setState({ ...state, ended: true })
+            setState(resign(state, myColor))
           }}
-          onBack={() => {
-            p2pRef.current?.destroy()
-            onBack()
-          }}
+          onBack={goLobbyFromGame}
         />
       </div>
     </section>

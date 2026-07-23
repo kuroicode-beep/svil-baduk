@@ -11,6 +11,8 @@ export type FontId =
   | 'reco'
 
 export type FontSizeId = 'small' | 'medium' | 'large'
+export type BoardScaleId = 'small' | 'medium' | 'large'
+export type LineWeightId = 'thin' | 'normal' | 'thick'
 
 export interface Settings {
   lang: Lang
@@ -19,6 +21,14 @@ export interface Settings {
   blinkIntersections: boolean
   maxContrastBoard: boolean
   reduceMotion: boolean
+  moveSound: boolean
+  boardScale: BoardScaleId
+  lineWeight: LineWeightId
+  katagoBridgeUrl: string
+  katagoExe: string
+  katagoModel: string
+  katagoConfig: string
+  katagoAutoConnect: boolean
 }
 
 const KEY = 'svil-baduk-settings'
@@ -40,6 +50,18 @@ export const FONT_SIZE_PX: Record<FontSizeId, number> = {
   large: 20,
 }
 
+export const BOARD_CELL_PX: Record<BoardScaleId, number> = {
+  small: 40,
+  medium: 48,
+  large: 60,
+}
+
+export const LINE_STROKE: Record<LineWeightId, number> = {
+  thin: 1.5,
+  normal: 2.5,
+  thick: 4,
+}
+
 export const defaultSettings = (): Settings => ({
   lang: 'ko',
   font: 'kyobo',
@@ -47,6 +69,14 @@ export const defaultSettings = (): Settings => ({
   blinkIntersections: true,
   maxContrastBoard: true,
   reduceMotion: false,
+  moveSound: true,
+  boardScale: 'medium',
+  lineWeight: 'normal',
+  katagoBridgeUrl: 'http://127.0.0.1:17419',
+  katagoExe: '',
+  katagoModel: '',
+  katagoConfig: '',
+  katagoAutoConnect: true,
 })
 
 export function loadSettings(): Settings {

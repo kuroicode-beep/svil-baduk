@@ -1,33 +1,49 @@
-/** 급/단 → KataGo visits / 내장 휴리스틱 난이도 */
+/** 난이도 10단계 → KataGo visits / 내장 휴리스틱 */
 
 export type RankId =
-  | '30k' | '20k' | '15k' | '10k' | '7k' | '5k' | '3k' | '1k'
-  | '1d' | '2d' | '3d' | '5d'
+  | 'lv1'
+  | 'lv2'
+  | 'lv3'
+  | 'lv4'
+  | 'lv5'
+  | 'lv6'
+  | 'lv7'
+  | 'lv8'
+  | 'lv9'
+  | 'lv10'
 
 export interface RankOption {
   id: RankId
+  /** 1–10 */
+  level: number
   labelKo: string
-  /** KataGo -v visits (대략) */
+  labelEn: string
+  /** KataGo maxVisits (대략) */
   visits: number
   /** 내장 AI: 합법적 수 중 무작위 비율 (1=완전랜덤, 0=캡처/중앙 선호) */
   randomness: number
 }
 
 export const RANKS: RankOption[] = [
-  { id: '30k', labelKo: '30급 (입문)', visits: 2, randomness: 0.95 },
-  { id: '20k', labelKo: '20급', visits: 4, randomness: 0.85 },
-  { id: '15k', labelKo: '15급', visits: 8, randomness: 0.7 },
-  { id: '10k', labelKo: '10급', visits: 16, randomness: 0.55 },
-  { id: '7k', labelKo: '7급', visits: 32, randomness: 0.4 },
-  { id: '5k', labelKo: '5급', visits: 64, randomness: 0.3 },
-  { id: '3k', labelKo: '3급', visits: 128, randomness: 0.2 },
-  { id: '1k', labelKo: '1급', visits: 256, randomness: 0.12 },
-  { id: '1d', labelKo: '초단', visits: 400, randomness: 0.08 },
-  { id: '2d', labelKo: '2단', visits: 600, randomness: 0.05 },
-  { id: '3d', labelKo: '3단', visits: 900, randomness: 0.03 },
-  { id: '5d', labelKo: '5단', visits: 1600, randomness: 0.01 },
+  { id: 'lv1', level: 1, labelKo: '1 · 입문', labelEn: '1 · Beginner', visits: 2, randomness: 0.95 },
+  { id: 'lv2', level: 2, labelKo: '2 · 왕초보', labelEn: '2 · Novice', visits: 4, randomness: 0.85 },
+  { id: 'lv3', level: 3, labelKo: '3 · 초급', labelEn: '3 · Easy', visits: 8, randomness: 0.7 },
+  { id: 'lv4', level: 4, labelKo: '4 · 초급+', labelEn: '4 · Easy+', visits: 16, randomness: 0.55 },
+  { id: 'lv5', level: 5, labelKo: '5 · 중급', labelEn: '5 · Medium', visits: 32, randomness: 0.4 },
+  { id: 'lv6', level: 6, labelKo: '6 · 중급+', labelEn: '6 · Medium+', visits: 64, randomness: 0.28 },
+  { id: 'lv7', level: 7, labelKo: '7 · 상급', labelEn: '7 · Hard', visits: 128, randomness: 0.18 },
+  { id: 'lv8', level: 8, labelKo: '8 · 상급+', labelEn: '8 · Hard+', visits: 256, randomness: 0.1 },
+  { id: 'lv9', level: 9, labelKo: '9 · 유단', labelEn: '9 · Dan', visits: 500, randomness: 0.05 },
+  { id: 'lv10', level: 10, labelKo: '10 · 고수', labelEn: '10 · Expert', visits: 1200, randomness: 0.02 },
 ]
 
+export const DEFAULT_RANK: RankId = 'lv3'
+
 export function getRank(id: RankId): RankOption {
-  return RANKS.find((r) => r.id === id) ?? RANKS[0]
+  return RANKS.find((r) => r.id === id) ?? RANKS[2]
+}
+
+export function rankLabel(id: RankId, lang: string): string {
+  const r = getRank(id)
+  return lang === 'ko' ? r.labelKo : r.labelEn
 }

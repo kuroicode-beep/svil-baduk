@@ -23,8 +23,12 @@ export interface GameState {
   captures: Record<Player, number>
   history: Move[]
   koPoint: Point | null
+  /** 위치 슈퍼코용 — 등장한 바둑판 해시 */
+  positionHashes: string[]
   consecutivePasses: number
   ended: boolean
+  /** 기권한 쪽 — 있으면 상대 승 */
+  resignedBy: Player | null
 }
 
 export type PlayResult =

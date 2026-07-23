@@ -8,16 +8,23 @@ export function inBounds(size: number, x: number, y: number): boolean {
   return x >= 0 && y >= 0 && x < size && y < size
 }
 
+export function boardHash(board: Stone[]): string {
+  return board.join('')
+}
+
 export function createGame(size: BoardSize = 19): GameState {
+  const board = Array<Stone>(size * size).fill(0)
   return {
     size,
-    board: Array<Stone>(size * size).fill(0),
+    board,
     toPlay: 1,
     captures: { 1: 0, 2: 0 },
     history: [],
     koPoint: null,
+    positionHashes: [boardHash(board)],
     consecutivePasses: 0,
     ended: false,
+    resignedBy: null,
   }
 }
 
@@ -27,8 +34,16 @@ export function cloneState(state: GameState): GameState {
     board: state.board.slice(),
     captures: { ...state.captures },
     history: state.history.slice(),
+    positionHashes: state.positionHashes.slice(),
     koPoint: state.koPoint ? { ...state.koPoint } : null,
   }
+}
+
+export function resign(state: GameState, player: Player): GameState {
+  const next = cloneState(state)
+  next.ended = true
+  next.resignedBy = player
+  return next
 }
 
 function neighbors(size: number, x: number, y: number): Point[] {
@@ -121,6 +136,12 @@ export function tryPlay(state: GameState, x: number, y: number): PlayResult {
   const own = groupAndLibs(next.board, next.size, x, y)
   if (own.libs.length === 0) return { ok: false, reason: 'suicide' }
 
+  const hash = boardHash(next.board)
+  const hashes = state.positionHashes ?? [boardHash(state.board)]
+  if (hashes.includes(hash)) {
+    return { ok: false, reason: 'superko' }
+  }
+
   let koPoint: Point | null = null
   if (captured.length === 1) {
     const after = groupAndLibs(next.board, next.size, x, y)
@@ -134,6 +155,7 @@ export function tryPlay(state: GameState, x: number, y: number): PlayResult {
   next.history.push(move)
   next.toPlay = opp
   next.koPoint = koPoint
+  next.positionHashes = [...hashes, hash]
   next.consecutivePasses = 0
   return { ok: true, state: next, move }
 }
@@ -141,6 +163,9 @@ export function tryPlay(state: GameState, x: number, y: number): PlayResult {
 export function pass(state: GameState): PlayResult {
   if (state.ended) return { ok: false, reason: 'game_ended' }
   const next = cloneState(state)
+  if (!next.positionHashes?.length) {
+    next.positionHashes = [boardHash(next.board)]
+  }
   const move: Move = {
     player: state.toPlay,
     x: -1,

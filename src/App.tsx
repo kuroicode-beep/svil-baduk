@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react'
+import { connectBridge } from './ai/bridgeTransport'
 import { Home } from './screens/Home'
 import { Learn } from './screens/Learn'
 import { Multi } from './screens/Multi'
@@ -39,13 +40,38 @@ export default function App() {
     return () => window.removeEventListener('keydown', onKey)
   }, [])
 
+  useEffect(() => {
+    if (!settings.katagoAutoConnect) return
+    let cancelled = false
+    let attempt = 0
+    const paths = {
+      exe: settings.katagoExe || undefined,
+      model: settings.katagoModel || undefined,
+      config: settings.katagoConfig || undefined,
+    }
+    const tryConnect = async () => {
+      while (!cancelled && attempt < 12) {
+        attempt += 1
+        const r = await connectBridge(settings.katagoBridgeUrl, paths)
+        if (r.ok || cancelled) return
+        // 브리지 기동·OpenCL 튜닝 대기 (최대 ~2분)
+        await new Promise((res) => setTimeout(res, attempt < 3 ? 2000 : 10000))
+      }
+    }
+    void tryConnect()
+    return () => {
+      cancelled = true
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [settings.katagoAutoConnect, settings.katagoBridgeUrl])
+
   return (
     <div className="app">
       {screen === 'home' && (
         <Home lang={settings.lang} onNavigate={(s) => setScreen(s)} />
       )}
       {screen === 'learn' && (
-        <Learn lang={settings.lang} onBack={() => setScreen('home')} />
+        <Learn lang={settings.lang} settings={settings} onBack={() => setScreen('home')} />
       )}
       {screen === 'solo' && (
         <Solo lang={settings.lang} settings={settings} onBack={() => setScreen('home')} />

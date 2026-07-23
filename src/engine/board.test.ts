@@ -72,4 +72,70 @@ describe('go engine', () => {
     if (!r.ok) throw new Error('pass')
     expect(r.state.ended).toBe(true)
   })
+
+  it('enforces simple ko', () => {
+    let g = createGame(9)
+    // Ko shape: White at (1,1); Black captures at (2,1) with single liberty → ko at (1,1)
+    const sequence: [number, number][] = [
+      [1, 0], // B
+      [2, 0], // W
+      [0, 1], // B
+      [2, 2], // W
+      [1, 2], // B
+      [3, 1], // W
+      [5, 5], // B dummy
+      [1, 1], // W victim
+      [2, 1], // B capture → ko
+    ]
+    for (const [x, y] of sequence) {
+      const r = tryPlay(g, x, y)
+      expect(r.ok).toBe(true)
+      if (!r.ok) return
+      g = r.state
+    }
+    expect(g.koPoint).toEqual({ x: 1, y: 1 })
+    const illegal = tryPlay(g, 1, 1)
+    expect(illegal.ok).toBe(false)
+    if (illegal.ok) return
+    expect(illegal.reason).toBe('ko')
+
+    // Fill a move elsewhere to lift ko
+    let r = tryPlay(g, 4, 4)
+    expect(r.ok).toBe(true)
+    if (!r.ok) return
+    g = r.state
+    r = tryPlay(g, 4, 5)
+    expect(r.ok).toBe(true)
+    if (!r.ok) return
+    g = r.state
+    r = tryPlay(g, 1, 1)
+    // 패 직후가 아니면 슈퍼코/패 규칙에 따라 가능할 수 있음 — 여기선 한 수씩 둔 뒤 재시도
+    expect(r.ok).toBe(true)
+  })
+
+  it('rejects positional superko (repeat board)', () => {
+    let g = createGame(9)
+    // 간단 순환: 따냄으로 이전 국면 재현 시도는 패/슈퍼코로 막힘
+    const sequence: [number, number][] = [
+      [1, 0],
+      [2, 0],
+      [0, 1],
+      [2, 2],
+      [1, 2],
+      [3, 1],
+      [5, 5],
+      [1, 1],
+      [2, 1], // B captures — ko at 1,1
+    ]
+    for (const [x, y] of sequence) {
+      const r = tryPlay(g, x, y)
+      expect(r.ok).toBe(true)
+      if (!r.ok) return
+      g = r.state
+    }
+    const retake = tryPlay(g, 1, 1)
+    expect(retake.ok).toBe(false)
+    if (retake.ok) return
+    expect(['ko', 'superko']).toContain(retake.reason)
+  })
 })

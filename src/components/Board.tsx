@@ -1,6 +1,6 @@
 import { useEffect, useId, useMemo, useRef, useState } from 'react'
 import { idx, legalMoves, starPoints } from '../engine/board'
-import type { GameState, Point } from '../engine/types'
+import type { GameState, Point, Stone } from '../engine/types'
 
 interface BoardProps {
   state: GameState
@@ -9,6 +9,12 @@ interface BoardProps {
   maxContrast: boolean
   reduceMotion: boolean
   lastMove: Point | null
+  /** 연습 문제 정답 후보 등 — 라벨과 함께 표시 */
+  markers?: Point[]
+  /** 계가 소유권: 1흑집 2백집 0공배 */
+  ownership?: Stone[]
+  cellSize?: number
+  lineWidth?: number
   onPlay: (x: number, y: number) => void
   ariaLabel: string
 }
@@ -20,6 +26,10 @@ export function Board({
   maxContrast,
   reduceMotion,
   lastMove,
+  markers = [],
+  ownership,
+  cellSize = 48,
+  lineWidth = 2.5,
   onPlay,
   ariaLabel,
 }: BoardProps) {
@@ -37,10 +47,11 @@ export function Board({
     setFocusIdx((i) => Math.min(i, legal.length - 1))
   }, [legal.length])
 
-  const pad = 36
-  const cell = 48
+  const pad = Math.round(cellSize * 0.75)
+  const cell = cellSize
   const boardPx = pad * 2 + cell * (state.size - 1)
   const stoneR = cell * 0.42
+  const stroke = Math.max(1, lineWidth)
   const line = maxContrast ? '#f5f5f7' : '#c9c9d4'
   const bg = maxContrast ? '#000000' : '#0d0d12'
   const gridBg = maxContrast ? '#111111' : '#16161d'
@@ -114,14 +125,14 @@ export function Board({
           height={cell * (state.size - 1) + cell}
           fill={gridBg}
           stroke={line}
-          strokeWidth={3}
+          strokeWidth={stroke + 1}
         />
         {Array.from({ length: state.size }, (_, i) => {
           const p = pad + i * cell
           return (
             <g key={`line-${i}`}>
-              <line x1={pad} y1={p} x2={pad + cell * (state.size - 1)} y2={p} stroke={line} strokeWidth={2} />
-              <line x1={p} y1={pad} x2={p} y2={pad + cell * (state.size - 1)} stroke={line} strokeWidth={2} />
+              <line x1={pad} y1={p} x2={pad + cell * (state.size - 1)} y2={p} stroke={line} strokeWidth={stroke} />
+              <line x1={p} y1={pad} x2={p} y2={pad + cell * (state.size - 1)} stroke={line} strokeWidth={stroke} />
             </g>
           )
         })}
@@ -130,7 +141,7 @@ export function Board({
             key={`star-${s.x}-${s.y}`}
             cx={pad + s.x * cell}
             cy={pad + s.y * cell}
-            r={5}
+            r={Math.max(4, stroke + 2)}
             fill={line}
           />
         ))}
@@ -158,6 +169,39 @@ export function Board({
                 aria-label={`착수 ${p.x + 1},${p.y + 1}${focused ? ' 선택됨' : ''}`}
                 tabIndex={-1}
               />
+            )
+          })}
+        {ownership &&
+          ownership.map((owner, i) => {
+            if (owner === 0 || state.board[i] !== 0) return null
+            const x = i % state.size
+            const y = Math.floor(i / state.size)
+            const cx = pad + x * cell
+            const cy = pad + y * cell
+            const fill = owner === 1 ? 'rgba(179,221,255,0.55)' : 'rgba(255,155,155,0.5)'
+            const label = owner === 1 ? '흑집' : '백집'
+            return (
+              <g key={`own-${i}`}>
+                <rect
+                  x={cx - cell * 0.35}
+                  y={cy - cell * 0.35}
+                  width={cell * 0.7}
+                  height={cell * 0.7}
+                  fill={fill}
+                  stroke={owner === 1 ? '#b3ddff' : '#ff9b9b'}
+                  strokeWidth={2}
+                />
+                <text
+                  x={cx}
+                  y={cy + 4}
+                  textAnchor="middle"
+                  fill={owner === 1 ? '#000' : '#000'}
+                  fontSize={Math.max(10, cell * 0.22)}
+                  fontFamily="Consolas, monospace"
+                >
+                  {label}
+                </text>
+              </g>
             )
           })}
         {state.board.map((stone, i) => {
@@ -211,7 +255,28 @@ export function Board({
             </g>
           )
         })}
-        {/* invisible hit targets for empty points */}
+        {markers.map((p) => (
+          <g key={`mark-${p.x}-${p.y}`}>
+            <circle
+              cx={pad + p.x * cell}
+              cy={pad + p.y * cell}
+              r={12}
+              fill="none"
+              stroke="#7ee2a8"
+              strokeWidth={3}
+            />
+            <text
+              x={pad + p.x * cell}
+              y={pad + p.y * cell + 5}
+              textAnchor="middle"
+              fill="#7ee2a8"
+              fontSize={11}
+              fontFamily="Consolas, monospace"
+            >
+              {markers.length === 1 ? '힌트' : '정답'}
+            </text>
+          </g>
+        ))}
         {interactive &&
           Array.from({ length: state.size * state.size }, (_, i) => {
             const x = i % state.size

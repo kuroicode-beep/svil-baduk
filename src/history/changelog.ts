@@ -6,6 +6,15 @@ export interface HistoryEntry {
 
 export const CHANGELOG: HistoryEntry[] = [
   {
+    version: '0.7.6',
+    date: '2026-07-24',
+    lines: [
+      '직전 수·힌트 동심원 반경 약 절반으로 축소',
+      '난이도 1~4: KataGo 대신 약한 내장 AI (완전/고랜덤)',
+      '난이도 5+: KataGo visits·선택 온도 재조정',
+    ],
+  },
+  {
     version: '0.7.5',
     date: '2026-07-24',
     lines: [

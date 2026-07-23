@@ -82,7 +82,7 @@ export function Board({
   const whiteStyle = whiteStoneStyle(whiteStone)
   const focusPoint = legal[focusIdx] ?? null
   const hintStyle = state.toPlay === 1 ? blackStyle : whiteStyle
-  const pulseThick = Math.max(10, cell * 0.22)
+  const pulseThick = Math.max(5, cell * 0.11)
 
   function handleKey(e: React.KeyboardEvent) {
     if (!interactive || legal.length === 0) return
@@ -308,23 +308,23 @@ export function Board({
                   <circle
                     cx={cx}
                     cy={cy}
-                    r={stoneR * 1.1}
+                    r={stoneR * 1.05}
                     fill="none"
                     stroke="#000"
-                    strokeWidth={Math.max(6, cell * 0.12)}
+                    strokeWidth={Math.max(3, cell * 0.06)}
                   />
                   <circle
                     cx={cx}
                     cy={cy}
-                    r={stoneR * 1.1}
+                    r={stoneR * 1.05}
                     fill="none"
                     stroke="#ffd479"
-                    strokeWidth={Math.max(5, cell * 0.1)}
+                    strokeWidth={Math.max(2.5, cell * 0.05)}
                   />
                   <PulseRings
                     cx={cx}
                     cy={cy}
-                    baseR={stoneR * 1.05}
+                    baseR={stoneR * 0.55}
                     thick={pulseThick}
                     color="#ffd479"
                     active={!reduceMotion}
@@ -362,7 +362,7 @@ export function Board({
               <PulseRings
                 cx={cx}
                 cy={cy}
-                baseR={stoneR * 1.05}
+                baseR={stoneR * 0.55}
                 thick={pulseThick}
                 color="#7ee2a8"
                 active={!reduceMotion}

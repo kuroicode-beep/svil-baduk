@@ -1,7 +1,7 @@
 {
   "name": "svil-baduk",
   "private": true,
-  "version": "0.7.5",
+  "version": "0.7.6",
   "homepage": "https://kuroicode-beep.github.io/svil-baduk",
   "type": "module",
   "scripts": {

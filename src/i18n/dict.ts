@@ -265,6 +265,13 @@ const dict = {
     zh: '引擎：KataGo（本地 GTP · visits',
     vi: 'Engine: KataGo (GTP cục bộ · visits',
   },
+  aiBuiltinForEasy: {
+    ko: '입문~초급+: 내장 AI(약한 랜덤). KataGo는 중급(5)부터',
+    en: 'Lv1–4: weak built-in AI. KataGo from level 5+',
+    ja: '入門〜初級+: 弱い内蔵AI。KataGoは中級(5)から',
+    zh: '入门~初级+: 弱内置AI。KataGo从中级(5)起',
+    vi: 'Lv1–4: AI tích hợp yếu. KataGo từ cấp 5+',
+  },
   illegal: { ko: '둘 수 없는 자리입니다', en: 'Illegal move', ja: '禁じ手です', zh: '非法落子', vi: 'Nước đi không hợp lệ' },
   superko: {
     ko: '슈퍼코 — 같은 국면으로 돌아갈 수 없습니다',

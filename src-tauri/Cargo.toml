@@ -1,6 +1,6 @@
 [package]
 name = "svil-baduk"
-version = "0.7.5"
+version = "0.7.6"
 description = "SVIL Baduk — high-contrast Go for low vision"
 authors = ["SVIL"]
 license = "MIT"

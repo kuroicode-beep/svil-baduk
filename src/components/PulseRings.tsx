@@ -59,8 +59,8 @@ export function PulseRings({
   if (!active) {
     return (
       <g pointerEvents="none" aria-hidden>
-        <circle cx={cx} cy={cy} r={baseR * 1.12} fill="none" stroke="#000" strokeWidth={thick + 5} />
-        <circle cx={cx} cy={cy} r={baseR * 1.12} fill="none" stroke={color} strokeWidth={thick} />
+        <circle cx={cx} cy={cy} r={baseR * 1.06} fill="none" stroke="#000" strokeWidth={thick + 3} />
+        <circle cx={cx} cy={cy} r={baseR * 1.06} fill="none" stroke={color} strokeWidth={thick} />
       </g>
     )
   }
@@ -69,7 +69,8 @@ export function PulseRings({
     <g pointerEvents="none" aria-hidden>
       {Array.from({ length: ringCount }, (_, i) => {
         const phase = (t + i / ringCount) % 1
-        const r = baseR * (1 + phase * 2.2)
+        // 최대 반경 ≈ baseR * 2.1 (이전 ~3.2의 절반 체감)
+        const r = baseR * (1 + phase * 1.1)
         const opacity = Math.max(0, 1 - phase)
         return (
           <g key={i} opacity={opacity}>
@@ -79,7 +80,7 @@ export function PulseRings({
               r={r}
               fill="none"
               stroke="#000000"
-              strokeWidth={thick + 5}
+              strokeWidth={thick + 3}
               strokeLinecap="round"
             />
             <circle

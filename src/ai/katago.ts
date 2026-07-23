@@ -102,7 +102,7 @@ export async function katagoGenmove(
 
   await syncBoard(state)
 
-  // visits / 시간 상한 — 5060 Ti급에서도 난이도별 체감 반응 유지
+  // visits / 시간 / 온도 — 저 visits여도 온도로 약하게
   try {
     await transport.send(`kata-set-param maxVisits ${rank.visits}`)
   } catch {
@@ -110,6 +110,21 @@ export async function katagoGenmove(
   }
   try {
     await transport.send(`kata-set-param maxTime ${rank.maxTimeSec}`)
+  } catch {
+    /* optional */
+  }
+  try {
+    await transport.send(`kata-set-param chosenMoveTemperature ${rank.moveTemperature}`)
+  } catch {
+    /* optional */
+  }
+  try {
+    await transport.send(`kata-set-param chosenMoveTemperatureEarly ${Math.max(rank.moveTemperature, rank.moveTemperature * 1.2)}`)
+  } catch {
+    /* optional */
+  }
+  try {
+    await transport.send(`kata-set-param chosenMoveTemperatureHalflife 20`)
   } catch {
     /* optional */
   }

@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useRef, useState } from 'react'
 import { pickBuiltinMove, pickBuiltinTopMoves } from '../ai/builtin'
 import { isKataGoAvailable, katagoGenmove } from '../ai/katago'
-import { DEFAULT_RANK, RANKS, getRank, rankLabel, type RankId } from '../ai/ranks'
+import { DEFAULT_RANK, RANKS, getRank, rankLabel, usesKataGoEngine, type RankId } from '../ai/ranks'
 import { playMoveSound } from '../audio/moveSound'
 import { Board } from '../components/Board'
 import { GamePanel } from '../components/GamePanel'
@@ -173,7 +173,7 @@ export function Solo({ lang, settings, onBack }: SoloProps) {
         if (gen !== aiTurnGenRef.current) return
 
         let move: Point | 'pass' | null = null
-        if (isKataGoAvailable()) {
+        if (isKataGoAvailable() && usesKataGoEngine(snapRank)) {
           try {
             move = await katagoGenmove(snapshot, snapRank)
           } catch (e) {
@@ -346,7 +346,7 @@ export function Solo({ lang, settings, onBack }: SoloProps) {
     setError('')
     try {
       let primary: Point | 'pass' | null = null
-      if (isKataGoAvailable()) {
+      if (isKataGoAvailable() && usesKataGoEngine(rankId)) {
         primary = await katagoGenmove(state, rankId)
       }
       const top = pickBuiltinTopMoves(state, 3)
@@ -391,14 +391,16 @@ export function Solo({ lang, settings, onBack }: SoloProps) {
           <p>
             {t(lang, 'opponentSummary')}: {rankLabel(rankId, lang)}
             {' · '}
-            {isKataGoAvailable()
+            {isKataGoAvailable() && usesKataGoEngine(rankId)
               ? `${t(lang, 'aiEngineKatago')} ${rank.visits})`
               : t(lang, 'aiEngineBuiltin')}
           </p>
           <p className="hint">
-            {isKataGoAvailable()
+            {isKataGoAvailable() && usesKataGoEngine(rankId)
               ? t(lang, 'katagoOn')
-              : `${t(lang, 'katagoOff')} — npm run katago:bridge`}
+              : isKataGoAvailable()
+                ? t(lang, 'aiBuiltinForEasy')
+                : `${t(lang, 'katagoOff')} — npm run katago:bridge`}
           </p>
         </div>
         <div className="setup-grid">

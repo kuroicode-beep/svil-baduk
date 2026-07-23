@@ -1,6 +1,7 @@
 import { useEffect, useId, useMemo, useRef, useState } from 'react'
 import { idx, legalMoves, starPoints } from '../engine/board'
 import type { GameState, Point, Stone } from '../engine/types'
+import { BlinkOpacity, PulseRings } from './PulseRings'
 import {
   blackStoneStyle,
   whiteStoneStyle,
@@ -81,61 +82,7 @@ export function Board({
   const whiteStyle = whiteStoneStyle(whiteStone)
   const focusPoint = legal[focusIdx] ?? null
   const hintStyle = state.toPlay === 1 ? blackStyle : whiteStyle
-
-  function PulseRings({
-    cx,
-    cy,
-    baseR,
-    tone,
-    fast,
-  }: {
-    cx: number
-    cy: number
-    baseR: number
-    tone: 'last' | 'hint'
-    fast?: boolean
-  }) {
-    const bright = tone === 'hint' ? '#7ee2a8' : '#ffd479'
-    const thick = Math.max(10, cell * 0.22)
-    if (reduceMotion) {
-      return (
-        <g pointerEvents="none" aria-hidden>
-          <circle cx={cx} cy={cy} r={baseR * 1.15} fill="none" stroke="#000" strokeWidth={thick + 4} />
-          <circle cx={cx} cy={cy} r={baseR * 1.15} fill="none" stroke={bright} strokeWidth={thick} />
-        </g>
-      )
-    }
-    return (
-      <g
-        className={`pulse-rings pulse-rings--${tone}${fast ? ' pulse-rings--fast' : ''}`}
-        pointerEvents="none"
-        aria-hidden
-      >
-        {[0, 1, 2, 3].map((i) => (
-          <g key={i} className={`pulse-ring pulse-ring--${i}`}>
-            <circle
-              cx={cx}
-              cy={cy}
-              r={baseR}
-              fill="none"
-              stroke="#000000"
-              strokeWidth={thick + 5}
-              strokeLinecap="round"
-            />
-            <circle
-              cx={cx}
-              cy={cy}
-              r={baseR}
-              fill="none"
-              stroke={bright}
-              strokeWidth={thick}
-              strokeLinecap="round"
-            />
-          </g>
-        ))}
-      </g>
-    )
-  }
+  const pulseThick = Math.max(10, cell * 0.22)
 
   function handleKey(e: React.KeyboardEvent) {
     if (!interactive || legal.length === 0) return
@@ -320,19 +267,11 @@ export function Board({
           const style = stone === 1 ? blackStyle : whiteStyle
           const label = stone === 1 ? '흑' : '백'
           const blinkStone = Boolean(isLast && blinkLastMove && !reduceMotion)
-          return (
-            <g key={`stone-${i}`} className={blinkStone ? 'stone-flash stone-flash--last' : undefined}>
-              <circle
-                className={blinkStone ? 'stone-flash-body' : undefined}
-                cx={cx}
-                cy={cy}
-                r={stoneR}
-                fill={style.fill}
-                stroke={style.stroke}
-                strokeWidth={3}
-              />
+          const showLastFx = Boolean(isLast && blinkLastMove)
+          const body = (
+            <>
+              <circle cx={cx} cy={cy} r={stoneR} fill={style.fill} stroke={style.stroke} strokeWidth={3} />
               <text
-                className={blinkStone ? 'stone-flash-body' : undefined}
                 x={cx}
                 y={cy + 5}
                 textAnchor="middle"
@@ -343,6 +282,17 @@ export function Board({
               >
                 {label}
               </text>
+            </>
+          )
+          return (
+            <g key={`stone-${i}`}>
+              {blinkStone ? (
+                <BlinkOpacity active periodMs={650}>
+                  {body}
+                </BlinkOpacity>
+              ) : (
+                body
+              )}
               {isLast && !blinkLastMove && (
                 <circle
                   cx={cx}
@@ -353,27 +303,33 @@ export function Board({
                   strokeWidth={2}
                 />
               )}
-              {blinkStone && (
+              {showLastFx && (
                 <>
                   <circle
                     cx={cx}
                     cy={cy}
-                    r={stoneR * 1.08}
+                    r={stoneR * 1.1}
                     fill="none"
                     stroke="#000"
                     strokeWidth={Math.max(6, cell * 0.12)}
-                    opacity={0.9}
                   />
                   <circle
-                    className="stone-halo-last"
                     cx={cx}
                     cy={cy}
-                    r={stoneR * 1.08}
+                    r={stoneR * 1.1}
                     fill="none"
                     stroke="#ffd479"
                     strokeWidth={Math.max(5, cell * 0.1)}
                   />
-                  <PulseRings cx={cx} cy={cy} baseR={stoneR * 1.05} tone="last" />
+                  <PulseRings
+                    cx={cx}
+                    cy={cy}
+                    baseR={stoneR * 1.05}
+                    thick={pulseThick}
+                    color="#ffd479"
+                    active={!reduceMotion}
+                    periodMs={1200}
+                  />
                 </>
               )}
             </g>
@@ -383,28 +339,35 @@ export function Board({
           const cx = pad + p.x * cell
           const cy = pad + p.y * cell
           const primary = mi === 0
+          const ghost = (
+            <circle
+              cx={cx}
+              cy={cy}
+              r={stoneR}
+              fill={hintStyle.fill}
+              stroke={primary ? '#7ee2a8' : hintStyle.stroke}
+              strokeWidth={primary ? 4 : 3}
+              opacity={0.55}
+            />
+          )
           return (
-            <g
-              key={`mark-${p.x}-${p.y}`}
-              className={reduceMotion ? undefined : 'stone-flash stone-flash--hint'}
-              pointerEvents="none"
-            >
-              <circle
-                className={reduceMotion ? undefined : 'stone-flash-body'}
+            <g key={`mark-${p.x}-${p.y}`} pointerEvents="none">
+              {reduceMotion ? (
+                ghost
+              ) : (
+                <BlinkOpacity active periodMs={380}>
+                  {ghost}
+                </BlinkOpacity>
+              )}
+              <PulseRings
                 cx={cx}
                 cy={cy}
-                r={stoneR}
-                fill={hintStyle.fill}
-                stroke={primary ? '#7ee2a8' : hintStyle.stroke}
-                strokeWidth={primary ? 4 : 3}
-                opacity={0.55}
+                baseR={stoneR * 1.05}
+                thick={pulseThick}
+                color="#7ee2a8"
+                active={!reduceMotion}
+                periodMs={750}
               />
-              {!reduceMotion && (
-                <PulseRings cx={cx} cy={cy} baseR={stoneR * 1.05} tone="hint" fast />
-              )}
-              {reduceMotion && (
-                <PulseRings cx={cx} cy={cy} baseR={stoneR * 1.05} tone="hint" />
-              )}
               <text
                 x={cx}
                 y={cy + 5}

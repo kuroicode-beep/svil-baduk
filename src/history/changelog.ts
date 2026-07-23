@@ -6,6 +6,14 @@ export interface HistoryEntry {
 
 export const CHANGELOG: HistoryEntry[] = [
   {
+    version: '0.7.5',
+    date: '2026-07-24',
+    lines: [
+      '직전 수·힌트 애니메이션: CSS 대신 JS(r/opacity)로 실제 깜빡임·동심원 동작',
+      '보드 overflow 클리핑 제거 (링이 잘리던 문제)',
+    ],
+  },
+  {
     version: '0.7.4',
     date: '2026-07-24',
     lines: [

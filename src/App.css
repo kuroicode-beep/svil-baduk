@@ -705,7 +705,8 @@ html[data-button-contrast='normal'] .btn-danger {
   position: relative;
   width: min(100%, 72vmin);
   aspect-ratio: 1;
-  overflow: hidden;
+  /* 동심원 퍼짐이 잘리지 않도록 — CSS scale 대신 JS r 애니메이션 사용 */
+  overflow: visible;
   border: 2px solid var(--border-strong);
   border-radius: 12px;
   background: #000;

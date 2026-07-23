@@ -28,6 +28,9 @@ export default function App() {
     const font = FONT_OPTIONS.find((f) => f.id === settings.font)?.css
     if (font) document.documentElement.style.setProperty('--font-ui', font)
     document.documentElement.dataset.reduceMotion = settings.reduceMotion ? '1' : '0'
+    document.documentElement.dataset.buttonContrast = settings.strongButtonContrast
+      ? 'strong'
+      : 'normal'
   }, [settings])
 
   useEffect(() => {

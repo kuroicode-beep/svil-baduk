@@ -56,12 +56,13 @@ npm run katago:bridge   # HTTP GTP 브리지 (기본 자동연결)
 | `npm run build:gh` | GitHub Pages용 빌드 (`/svil-baduk/`) |
 | `npm run deploy` | `gh-pages` 브랜치 배포 |
 | `npm run katago:bridge` | 로컬 KataGo GTP HTTP 브리지 |
-| `npm run start:app` | 빌드 후 preview + 브리지 실행 |
+| `npm run start:app` | preview + 브리지 (콘솔 숨김) |
+| `npm run start:tauri` | Tauri exe + 브리지 (콘솔 숨김) |
 | `npm run shortcut` | 바탕화면 「SVIL Baduk」 바로가기 (preview) |
 | `npm run tauri:dev` | Tauri 개발 셸 |
 | `npm run tauri:build` | Tauri 릴리스(NSIS) |
 | `npm run codesign:setup` | 로컬 코드사인 인증서 생성 |
-| `npm run shortcut:tauri` | Tauri exe 바탕화면 바로가기 |
+| `npm run shortcut:tauri` | Tauri+브리지 바탕화면 바로가기 (콘솔 숨김) |
 
 ## CI
 

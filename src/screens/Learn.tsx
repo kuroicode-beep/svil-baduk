@@ -111,7 +111,7 @@ export function Learn({ lang, settings, onBack }: LearnProps) {
           className={`tab-btn ${tab === 'lessons' ? 'is-active' : ''}`}
           onClick={() => setTab('lessons')}
         >
-          {{ ko: '설명 레슨', en: 'Lessons', ja: '解説レッスン', zh: '讲解课程', vi: 'Bài học' }[lang]}
+          {{ ko: '단계별 배우기', en: 'Lessons', ja: '段階学習', zh: '分步学习', vi: 'Học từng bước' }[lang]}
         </button>
         <button
           type="button"

@@ -217,68 +217,94 @@ export function Multi({ lang, settings, onBack }: MultiProps) {
 
   if (phase === 'lobby') {
     return (
-      <section className="screen">
+      <section className="screen multi-lobby">
         <header className="screen-head">
           <h2>{t(lang, 'multi')}</h2>
           <button type="button" className="btn" onClick={onBack}>{t(lang, 'back')}</button>
         </header>
         <p className="hint">{t(lang, 'p2pHint')}</p>
         {error && <p className="error" role="alert">{error}</p>}
-        <label className="field">
-          <span>{t(lang, 'yourId')}</span>
-          <div className="id-row">
-            <code className="mono id-box">{myId || '…'}</code>
-            <button
-              type="button"
-              className="btn"
-              disabled={!myId}
-              onClick={() => navigator.clipboard.writeText(myId)}
-            >
-              {t(lang, 'copyId')}
-            </button>
+        <div className="setup-grid">
+          <div className="setup-side">
+            <div className="setup-panel field">
+              <span className="field-label">{t(lang, 'yourId')}</span>
+              <div className="id-row">
+                <code className="mono id-box">{myId || '…'}</code>
+                <button
+                  type="button"
+                  className="btn"
+                  disabled={!myId}
+                  onClick={() => navigator.clipboard.writeText(myId)}
+                >
+                  {t(lang, 'copyId')}
+                </button>
+              </div>
+              {myId && <RoomQr value={myId} label="방 ID QR — 상대가 스캔하거나 ID를 입력" />}
+            </div>
+            <div className="setup-panel field">
+              <span className="field-label">{t(lang, 'peerId')}</span>
+              <input
+                value={peerInput}
+                onChange={(e) => setPeerInput(e.target.value)}
+                className="mono"
+                autoComplete="off"
+              />
+              <div className="btn-row">
+                <button type="button" className="btn btn-primary" onClick={joinRoom} disabled={!peerReady}>
+                  {t(lang, 'joinRoom')}
+                </button>
+                <button type="button" className="btn" onClick={bootPeer}>
+                  {t(lang, 'reinitPeer')}
+                </button>
+              </div>
+            </div>
           </div>
-        </label>
-        {myId && <RoomQr value={myId} label="방 ID QR — 상대가 스캔하거나 ID를 입력" />}
-        <label className="field">
-          <span>{t(lang, 'boardSize')}</span>
-          <select value={size} onChange={(e) => setSize(Number(e.target.value) as BoardSize)}>
-            <option value={9}>9×9</option>
-            <option value={13}>13×13</option>
-            <option value={19}>19×19</option>
-          </select>
-        </label>
-        <fieldset className="field">
-          <legend>{t(lang, 'playAs')} ({t(lang, 'hostLabel')})</legend>
-          <label className="radio">
-            <input type="radio" checked={hostColor === 1} onChange={() => setHostColor(1)} />
-            {t(lang, 'black')}
-          </label>
-          <label className="radio">
-            <input type="radio" checked={hostColor === 2} onChange={() => setHostColor(2)} />
-            {t(lang, 'white')}
-          </label>
-        </fieldset>
-        <button type="button" className="btn btn-primary" onClick={createRoom}>
-          {t(lang, 'hostRoom')}
-        </button>
-        <label className="field">
-          <span>{t(lang, 'peerId')}</span>
-          <input
-            value={peerInput}
-            onChange={(e) => setPeerInput(e.target.value)}
-            className="mono"
-            autoComplete="off"
-          />
-        </label>
-        <div className="btn-row">
-          <button type="button" className="btn btn-primary" onClick={joinRoom} disabled={!peerReady}>
-            {t(lang, 'joinRoom')}
-          </button>
-          <button type="button" className="btn" onClick={bootPeer}>
-            {t(lang, 'reinitPeer')}
-          </button>
+          <div className="setup-side">
+            <fieldset className="field setup-panel">
+              <legend>{t(lang, 'boardSize')}</legend>
+              <div className="size-pick" role="group" aria-label={t(lang, 'boardSize')}>
+                {([9, 13, 19] as BoardSize[]).map((n) => (
+                  <button
+                    key={n}
+                    type="button"
+                    className={`btn size-pick-btn${size === n ? ' size-pick-on' : ''}`}
+                    aria-pressed={size === n}
+                    onClick={() => setSize(n)}
+                  >
+                    <span className="mono">{n}×{n}</span>
+                  </button>
+                ))}
+              </div>
+            </fieldset>
+            <fieldset className="field setup-panel">
+              <legend>{t(lang, 'playAs')} ({t(lang, 'hostLabel')})</legend>
+              <div className="color-pick" role="group">
+                <button
+                  type="button"
+                  className={`btn color-pick-btn${hostColor === 1 ? ' color-pick-on' : ''}`}
+                  aria-pressed={hostColor === 1}
+                  onClick={() => setHostColor(1)}
+                >
+                  {t(lang, 'black')}
+                </button>
+                <button
+                  type="button"
+                  className={`btn color-pick-btn${hostColor === 2 ? ' color-pick-on' : ''}`}
+                  aria-pressed={hostColor === 2}
+                  onClick={() => setHostColor(2)}
+                >
+                  {t(lang, 'white')}
+                </button>
+              </div>
+            </fieldset>
+            <div className="setup-panel lobby-status" role="status">
+              <p className="status-line">{connected ? t(lang, 'connected') : t(lang, 'waiting')}</p>
+              <button type="button" className="btn btn-primary" onClick={createRoom}>
+                {t(lang, 'hostRoom')}
+              </button>
+            </div>
+          </div>
         </div>
-        <p className="meta">{connected ? t(lang, 'connected') : t(lang, 'waiting')}</p>
       </section>
     )
   }

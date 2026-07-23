@@ -6,6 +6,25 @@ export interface HistoryEntry {
 
 export const CHANGELOG: HistoryEntry[] = [
   {
+    version: '0.7.0',
+    date: '2026-07-23',
+    lines: [
+      'Stitch 고대비 비전 UI (홈 2열·버튼·설정 미리보기·Solo/멀티/캐릭터)',
+      'KataGo GPU(RTX 5060 Ti): 증분 보드 동기화·스레드/시간 상한',
+      '서버 콘솔 숨김 실행 · 버튼 대비 확실하게 옵션 · 화점 고대비 표시',
+    ],
+  },
+  {
+    version: '0.6.9',
+    date: '2026-07-23',
+    lines: [
+      '설정: 버튼 대비 확실하게 옵션 (글자·테두리 강화)',
+      '서버/브리지 콘솔 백그라운드(숨김) 실행',
+      'Stitch 접근성 비전 디자인 적용 (홈 2열·버튼 시스템·설정 미리보기)',
+      'KataGo: 보드 증분 동기화 + RTX 5060 Ti용 스레드/시간 상한 (체감 속도)',
+    ],
+  },
+  {
     version: '0.6.8',
     date: '2026-07-23',
     lines: [

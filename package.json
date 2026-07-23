@@ -1,7 +1,7 @@
 {
   "name": "svil-baduk",
   "private": true,
-  "version": "0.6.8",
+  "version": "0.7.0",
   "homepage": "https://kuroicode-beep.github.io/svil-baduk",
   "type": "module",
   "scripts": {
@@ -15,6 +15,7 @@
     "katago:bridge": "node scripts/katago-bridge.mjs",
     "dev:all": "powershell -ExecutionPolicy Bypass -File scripts/dev-all.ps1",
     "start:app": "powershell -ExecutionPolicy Bypass -File scripts/start-app.ps1",
+    "start:tauri": "powershell -ExecutionPolicy Bypass -File scripts/start-tauri.ps1",
     "shortcut": "powershell -ExecutionPolicy Bypass -File scripts/install_desktop_shortcut.ps1",
     "shortcut:tauri": "powershell -ExecutionPolicy Bypass -File scripts/install_tauri_shortcut.ps1",
     "tauri": "tauri",

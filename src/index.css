@@ -1,20 +1,26 @@
 :root {
+  /* SVIL Baduk Vision (Stitch) + 기존 고대비 토큰 */
   --bg: #0d0d12;
   --surface: #16161d;
   --surface-2: #1f1f2a;
-  --border: #3a3a48;
+  --surface-high: #292931;
+  --border: #40484f;
   --border-strong: #6b6b82;
-  --text: #f5f5f7;
-  --text-sub: #c9c9d4;
+  --border-btn: #c9c9d4;
+  --text: #e4e1eb;
+  --text-bright: #f5f5f7;
+  --text-sub: #c0c7d0;
   --accent: #7ec8ff;
-  --accent-strong: #b3ddff;
+  --accent-strong: #bee1ff;
   --accent-max: #d6ecff;
   --positive: #7ee2a8;
   --warning: #ffd479;
-  --negative: #ff9b9b;
+  --negative: #ffb4ab;
   --focus: #ffff00;
   --font-ui: "KyoboHandwriting2019", "Segoe UI", "Malgun Gothic", sans-serif;
   --font-base: 18px;
+  --radius: 12px;
+  --gap: 8px;
 }
 
 @font-face {
@@ -46,8 +52,7 @@ html:fullscreen #root {
 body {
   margin: 0;
   background:
-    radial-gradient(ellipse at 20% 0%, #1a2438 0%, transparent 50%),
-    radial-gradient(ellipse at 80% 100%, #1a1828 0%, transparent 45%),
+    radial-gradient(circle at 50% 40%, #1f1f2a 0%, transparent 55%),
     var(--bg);
   color: var(--text);
   font-family: var(--font-ui);
@@ -66,7 +71,7 @@ select {
 
 :focus-visible {
   outline: 3px solid var(--focus);
-  outline-offset: 2px;
+  outline-offset: 3px;
 }
 
 .mono {

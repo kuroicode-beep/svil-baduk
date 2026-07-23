@@ -41,6 +41,10 @@ export function Board({
     [interactive, state],
   )
   const stars = useMemo(() => starPoints(state.size), [state.size])
+  const starSet = useMemo(
+    () => new Set(stars.map((s) => `${s.x},${s.y}`)),
+    [stars],
+  )
 
   useEffect(() => {
     if (legal.length === 0) return
@@ -52,7 +56,11 @@ export function Board({
   const boardPx = pad * 2 + cell * (state.size - 1)
   const stoneR = cell * 0.42
   const stroke = Math.max(1, lineWidth)
+  /** 화점: 칸 비율 + 최소 크기 — 저시력에서도 격자선과 구분 */
+  const starR = Math.max(8, cell * 0.18)
   const line = maxContrast ? '#f5f5f7' : '#c9c9d4'
+  const starFill = '#ffffff'
+  const starStroke = '#000000'
   const bg = maxContrast ? '#000000' : '#0d0d12'
   const gridBg = maxContrast ? '#111111' : '#16161d'
 
@@ -135,20 +143,35 @@ export function Board({
             </g>
           )
         })}
-        {stars.map((s) => (
-          <circle
-            key={`star-${s.x}-${s.y}`}
-            cx={pad + s.x * cell}
-            cy={pad + s.y * cell}
-            r={Math.max(4, stroke + 2)}
-            fill={line}
-          />
-        ))}
         {interactive &&
           legal.map((p) => {
             const cx = pad + p.x * cell
             const cy = pad + p.y * cell
             const focused = focusPoint?.x === p.x && focusPoint?.y === p.y
+            const onStar = starSet.has(`${p.x},${p.y}`)
+            /* 화점 위에서는 링만 — 화점 점이 가려지지 않게 */
+            if (onStar) {
+              return (
+                <circle
+                  key={`legal-${p.x}-${p.y}`}
+                  className={[
+                    'legal-dot',
+                    blink && !reduceMotion ? 'legal-dot--blink' : '',
+                    focused ? 'legal-dot--focus' : '',
+                  ].join(' ')}
+                  cx={cx}
+                  cy={cy}
+                  r={starR + (focused ? 6 : 4)}
+                  fill="none"
+                  stroke="#ffd479"
+                  strokeWidth={focused ? 4 : 3}
+                  onClick={() => onPlay(p.x, p.y)}
+                  role="button"
+                  aria-label={`착수 ${p.x + 1},${p.y + 1}${focused ? ' 선택됨' : ''}`}
+                  tabIndex={-1}
+                />
+              )
+            }
             return (
               <circle
                 key={`legal-${p.x}-${p.y}`}
@@ -170,6 +193,19 @@ export function Board({
               />
             )
           })}
+        {stars.map((s) => (
+          <circle
+            key={`star-${s.x}-${s.y}`}
+            className="board-hoshi"
+            cx={pad + s.x * cell}
+            cy={pad + s.y * cell}
+            r={starR}
+            fill={starFill}
+            stroke={starStroke}
+            strokeWidth={Math.max(2, stroke)}
+            aria-hidden
+          />
+        ))}
         {ownership &&
           ownership.map((owner, i) => {
             if (owner === 0 || state.board[i] !== 0) return null

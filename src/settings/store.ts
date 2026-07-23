@@ -21,6 +21,8 @@ export interface Settings {
   fontSize: FontSizeId
   blinkIntersections: boolean
   maxContrastBoard: boolean
+  /** 버튼 글자·테두리 대비를 WCAG 이상으로 강제 */
+  strongButtonContrast: boolean
   reduceMotion: boolean
   moveSound: boolean
   boardScale: BoardScaleId
@@ -70,6 +72,7 @@ export const defaultSettings = (): Settings => ({
   fontSize: 'medium',
   blinkIntersections: true,
   maxContrastBoard: true,
+  strongButtonContrast: true,
   reduceMotion: false,
   moveSound: true,
   boardScale: 'medium',

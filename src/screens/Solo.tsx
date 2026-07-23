@@ -293,7 +293,7 @@ export function Solo({ lang, settings, onBack }: SoloProps) {
             ? `${profile.name} · ${t(lang, 'profileLevel')} ${profile.level} · ${profile.wins}W/${profile.losses}L · ${t(lang, 'profileHighScore')} ${profile.highScore}`
             : t(lang, 'profileNeedChar')}
         </p>
-        <div className="ai-status" role="status">
+        <div className="ai-status setup-strip" role="status">
           <p>
             {t(lang, 'opponentSummary')}: {rankLabel(rankId, lang)}
             {' · '}
@@ -307,43 +307,68 @@ export function Solo({ lang, settings, onBack }: SoloProps) {
               : `${t(lang, 'katagoOff')} — npm run katago:bridge`}
           </p>
         </div>
-        <fieldset className="field">
-          <legend>{t(lang, 'difficulty')} (1–10)</legend>
-          <div className="diff-level-row" role="group" aria-label={t(lang, 'difficulty')}>
-            {RANKS.map((r) => (
-              <button
-                key={r.id}
-                type="button"
-                className={`btn diff-level${rankId === r.id ? ' diff-level-on' : ''}`}
-                aria-pressed={rankId === r.id}
-                onClick={() => setRankId(r.id)}
-              >
-                <span className="diff-level-num">{r.level}</span>
-                <span className="diff-level-name">{lang === 'ko' ? r.labelKo.split(' · ')[1] : r.labelEn.split(' · ')[1]}</span>
-              </button>
-            ))}
+        <div className="setup-grid">
+          <fieldset className="field setup-panel">
+            <legend>{t(lang, 'difficulty')} (1–10)</legend>
+            <p className="setup-selected mono" aria-live="polite">
+              Lv.{rank.level} · {lang === 'ko' ? rank.labelKo : rank.labelEn}
+            </p>
+            <div className="diff-level-row" role="group" aria-label={t(lang, 'difficulty')}>
+              {RANKS.map((r) => (
+                <button
+                  key={r.id}
+                  type="button"
+                  className={`btn diff-level${rankId === r.id ? ' diff-level-on' : ''}`}
+                  aria-pressed={rankId === r.id}
+                  onClick={() => setRankId(r.id)}
+                >
+                  <span className="diff-level-num">{r.level}</span>
+                  <span className="diff-level-name">{lang === 'ko' ? r.labelKo.split(' · ')[1] : r.labelEn.split(' · ')[1]}</span>
+                </button>
+              ))}
+            </div>
+          </fieldset>
+          <div className="setup-side">
+            <fieldset className="field setup-panel">
+              <legend>{t(lang, 'boardSize')}</legend>
+              <div className="size-pick" role="group" aria-label={t(lang, 'boardSize')}>
+                {([9, 13, 19] as BoardSize[]).map((n) => (
+                  <button
+                    key={n}
+                    type="button"
+                    className={`btn size-pick-btn${size === n ? ' size-pick-on' : ''}`}
+                    aria-pressed={size === n}
+                    onClick={() => setSize(n)}
+                  >
+                    <span className="mono">{n}×{n}</span>
+                  </button>
+                ))}
+              </div>
+            </fieldset>
+            <fieldset className="field setup-panel">
+              <legend>{t(lang, 'playAs')}</legend>
+              <div className="color-pick" role="group" aria-label={t(lang, 'playAs')}>
+                <button
+                  type="button"
+                  className={`btn color-pick-btn${myColor === 1 ? ' color-pick-on' : ''}`}
+                  aria-pressed={myColor === 1}
+                  onClick={() => setMyColor(1)}
+                >
+                  {t(lang, 'black')}
+                </button>
+                <button
+                  type="button"
+                  className={`btn color-pick-btn${myColor === 2 ? ' color-pick-on' : ''}`}
+                  aria-pressed={myColor === 2}
+                  onClick={() => setMyColor(2)}
+                >
+                  {t(lang, 'white')}
+                </button>
+              </div>
+            </fieldset>
           </div>
-        </fieldset>
-        <label className="field">
-          <span>{t(lang, 'boardSize')}</span>
-          <select value={size} onChange={(e) => setSize(Number(e.target.value) as BoardSize)}>
-            <option value={9}>9×9</option>
-            <option value={13}>13×13</option>
-            <option value={19}>19×19</option>
-          </select>
-        </label>
-        <fieldset className="field">
-          <legend>{t(lang, 'playAs')}</legend>
-          <label className="radio">
-            <input type="radio" checked={myColor === 1} onChange={() => setMyColor(1)} />
-            {t(lang, 'black')}
-          </label>
-          <label className="radio">
-            <input type="radio" checked={myColor === 2} onChange={() => setMyColor(2)} />
-            {t(lang, 'white')}
-          </label>
-        </fieldset>
-        <div className="btn-row">
+        </div>
+        <div className="btn-row setup-actions">
           <button type="button" className="btn btn-primary" onClick={start}>
             {t(lang, 'startGame')}
           </button>

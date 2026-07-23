@@ -4,7 +4,7 @@
 
 - **저장소:** https://github.com/kuroicode-beep/svil-baduk
 - **로컬:** `C:\Projects\svil-baduk`
-- **버전:** 0.6.7
+- **버전:** 0.7.0
 - **배포:** `npm run deploy` → GitHub Pages (`/svil-baduk/`); 데스크톱 `npm run tauri:build`
 
 ## 하위 문서
@@ -18,7 +18,7 @@
 | 로드맵 | [/doc/svil-baduk-ppg1MkvqHF](/doc/svil-baduk-ppg1MkvqHF) |
 | 작업지시서 | [/doc/svil-baduk-cIsxx2nwOU](/doc/svil-baduk-cIsxx2nwOU) |
 
-## 현재 기능 (0.6.x)
+## 현재 기능 (0.7.x)
 
 - AI와 겨루기 (난이도 1–10, 내장 AI / KataGo)
 - 캐릭터·레벨·전적·최고 점수
@@ -31,3 +31,4 @@
 ## 한 줄 요약
 
 배우기 · AI 대국(난이도) · 캐릭터/전적 · P2P · KataGo 브리지.
+

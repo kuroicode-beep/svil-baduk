@@ -14,7 +14,7 @@ export async function detectComputeHint(): Promise<ComputeHint> {
       if (adapter) {
         return {
           kind: 'gpu',
-          detail: 'WebGPU adapter detected — KataGo OpenCL/CUDA recommended',
+          detail: 'WebGPU adapter detected — KataGo OpenCL/CUDA on local GPU',
         }
       }
     } catch {
@@ -32,10 +32,10 @@ export async function detectComputeHint(): Promise<ComputeHint> {
           const renderer = String(gl.getParameter(dbg.UNMASKED_RENDERER_WEBGL) || '')
           const vendor = String(gl.getParameter(dbg.UNMASKED_VENDOR_WEBGL) || '')
           const line = `${vendor} ${renderer}`.trim()
-          if (/nvidia|geforce|radeon|amd|apple|adreno|mali|intel iris|intel\(r\) arc/i.test(line)) {
+          if (/5060|rtx|nvidia|geforce|radeon|amd|apple|adreno|mali|intel iris|intel\(r\) arc/i.test(line)) {
             return {
               kind: 'gpu',
-              detail: `GPU: ${line} — OpenCL/CUDA KataGo recommended`,
+              detail: `GPU: ${line} — KataGo는 로컬 OpenCL/CUDA로 이 GPU를 사용 (브라우저 WebGL과 별개)`,
             }
           }
           if (/swiftshader|llvmpipe|software/i.test(line)) {

@@ -167,6 +167,29 @@ export function SettingsScreen({ lang, settings, onChange, onBack }: SettingsPro
       <label className="check">
         <input
           type="checkbox"
+          checked={settings.strongButtonContrast}
+          onChange={(e) => onChange({ ...settings, strongButtonContrast: e.target.checked })}
+        />
+        {t(lang, 'strongButtonContrast')}
+      </label>
+
+      {settings.strongButtonContrast && (
+        <div className="contrast-preview" aria-label={t(lang, 'strongButtonContrast')}>
+          <button type="button" className="btn btn-primary" tabIndex={-1}>
+            {t(lang, 'startGame')}
+          </button>
+          <button type="button" className="btn" tabIndex={-1}>
+            {t(lang, 'review')}
+          </button>
+          <button type="button" className="btn btn-danger" tabIndex={-1}>
+            {t(lang, 'resign')}
+          </button>
+        </div>
+      )}
+
+      <label className="check">
+        <input
+          type="checkbox"
           checked={settings.reduceMotion}
           onChange={(e) => onChange({ ...settings, reduceMotion: e.target.checked })}
         />

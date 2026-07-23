@@ -202,6 +202,13 @@ const dict = {
   blinkOn: { ko: '착수점 깜빡임: 켜짐', en: 'Intersection blink: On', ja: '交点点滅: オン', zh: '交叉点闪烁: 开', vi: 'Nhấp nháy: Bật' },
   blinkOff: { ko: '착수점 깜빡임: 꺼짐', en: 'Intersection blink: Off', ja: '交点点滅: オフ', zh: '交叉点闪烁: 关', vi: 'Nhấp nháy: Tắt' },
   highContrast: { ko: '최대 대비 보드', en: 'Max contrast board', ja: '最大コントラスト盤', zh: '最大对比棋盘', vi: 'Bàn tương phản tối đa' },
+  strongButtonContrast: {
+    ko: '버튼 대비 확실하게 (글자·테두리 강화)',
+    en: 'Strong button contrast (text & border)',
+    ja: 'ボタンコントラストをはっきり',
+    zh: '按钮对比更清晰（文字与边框）',
+    vi: 'Độ tương phản nút rõ ràng (chữ & viền)',
+  },
   next: { ko: '다음', en: 'Next', ja: '次へ', zh: '下一步', vi: 'Tiếp' },
   prev: { ko: '이전', en: 'Previous', ja: '前へ', zh: '上一步', vi: 'Trước' },
   lessonDone: {

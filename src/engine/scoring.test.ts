@@ -52,8 +52,21 @@ describe('beginner scoring', () => {
     expect(g.ended).toBe(true)
     const s = estimateScore(g)
     expect(s.blackCaptures).toBe(1)
-    expect(s.komi).toBe(komiFor(9))
+    expect(s.komi).toBe(komiFor(9, 'japanese'))
     expect(s.whiteTotal).toBe(s.whiteTerritory + s.whiteCaptures + s.komi)
+  })
+
+  it('chinese rules use stones + territory + komi', () => {
+    const g = createGame(9)
+    g.board[idx(9, 0, 0)] = 1
+    g.board[idx(9, 8, 8)] = 2
+    const jp = estimateScore(g, 'japanese')
+    const cn = estimateScore(g, 'chinese')
+    expect(cn.rules).toBe('chinese')
+    expect(cn.komi).toBe(7.5)
+    expect(cn.blackTotal).toBe(cn.blackTerritory + cn.blackStones)
+    expect(cn.whiteTotal).toBe(cn.whiteTerritory + cn.whiteStones + cn.komi)
+    expect(cn.blackStones).toBeGreaterThanOrEqual(jp.blackCaptures >= 0 ? 1 : 0)
   })
 
   it('awards win to opponent on resign', () => {

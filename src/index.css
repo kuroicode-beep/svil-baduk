@@ -12,7 +12,7 @@
   --positive: #7ee2a8;
   --warning: #ffd479;
   --negative: #ff9b9b;
-  --focus: #ffd479;
+  --focus: #ffff00;
   --font-ui: "KyoboHandwriting2019", "Segoe UI", "Malgun Gothic", sans-serif;
   --font-base: 18px;
 }
@@ -33,6 +33,14 @@ html,
 body,
 #root {
   min-height: 100%;
+  height: 100%;
+}
+
+html:fullscreen,
+html:fullscreen body,
+html:fullscreen #root {
+  height: 100%;
+  background: var(--bg);
 }
 
 body {

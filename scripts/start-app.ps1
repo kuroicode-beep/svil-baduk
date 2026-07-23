@@ -1,19 +1,18 @@
-﻿# SVIL Baduk 실행 — 빌드 산출물 preview + KataGo 브리지
+﻿# SVIL Baduk launcher — preview build + KataGo bridge
 $ErrorActionPreference = "Stop"
 $Root = Split-Path -Parent $PSScriptRoot
 Set-Location $Root
 
 $dist = Join-Path $Root "dist\index.html"
 if (-not (Test-Path $dist)) {
-  Write-Host "dist 없음 — npm run build 실행..." -ForegroundColor Yellow
+  Write-Host "dist missing — running npm run build..." -ForegroundColor Yellow
   npm run build
   if ($LASTEXITCODE -ne 0) { throw "build failed" }
 }
 
-# KataGo 브리지 (이미 떠 있으면 포트 충돌로 바로 종료되어도 무시)
 $bridgeRunning = $false
 try {
-  $h = Invoke-RestMethod -Uri "http://127.0.0.1:17419/health" -TimeoutSec 1
+  $null = Invoke-RestMethod -Uri "http://127.0.0.1:17419/health" -TimeoutSec 1
   $bridgeRunning = $true
 } catch { $bridgeRunning = $false }
 
@@ -25,5 +24,13 @@ if (-not $bridgeRunning) {
   Start-Sleep -Seconds 2
 }
 
-Write-Host "SVIL Baduk preview 시작 (브라우저 자동 오픈)" -ForegroundColor Cyan
-npm run preview -- --host 127.0.0.1 --open
+# If preview already up, just open browser
+try {
+  $null = Invoke-WebRequest -Uri "http://127.0.0.1:4173" -UseBasicParsing -TimeoutSec 1
+  Start-Process "http://127.0.0.1:4173/"
+  Write-Host "Opened existing preview http://127.0.0.1:4173/"
+  exit 0
+} catch { }
+
+Write-Host "Starting SVIL Baduk preview..." -ForegroundColor Cyan
+npm run preview -- --host 127.0.0.1 --port 4173 --open

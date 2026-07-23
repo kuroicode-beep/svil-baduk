@@ -1,4 +1,5 @@
 import type { Lang } from '../i18n/dict'
+import type { GoRules } from '../engine/scoring'
 
 export type FontId =
   | 'kyobo'
@@ -24,6 +25,7 @@ export interface Settings {
   moveSound: boolean
   boardScale: BoardScaleId
   lineWeight: LineWeightId
+  goRules: GoRules
   katagoBridgeUrl: string
   katagoExe: string
   katagoModel: string
@@ -72,6 +74,7 @@ export const defaultSettings = (): Settings => ({
   moveSound: true,
   boardScale: 'medium',
   lineWeight: 'normal',
+  goRules: 'japanese',
   katagoBridgeUrl: 'http://127.0.0.1:17419',
   katagoExe: '',
   katagoModel: '',

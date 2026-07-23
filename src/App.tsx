@@ -3,6 +3,7 @@ import { connectBridge } from './ai/bridgeTransport'
 import { Home } from './screens/Home'
 import { Learn } from './screens/Learn'
 import { Multi } from './screens/Multi'
+import { ProfileScreen } from './screens/Profile'
 import { SettingsScreen } from './screens/Settings'
 import { Solo } from './screens/Solo'
 import {
@@ -14,7 +15,7 @@ import {
 } from './settings/store'
 import './App.css'
 
-type Screen = 'home' | 'learn' | 'solo' | 'multi' | 'settings'
+type Screen = 'home' | 'learn' | 'solo' | 'multi' | 'settings' | 'profile'
 
 export default function App() {
   const [screen, setScreen] = useState<Screen>('home')
@@ -86,6 +87,9 @@ export default function App() {
           onChange={setSettings}
           onBack={() => setScreen('home')}
         />
+      )}
+      {screen === 'profile' && (
+        <ProfileScreen lang={settings.lang} onBack={() => setScreen('home')} />
       )}
     </div>
   )

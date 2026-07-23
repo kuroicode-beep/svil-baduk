@@ -5,6 +5,7 @@ import {
   probeBridge,
   type BridgeHealth,
 } from '../ai/bridgeTransport'
+import { detectComputeHint, type ComputeHint } from '../ai/detectCompute'
 import { isKataGoAvailable, KATAGO_SETUP_HINT } from '../ai/katago'
 import { playMoveSound } from '../audio/moveSound'
 import { CHANGELOG } from '../history/changelog'
@@ -30,10 +31,15 @@ export function SettingsScreen({ lang, settings, onChange, onBack }: SettingsPro
   const [kgBusy, setKgBusy] = useState(false)
   const [connected, setConnected] = useState(() => isKataGoAvailable())
   const [health, setHealth] = useState<BridgeHealth | null>(null)
+  const [compute, setCompute] = useState<ComputeHint | null>(null)
 
   useEffect(() => {
     void probeBridge(settings.katagoBridgeUrl).then(setHealth)
   }, [settings.katagoBridgeUrl])
+
+  useEffect(() => {
+    void detectComputeHint().then(setCompute)
+  }, [])
 
   async function onConnect() {
     setKgBusy(true)
@@ -72,6 +78,26 @@ export function SettingsScreen({ lang, settings, onChange, onBack }: SettingsPro
         <h2>{t(lang, 'settings')}</h2>
         <button type="button" className="btn" onClick={onBack}>{t(lang, 'back')}</button>
       </header>
+
+      <fieldset className="field">
+        <legend>{t(lang, 'goRules')}</legend>
+        <label className="radio">
+          <input
+            type="radio"
+            checked={settings.goRules === 'japanese'}
+            onChange={() => onChange({ ...settings, goRules: 'japanese' })}
+          />
+          {t(lang, 'rulesJapanese')}
+        </label>
+        <label className="radio">
+          <input
+            type="radio"
+            checked={settings.goRules === 'chinese'}
+            onChange={() => onChange({ ...settings, goRules: 'chinese' })}
+          />
+          {t(lang, 'rulesChinese')}
+        </label>
+      </fieldset>
 
       <label className="field">
         <span>{t(lang, 'language')}</span>
@@ -203,6 +229,14 @@ export function SettingsScreen({ lang, settings, onChange, onBack }: SettingsPro
       <details className="details" open>
         <summary>{t(lang, 'katagoStatus')}</summary>
         <p className="meta">{connected ? t(lang, 'katagoOn') : t(lang, 'katagoOff')}</p>
+        {compute && (
+          <p className="meta" role="status">
+            {t(lang, 'computeDetect')}:{' '}
+            <span className="mono">
+              [{compute.kind.toUpperCase()}] {compute.detail}
+            </span>
+          </p>
+        )}
         {health && (
           <p className="meta mono" role="status">
             bridge {health.running ? 'running' : 'idle'}

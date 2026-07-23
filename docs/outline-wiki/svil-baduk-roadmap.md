@@ -68,7 +68,7 @@ timeline
 
 ## v0.3.0 — KataGo 실연동
 
-- [ ] Tauri(또는 Electron) 셸
+- [x] Tauri(또는 Electron) 셸 — Tauri 2 + NSIS, 코드사인 훅(인증서 있을 때)
 - [ ] `katago.exe gtp` spawn + transport
 - [ ] 급단 → visits/노이즈 매핑 튜닝
 - [ ] 모델 다운로드 안내·경로 설정 UI

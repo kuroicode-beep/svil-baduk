@@ -6,6 +6,87 @@ export interface HistoryEntry {
 
 export const CHANGELOG: HistoryEntry[] = [
   {
+    version: '0.6.8',
+    date: '2026-07-23',
+    lines: [
+      '대국 시작 시 전체화면',
+      '바둑판·메뉴 한 화면 맞춤 정렬 (보드 잘림/스크롤 제거)',
+    ],
+  },
+  {
+    version: '0.6.7',
+    date: '2026-07-23',
+    lines: [
+      'Tauri 2 데스크톱 셸 (npm run tauri:dev / tauri:build)',
+      'Windows Authenticode 코드사인 훅 (인증서 있을 때 자동 서명)',
+      '바탕화면 바로가기: shortcut:tauri',
+    ],
+  },
+  {
+    version: '0.6.6',
+    date: '2026-07-23',
+    lines: [
+      'package.json homepage (GitHub Pages URL)',
+      '로드맵: 배포 파이프라인 상태 갱신',
+    ],
+  },
+  {
+    version: '0.6.5',
+    date: '2026-07-23',
+    lines: [
+      'AI 대국: 난이도·판 크기·색깔 선택 기억',
+    ],
+  },
+  {
+    version: '0.6.4',
+    date: '2026-07-23',
+    lines: [
+      'README·Outline 로컬 위키를 0.6.x 기능에 맞춤',
+      '배포/Pages·캐릭터·AI 대국 안내 정리',
+    ],
+  },
+  {
+    version: '0.6.3',
+    date: '2026-07-23',
+    lines: [
+      '포커스 링 #FFFF00 (고대비 표준)',
+      'AI 힌트 단축키 H + 스크린리더 후보 낭독',
+    ],
+  },
+  {
+    version: '0.6.2',
+    date: '2026-07-23',
+    lines: [
+      'AI 힌트: 상위 3수 숫자·상대점수 라벨 (분석 색칠 1차)',
+      'KataGo 연결 시 1순위 AI 수 + 보조 후보 표시',
+    ],
+  },
+  {
+    version: '0.6.1',
+    date: '2026-07-23',
+    lines: [
+      '설정: 일본식/중국식 룰 + 덤 계가 분기',
+      '바로가기 런처 안정화 (포트 재사용·ASCII BOM)',
+    ],
+  },
+  {
+    version: '0.6.0',
+    date: '2026-07-23',
+    lines: [
+      '유저 캐릭터 생성(이름·상징)',
+      '레벨업·XP, 전적(W/L/D), 최고 점수·최고 격파 난이도',
+      'AI 대국 종료 시 프로필 반영',
+    ],
+  },
+  {
+    version: '0.5.3',
+    date: '2026-07-23',
+    lines: [
+      '설정: GPU/CPU 추정 안내 (WebGPU·WebGL)',
+      '엔진 테스트: 자살수·따냄 케이스 추가',
+    ],
+  },
+  {
     version: '0.5.2',
     date: '2026-07-23',
     lines: [

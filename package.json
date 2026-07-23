@@ -1,7 +1,8 @@
 {
   "name": "svil-baduk",
   "private": true,
-  "version": "0.5.2",
+  "version": "0.6.8",
+  "homepage": "https://kuroicode-beep.github.io/svil-baduk",
   "type": "module",
   "scripts": {
     "dev": "vite",
@@ -15,15 +16,22 @@
     "dev:all": "powershell -ExecutionPolicy Bypass -File scripts/dev-all.ps1",
     "start:app": "powershell -ExecutionPolicy Bypass -File scripts/start-app.ps1",
     "shortcut": "powershell -ExecutionPolicy Bypass -File scripts/install_desktop_shortcut.ps1",
+    "shortcut:tauri": "powershell -ExecutionPolicy Bypass -File scripts/install_tauri_shortcut.ps1",
+    "tauri": "tauri",
+    "tauri:dev": "tauri dev",
+    "tauri:build": "tauri build",
+    "codesign:setup": "powershell -ExecutionPolicy Bypass -File scripts/setup-codesign.ps1",
     "deploy": "npm run build:gh && gh-pages -d dist -b gh-pages"
   },
   "dependencies": {
+    "@tauri-apps/api": "^2.11.1",
     "peerjs": "^1.5.4",
     "qrcode": "^1.5.4",
     "react": "^19.1.0",
     "react-dom": "^19.1.0"
   },
   "devDependencies": {
+    "@tauri-apps/cli": "^2.11.4",
     "@types/qrcode": "^1.5.6",
     "@types/react": "^19.1.2",
     "@types/react-dom": "^19.1.2",

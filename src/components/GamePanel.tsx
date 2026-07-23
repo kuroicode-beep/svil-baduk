@@ -1,6 +1,6 @@
 import { useRef } from 'react'
 import { pointLabel } from '../engine/board'
-import { estimateScore } from '../engine/scoring'
+import { estimateScore, type GoRules } from '../engine/scoring'
 import type { GameState, Player } from '../engine/types'
 import type { Lang } from '../i18n/dict'
 import { t } from '../i18n/dict'
@@ -12,6 +12,7 @@ interface GamePanelProps {
   statusText: string
   reviewPly?: number
   reviewLen?: number
+  goRules?: GoRules
   onPass: () => void
   onResign: () => void
   onBack: () => void
@@ -28,6 +29,7 @@ export function GamePanel({
   statusText,
   reviewPly,
   reviewLen,
+  goRules = 'japanese',
   onPass,
   onResign,
   onBack,
@@ -40,7 +42,7 @@ export function GamePanel({
   const fileRef = useRef<HTMLInputElement>(null)
   const last = state.history[state.history.length - 1]
   const turnLabel = state.toPlay === 1 ? t(lang, 'black') : t(lang, 'white')
-  const score = state.ended ? estimateScore(state) : null
+  const score = state.ended ? estimateScore(state, goRules) : null
   const resultLabel = score
     ? `${
         score.winner === 1
@@ -59,15 +61,14 @@ export function GamePanel({
 
   return (
     <aside className="panel" aria-live="polite">
-      <p className="status-line">{statusText}</p>
-      <p className="meta mono">
-        {turnLabel} · {state.ended ? t(lang, 'gameOver') : t(lang, 'yourTurn')}
-      </p>
-      {reviewLen != null && reviewPly != null && (
+      <header className="panel-head">
+        <p className="status-line">{statusText}</p>
         <p className="meta mono">
-          {t(lang, 'review')} {reviewPly}/{reviewLen}
+          {turnLabel}
+          {state.ended ? ` · ${t(lang, 'gameOver')}` : ` · ${t(lang, 'yourTurn')}`}
+          {reviewLen != null && reviewPly != null ? ` · ${t(lang, 'review')} ${reviewPly}/${reviewLen}` : ''}
         </p>
-      )}
+      </header>
       <dl className="stats">
         <div>
           <dt>{t(lang, 'black')} {t(lang, 'captures')}</dt>
@@ -100,6 +101,10 @@ export function GamePanel({
             <div>
               <dt>{t(lang, 'white')} {t(lang, 'territory')}</dt>
               <dd className="mono">{score.whiteTerritory}</dd>
+            </div>
+            <div>
+              <dt>{t(lang, 'goRules')}</dt>
+              <dd>{score.rules === 'chinese' ? t(lang, 'rulesChinese') : t(lang, 'rulesJapanese')}</dd>
             </div>
             <div>
               <dt>{t(lang, 'komi')} ({t(lang, 'white')})</dt>

@@ -10,6 +10,7 @@ import type { BoardSize, GameState, Move, Player, Point } from '../engine/types'
 import type { Lang } from '../i18n/dict'
 import { t } from '../i18n/dict'
 import { BadukP2P, friendlyP2PError, type P2PMessage } from '../p2p/session'
+import { enterFullscreen, exitFullscreen } from '../platform/fullscreen'
 import { BOARD_CELL_PX, LINE_STROKE, type Settings } from '../settings/store'
 
 interface MultiProps {
@@ -42,6 +43,17 @@ export function Multi({ lang, settings, onBack }: MultiProps) {
   phaseRef.current = phase
   soundRef.current = settings.moveSound
   lobbyRef.current = { amHost, size, hostColor }
+
+  useEffect(() => {
+    if (phase === 'play') {
+      void enterFullscreen()
+    } else {
+      void exitFullscreen()
+    }
+    return () => {
+      void exitFullscreen()
+    }
+  }, [phase])
 
   function returnToLobby(message?: string) {
     setConnected(false)
@@ -291,7 +303,7 @@ export function Multi({ lang, settings, onBack }: MultiProps) {
           maxContrast={settings.maxContrastBoard}
           reduceMotion={settings.reduceMotion}
           lastMove={lastMove}
-          ownership={state.ended ? estimateScore(state).ownership : undefined}
+          ownership={state.ended ? estimateScore(state, settings.goRules).ownership : undefined}
           cellSize={BOARD_CELL_PX[settings.boardScale]}
           lineWidth={LINE_STROKE[settings.lineWeight]}
           onPlay={onPlay}
@@ -300,6 +312,7 @@ export function Multi({ lang, settings, onBack }: MultiProps) {
         <GamePanel
           lang={lang}
           state={state}
+          goRules={settings.goRules}
           statusText={
             state.ended
               ? `${t(lang, 'gameOver')} · ${t(lang, 'score')}`

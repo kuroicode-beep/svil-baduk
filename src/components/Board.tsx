@@ -9,8 +9,8 @@ interface BoardProps {
   maxContrast: boolean
   reduceMotion: boolean
   lastMove: Point | null
-  /** 연습 문제 정답 후보 등 — 라벨과 함께 표시 */
-  markers?: Point[]
+  /** 힌트/분석 후보 — label이 있으면 숫자·퍼센트 표시 */
+  markers?: Array<Point & { label?: string }>
   /** 계가 소유권: 1흑집 2백집 0공배 */
   ownership?: Stone[]
   cellSize?: number
@@ -107,9 +107,8 @@ export function Board({
       <svg
         ref={svgRef}
         className="board-svg"
-        width={boardPx}
-        height={boardPx}
         viewBox={`0 0 ${boardPx} ${boardPx}`}
+        preserveAspectRatio="xMidYMid meet"
         role="application"
         aria-labelledby={titleId}
         aria-label={ariaLabel}
@@ -260,8 +259,8 @@ export function Board({
             <circle
               cx={pad + p.x * cell}
               cy={pad + p.y * cell}
-              r={12}
-              fill="none"
+              r={14}
+              fill="rgba(0,0,0,0.65)"
               stroke="#7ee2a8"
               strokeWidth={3}
             />
@@ -270,10 +269,11 @@ export function Board({
               y={pad + p.y * cell + 5}
               textAnchor="middle"
               fill="#7ee2a8"
-              fontSize={11}
+              fontSize={p.label && p.label.length > 3 ? 10 : 12}
               fontFamily="Consolas, monospace"
+              fontWeight={700}
             >
-              {markers.length === 1 ? '힌트' : '정답'}
+              {p.label ?? (markers.length === 1 ? '힌트' : '정답')}
             </text>
           </g>
         ))}

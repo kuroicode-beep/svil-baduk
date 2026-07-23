@@ -138,4 +138,51 @@ describe('go engine', () => {
     if (retake.ok) return
     expect(['ko', 'superko']).toContain(retake.reason)
   })
+
+  it('rejects suicide (fill own last liberty)', () => {
+    let g = createGame(9)
+    // White box around (1,1) with one hole; black cannot play into only liberty if suicide
+    const sequence: [number, number][] = [
+      [0, 0], // B elsewhere
+      [1, 0], // W
+      [5, 5], // B
+      [0, 1], // W
+      [5, 6], // B
+      [2, 1], // W
+      [5, 7], // B
+      [1, 2], // W — (1,1) empty, surrounded by W on N/W/E/S
+    ]
+    for (const [x, y] of sequence) {
+      const r = tryPlay(g, x, y)
+      expect(r.ok).toBe(true)
+      if (!r.ok) return
+      g = r.state
+    }
+    // Black to play into (1,1) — suicide
+    const suicide = tryPlay(g, 1, 1)
+    expect(suicide.ok).toBe(false)
+  })
+
+  it('allows capturing instead of suicide', () => {
+    let g = createGame(9)
+    // Classic: white stone at (1,1) with one liberty; black captures
+    const sequence: [number, number][] = [
+      [1, 0], // B
+      [1, 1], // W victim
+      [0, 1], // B
+      [5, 5], // W
+      [2, 1], // B
+      [5, 6], // W
+    ]
+    for (const [x, y] of sequence) {
+      const r = tryPlay(g, x, y)
+      expect(r.ok).toBe(true)
+      if (!r.ok) return
+      g = r.state
+    }
+    const cap = tryPlay(g, 1, 2) // B captures W
+    expect(cap.ok).toBe(true)
+    if (!cap.ok) return
+    expect(cap.move.captured).toEqual([{ x: 1, y: 1 }])
+  })
 })

@@ -187,6 +187,9 @@ export function Multi({ lang, settings, onBack }: MultiProps) {
           y: state.history[state.history.length - 1].y,
         }
       : null
+  const lastWasOpponent =
+    !!state.history.length && state.history[state.history.length - 1].player !== myColor
+  const blinkLastMove = humanTurn && lastWasOpponent && !!lastMove
 
   function sendMove(move: Move) {
     p2pRef.current?.send({ type: 'move', move })
@@ -329,6 +332,9 @@ export function Multi({ lang, settings, onBack }: MultiProps) {
           maxContrast={settings.maxContrastBoard}
           reduceMotion={settings.reduceMotion}
           lastMove={lastMove}
+          blinkLastMove={blinkLastMove}
+          blackStone={settings.blackStone}
+          whiteStone={settings.whiteStone}
           ownership={state.ended ? estimateScore(state, settings.goRules).ownership : undefined}
           cellSize={BOARD_CELL_PX[settings.boardScale]}
           lineWidth={LINE_STROKE[settings.lineWeight]}

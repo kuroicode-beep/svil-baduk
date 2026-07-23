@@ -1,5 +1,6 @@
 import type { Lang } from '../i18n/dict'
 import type { GoRules } from '../engine/scoring'
+import type { BlackStoneId, WhiteStoneId } from './stoneColors'
 
 export type FontId =
   | 'kyobo'
@@ -28,6 +29,8 @@ export interface Settings {
   boardScale: BoardScaleId
   lineWeight: LineWeightId
   goRules: GoRules
+  blackStone: BlackStoneId
+  whiteStone: WhiteStoneId
   katagoBridgeUrl: string
   katagoExe: string
   katagoModel: string
@@ -78,6 +81,8 @@ export const defaultSettings = (): Settings => ({
   boardScale: 'medium',
   lineWeight: 'normal',
   goRules: 'japanese',
+  blackStone: 'black',
+  whiteStone: 'white',
   katagoBridgeUrl: 'http://127.0.0.1:17419',
   katagoExe: '',
   katagoModel: '',

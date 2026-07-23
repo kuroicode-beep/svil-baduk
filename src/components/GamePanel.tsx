@@ -42,7 +42,8 @@ export function GamePanel({
   const fileRef = useRef<HTMLInputElement>(null)
   const last = state.history[state.history.length - 1]
   const turnLabel = state.toPlay === 1 ? t(lang, 'black') : t(lang, 'white')
-  const score = state.ended ? estimateScore(state, goRules) : null
+  const liveScore = estimateScore(state, goRules)
+  const score = state.ended ? liveScore : null
   const resultLabel = score
     ? `${
         score.winner === 1
@@ -59,6 +60,12 @@ export function GamePanel({
     downloadSgf(`svil-baduk-${state.size}-${stamp}.sgf`, sgf)
   }
 
+  const lastCoord = last
+    ? last.pass
+      ? t(lang, 'pass')
+      : pointLabel(last.x, last.y)
+    : '—'
+
   return (
     <aside className="panel" aria-live="polite">
       <header className="panel-head">
@@ -69,7 +76,29 @@ export function GamePanel({
           {reviewLen != null && reviewPly != null ? ` · ${t(lang, 'review')} ${reviewPly}/${reviewLen}` : ''}
         </p>
       </header>
-      <dl className="stats">
+
+      <div className="last-move-box" role="status" aria-label={t(lang, 'lastMove')}>
+        <span className="last-move-label">{t(lang, 'lastMove')}</span>
+        <span className="last-move-coord mono">{lastCoord}</span>
+      </div>
+
+      <dl className="stats stats-live">
+        <div>
+          <dt>{t(lang, 'black')} {t(lang, 'territory')}</dt>
+          <dd className="mono">{liveScore.blackTerritory}</dd>
+        </div>
+        <div>
+          <dt>{t(lang, 'white')} {t(lang, 'territory')}</dt>
+          <dd className="mono">{liveScore.whiteTerritory}</dd>
+        </div>
+        <div>
+          <dt>{t(lang, 'black')} {t(lang, 'total')}</dt>
+          <dd className="mono">{liveScore.blackTotal}</dd>
+        </div>
+        <div>
+          <dt>{t(lang, 'white')} {t(lang, 'total')}</dt>
+          <dd className="mono">{liveScore.whiteTotal}</dd>
+        </div>
         <div>
           <dt>{t(lang, 'black')} {t(lang, 'captures')}</dt>
           <dd className="mono">{state.captures[1 as Player]}</dd>
@@ -78,30 +107,13 @@ export function GamePanel({
           <dt>{t(lang, 'white')} {t(lang, 'captures')}</dt>
           <dd className="mono">{state.captures[2 as Player]}</dd>
         </div>
-        <div>
-          <dt>{t(lang, 'lastMove')}</dt>
-          <dd className="mono">
-            {last
-              ? last.pass
-                ? t(lang, 'pass')
-                : pointLabel(last.x, last.y)
-              : '—'}
-          </dd>
-        </div>
       </dl>
+      <p className="hint score-live-note">{t(lang, 'liveScoreNote')}</p>
 
       {score && (
         <section className="score-box" aria-label={t(lang, 'score')}>
           <h3 className="score-title">{t(lang, 'score')} — {resultLabel}</h3>
           <dl className="stats">
-            <div>
-              <dt>{t(lang, 'black')} {t(lang, 'territory')}</dt>
-              <dd className="mono">{score.blackTerritory}</dd>
-            </div>
-            <div>
-              <dt>{t(lang, 'white')} {t(lang, 'territory')}</dt>
-              <dd className="mono">{score.whiteTerritory}</dd>
-            </div>
             <div>
               <dt>{t(lang, 'goRules')}</dt>
               <dd>{score.rules === 'chinese' ? t(lang, 'rulesChinese') : t(lang, 'rulesJapanese')}</dd>
@@ -109,14 +121,6 @@ export function GamePanel({
             <div>
               <dt>{t(lang, 'komi')} ({t(lang, 'white')})</dt>
               <dd className="mono">{score.komi}</dd>
-            </div>
-            <div>
-              <dt>{t(lang, 'black')} {t(lang, 'total')}</dt>
-              <dd className="mono">{score.blackTotal}</dd>
-            </div>
-            <div>
-              <dt>{t(lang, 'white')} {t(lang, 'total')}</dt>
-              <dd className="mono">{score.whiteTotal}</dd>
             </div>
           </dl>
           <p className="hint">{t(lang, 'scoreNote')}</p>

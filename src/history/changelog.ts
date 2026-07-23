@@ -6,6 +6,23 @@ export interface HistoryEntry {
 
 export const CHANGELOG: HistoryEntry[] = [
   {
+    version: '0.7.2',
+    date: '2026-07-24',
+    lines: [
+      '흑/백 돌 색 선택 (설정) · 상대 직전 수 내 착수까지 깜빡임',
+      '우측 패널: 직전 좌표 확대 · 진행 중 집/합계 표시',
+      'AI 대국 스냅샷 — 종료 후에도 이어서 두기',
+    ],
+  },
+  {
+    version: '0.7.1',
+    date: '2026-07-24',
+    lines: [
+      'AI 첫 수가 영구 대기하던 버그 수정 (aiBusy effect 자기취소)',
+      'KataGo genmove 실패 시 내장 AI로 즉시 폴백',
+    ],
+  },
+  {
     version: '0.7.0',
     date: '2026-07-23',
     lines: [

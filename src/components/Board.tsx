@@ -1,6 +1,12 @@
 import { useEffect, useId, useMemo, useRef, useState } from 'react'
 import { idx, legalMoves, starPoints } from '../engine/board'
 import type { GameState, Point, Stone } from '../engine/types'
+import {
+  blackStoneStyle,
+  whiteStoneStyle,
+  type BlackStoneId,
+  type WhiteStoneId,
+} from '../settings/stoneColors'
 
 interface BoardProps {
   state: GameState
@@ -9,6 +15,10 @@ interface BoardProps {
   maxContrast: boolean
   reduceMotion: boolean
   lastMove: Point | null
+  /** 상대 직전 수 — 내 착수 전까지 깜빡임 */
+  blinkLastMove?: boolean
+  blackStone?: BlackStoneId
+  whiteStone?: WhiteStoneId
   /** 힌트/분석 후보 — label이 있으면 숫자·퍼센트 표시 */
   markers?: Array<Point & { label?: string }>
   /** 계가 소유권: 1흑집 2백집 0공배 */
@@ -26,6 +36,9 @@ export function Board({
   maxContrast,
   reduceMotion,
   lastMove,
+  blinkLastMove = false,
+  blackStone = 'black',
+  whiteStone = 'white',
   markers = [],
   ownership,
   cellSize = 48,
@@ -64,6 +77,8 @@ export function Board({
   const bg = maxContrast ? '#000000' : '#0d0d12'
   const gridBg = maxContrast ? '#111111' : '#16161d'
 
+  const blackStyle = blackStoneStyle(blackStone)
+  const whiteStyle = whiteStoneStyle(whiteStone)
   const focusPoint = legal[focusIdx] ?? null
 
   function handleKey(e: React.KeyboardEvent) {
@@ -246,45 +261,41 @@ export function Board({
           const cx = pad + x * cell
           const cy = pad + y * cell
           const isLast = lastMove && lastMove.x === x && lastMove.y === y
-          const fill = stone === 1 ? '#f5f5f7' : '#1a1a1a'
-          const stroke = stone === 1 ? '#000000' : '#f5f5f7'
+          const style = stone === 1 ? blackStyle : whiteStyle
+          const label = stone === 1 ? '흑' : '백'
           return (
             <g key={`stone-${i}`}>
-              <circle cx={cx} cy={cy} r={stoneR} fill={fill} stroke={stroke} strokeWidth={3} />
-              {stone === 2 && (
-                <text
-                  x={cx}
-                  y={cy + 5}
-                  textAnchor="middle"
-                  fill="#f5f5f7"
-                  fontSize={12}
-                  fontFamily="Consolas, monospace"
-                  aria-hidden
-                >
-                  백
-                </text>
-              )}
-              {stone === 1 && (
-                <text
-                  x={cx}
-                  y={cy + 5}
-                  textAnchor="middle"
-                  fill="#000000"
-                  fontSize={12}
-                  fontFamily="Consolas, monospace"
-                  aria-hidden
-                >
-                  흑
-                </text>
-              )}
+              <circle
+                cx={cx}
+                cy={cy}
+                r={stoneR}
+                fill={style.fill}
+                stroke={style.stroke}
+                strokeWidth={3}
+              />
+              <text
+                x={cx}
+                y={cy + 5}
+                textAnchor="middle"
+                fill={style.label}
+                fontSize={12}
+                fontFamily="Consolas, monospace"
+                aria-hidden
+              >
+                {label}
+              </text>
               {isLast && (
                 <circle
+                  className={[
+                    'last-move-mark',
+                    blinkLastMove && !reduceMotion ? 'last-move-mark--blink' : '',
+                  ].join(' ')}
                   cx={cx}
                   cy={cy}
-                  r={stoneR * 0.28}
+                  r={stoneR * (blinkLastMove ? 0.38 : 0.28)}
                   fill="#ffd479"
                   stroke="#000"
-                  strokeWidth={2}
+                  strokeWidth={blinkLastMove ? 3 : 2}
                 />
               )}
             </g>

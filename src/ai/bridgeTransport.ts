@@ -34,10 +34,13 @@ export function createBridgeTransport(baseUrl = DEFAULT_BRIDGE_URL): KataGoTrans
   return {
     isConnected: () => connected,
     async send(line: string) {
+      const isSearch = /^\s*genmove\b/i.test(line) || /^\s*kata-genmove/i.test(line)
       const res = await fetch(`${root}/gtp`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ line }),
+        // OpenCL 첫 튜닝·고난이도 여유. 그 외 GTP는 짧게.
+        signal: AbortSignal.timeout(isSearch ? 90_000 : 15_000),
       })
       const data = (await res.json()) as { ok: boolean; response?: string; error?: string }
       if (!res.ok || !data.ok) throw new Error(data.error || 'gtp_failed')

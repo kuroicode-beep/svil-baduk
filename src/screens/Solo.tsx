@@ -16,6 +16,7 @@ import { hasCharacter, loadProfile, saveProfile } from '../profile/store'
 import { enterFullscreen, exitFullscreen } from '../platform/fullscreen'
 import { BOARD_CELL_PX, LINE_STROKE, type Settings } from '../settings/store'
 import { decodeSgf, replayTo } from '../sgf/sgf'
+import { clearSoloSnapshot, loadSoloSnapshot, saveSoloSnapshot } from '../solo/snapshot'
 
 const SOLO_PREFS_KEY = 'svil-baduk-solo-prefs'
 
@@ -61,7 +62,10 @@ export function Solo({ lang, settings, onBack }: SoloProps) {
   const [hintPts, setHintPts] = useState<Array<Point & { label?: string }>>([])
   const [hintBusy, setHintBusy] = useState(false)
   const [progressNote, setProgressNote] = useState('')
+  const [snapshotMeta, setSnapshotMeta] = useState(() => loadSoloSnapshot())
   const recordedEndRef = useRef(false)
+  /** AI 착수 요청 세대 — aiBusy를 deps에 넣으면 setAiBusy(true)가 effect를 취소해 영구 정지됨 */
+  const aiTurnGenRef = useRef(0)
 
   const reviewing = tree !== null && ply < tree.length
   const state = useMemo(
@@ -79,9 +83,22 @@ export function Solo({ lang, settings, onBack }: SoloProps) {
 
   const atTip = !tree || ply === tree.length
   const humanTurn = phase === 'play' && atTip && !state.ended && state.toPlay === myColor
+  const lastWasOpponent =
+    !!state.history.length && state.history[state.history.length - 1].player !== myColor
+  const blinkLastMove = humanTurn && lastWasOpponent && !!lastMove
   const ownership = state.ended
     ? estimateScore(state, settings.goRules).ownership
     : undefined
+
+  function persistSnapshot(next: GameState, opts?: { size?: BoardSize; rankId?: RankId; myColor?: Player }) {
+    saveSoloSnapshot({
+      size: opts?.size ?? size,
+      rankId: opts?.rankId ?? rankId,
+      myColor: opts?.myColor ?? myColor,
+      state: next,
+    })
+    setSnapshotMeta(loadSoloSnapshot())
+  }
 
   useEffect(() => {
     if (phase === 'play') {
@@ -117,52 +134,74 @@ export function Solo({ lang, settings, onBack }: SoloProps) {
   }, [phase, tree, ply, live.history.length, humanTurn, aiBusy, hintBusy, rankId])
 
   useEffect(() => {
-    if (phase !== 'play' || !atTip || state.ended || state.toPlay === myColor || aiBusy) return
-    let cancelled = false
+    if (phase !== 'play' || !atTip || state.ended || state.toPlay === myColor) return
+
+    const gen = ++aiTurnGenRef.current
+    const snapshot = state
+    const snapRank = rankId
+    const snapSound = settings.moveSound
+    setAiBusy(true)
+
     ;(async () => {
-      setAiBusy(true)
-      await new Promise((r) => setTimeout(r, 280))
-      if (cancelled) return
-      let move: Point | 'pass' | null = null
-      if (isKataGoAvailable()) {
-        move = await katagoGenmove(state, rankId)
-      }
-      if (!move) {
-        const p = pickBuiltinMove(state, rankId)
-        move = p ?? 'pass'
-      }
-      if (cancelled) return
-      if (move === 'pass') {
-        const r = pass(state)
-        if (r.ok) commitLive(r.state)
-      } else {
-        const r = tryPlay(state, move.x, move.y)
-        if (r.ok) {
-          commitLive(r.state)
-          playMoveSound(settings.moveSound)
-        } else {
-          const r2 = pass(state)
-          if (r2.ok) commitLive(r2.state)
+      try {
+        await new Promise((r) => setTimeout(r, 120))
+        if (gen !== aiTurnGenRef.current) return
+
+        let move: Point | 'pass' | null = null
+        if (isKataGoAvailable()) {
+          try {
+            move = await katagoGenmove(snapshot, snapRank)
+          } catch (e) {
+            console.warn('[solo] katago genmove failed, falling back', e)
+            move = null
+          }
         }
+        if (!move) {
+          const p = pickBuiltinMove(snapshot, snapRank)
+          move = p ?? 'pass'
+        }
+        if (gen !== aiTurnGenRef.current) return
+
+        if (move === 'pass') {
+          const r = pass(snapshot)
+          if (r.ok) commitLive(r.state)
+        } else {
+          const r = tryPlay(snapshot, move.x, move.y)
+          if (r.ok) {
+            commitLive(r.state)
+            playMoveSound(snapSound)
+          } else {
+            const r2 = pass(snapshot)
+            if (r2.ok) commitLive(r2.state)
+          }
+        }
+      } finally {
+        if (gen === aiTurnGenRef.current) setAiBusy(false)
       }
-      setAiBusy(false)
     })()
+
     return () => {
-      cancelled = true
+      // 진행 중 요청 무효화 (언마운트·의존성 변경·Strict Mode 재실행)
+      if (aiTurnGenRef.current === gen) aiTurnGenRef.current += 1
+      setAiBusy(false)
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [phase, state, myColor, rankId, aiBusy, settings.moveSound, atTip])
+  }, [phase, state, myColor, rankId, settings.moveSound, atTip])
 
   function commitLive(next: GameState) {
     setLive(next)
     setTree(null)
     setPly(next.history.length)
     setHintPts([])
+    persistSnapshot(next)
   }
 
   function start() {
     saveSoloPrefs({ rankId, size, myColor })
     const g = createGame(size)
+    aiTurnGenRef.current += 1
+    clearSoloSnapshot()
+    setSnapshotMeta(null)
     setLive(g)
     setTree(null)
     setPly(0)
@@ -171,7 +210,36 @@ export function Solo({ lang, settings, onBack }: SoloProps) {
     setAiBusy(false)
     setProgressNote('')
     recordedEndRef.current = false
+    persistSnapshot(g)
     void enterFullscreen()
+  }
+
+  function resumeSnapshot() {
+    const snap = loadSoloSnapshot()
+    if (!snap) return
+    saveSoloPrefs({ rankId: snap.rankId, size: snap.size, myColor: snap.myColor })
+    aiTurnGenRef.current += 1
+    setSize(snap.size)
+    setRankId(snap.rankId)
+    setMyColor(snap.myColor)
+    setLive(snap.state)
+    setTree(null)
+    setPly(snap.state.history.length)
+    setError('')
+    setPhase('play')
+    setAiBusy(false)
+    setProgressNote('')
+    recordedEndRef.current = snap.state.ended
+    setSnapshotMeta(snap)
+    void enterFullscreen()
+  }
+
+  function leaveToSetup() {
+    if (phase === 'play') {
+      persistSnapshot(live)
+    }
+    setPhase('setup')
+    setSnapshotMeta(loadSoloSnapshot())
   }
 
   useEffect(() => {
@@ -244,6 +312,7 @@ export function Solo({ lang, settings, onBack }: SoloProps) {
     setPhase('play')
     setAiBusy(false)
     setHintPts([])
+    persistSnapshot(loaded.state, { size: loaded.size })
   }
 
   async function onHint() {
@@ -369,8 +438,18 @@ export function Solo({ lang, settings, onBack }: SoloProps) {
           </div>
         </div>
         <div className="btn-row setup-actions">
+          {snapshotMeta && (
+            <button type="button" className="btn btn-primary" onClick={resumeSnapshot}>
+              {t(lang, 'resumeGame')}
+              <span className="nav-btn-sub mono">
+                {snapshotMeta.size}×{snapshotMeta.size} · {snapshotMeta.state.history.length}
+                {t(lang, 'movesShort')}
+                {snapshotMeta.state.ended ? ` · ${t(lang, 'gameOver')}` : ''}
+              </span>
+            </button>
+          )}
           <button type="button" className="btn btn-primary" onClick={start}>
-            {t(lang, 'startGame')}
+            {snapshotMeta ? t(lang, 'newGame') : t(lang, 'startGame')}
           </button>
           <label className="btn">
             {t(lang, 'loadSgf')}
@@ -434,6 +513,9 @@ export function Solo({ lang, settings, onBack }: SoloProps) {
           maxContrast={settings.maxContrastBoard}
           reduceMotion={settings.reduceMotion}
           lastMove={lastMove}
+          blinkLastMove={blinkLastMove}
+          blackStone={settings.blackStone}
+          whiteStone={settings.whiteStone}
           ownership={ownership}
           markers={hintPts}
           cellSize={BOARD_CELL_PX[settings.boardScale]}
@@ -454,7 +536,7 @@ export function Solo({ lang, settings, onBack }: SoloProps) {
             if (r.ok) commitLive(r.state)
           }}
           onResign={() => commitLive(resign(state, myColor))}
-          onBack={() => setPhase('setup')}
+          onBack={leaveToSetup}
           onLoadSgf={onLoadSgf}
           onUndo={onUndo}
           onRedo={onRedo}

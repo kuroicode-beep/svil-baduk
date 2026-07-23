@@ -18,6 +18,12 @@ import {
   type LineWeightId,
   type Settings as SettingsState,
 } from '../settings/store'
+import {
+  BLACK_STONE_OPTIONS,
+  WHITE_STONE_OPTIONS,
+  type BlackStoneId,
+  type WhiteStoneId,
+} from '../settings/stoneColors'
 
 interface SettingsProps {
   lang: Lang
@@ -163,6 +169,50 @@ export function SettingsScreen({ lang, settings, onChange, onBack }: SettingsPro
         />
         {t(lang, 'highContrast')}
       </label>
+
+      <fieldset className="field">
+        <legend>{t(lang, 'blackStoneColor')}</legend>
+        <div className="stone-swatch-row" role="group" aria-label={t(lang, 'blackStoneColor')}>
+          {BLACK_STONE_OPTIONS.map((o) => (
+            <button
+              key={o.id}
+              type="button"
+              className={`btn stone-swatch${settings.blackStone === o.id ? ' stone-swatch-on' : ''}`}
+              aria-pressed={settings.blackStone === o.id}
+              onClick={() => onChange({ ...settings, blackStone: o.id as BlackStoneId })}
+            >
+              <span
+                className="stone-swatch-dot"
+                style={{ background: o.style.fill, borderColor: o.style.stroke }}
+                aria-hidden
+              />
+              {lang === 'ko' ? o.labelKo : o.labelEn}
+            </button>
+          ))}
+        </div>
+      </fieldset>
+
+      <fieldset className="field">
+        <legend>{t(lang, 'whiteStoneColor')}</legend>
+        <div className="stone-swatch-row" role="group" aria-label={t(lang, 'whiteStoneColor')}>
+          {WHITE_STONE_OPTIONS.map((o) => (
+            <button
+              key={o.id}
+              type="button"
+              className={`btn stone-swatch${settings.whiteStone === o.id ? ' stone-swatch-on' : ''}`}
+              aria-pressed={settings.whiteStone === o.id}
+              onClick={() => onChange({ ...settings, whiteStone: o.id as WhiteStoneId })}
+            >
+              <span
+                className="stone-swatch-dot"
+                style={{ background: o.style.fill, borderColor: o.style.stroke }}
+                aria-hidden
+              />
+              {lang === 'ko' ? o.labelKo : o.labelEn}
+            </button>
+          ))}
+        </div>
+      </fieldset>
 
       <label className="check">
         <input

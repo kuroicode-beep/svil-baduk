@@ -190,6 +190,8 @@ export function Learn({ lang, settings, onBack }: LearnProps) {
               maxContrast={settings.maxContrastBoard}
               reduceMotion={settings.reduceMotion}
               lastMove={null}
+              blackStone={settings.blackStone}
+              whiteStone={settings.whiteStone}
               markers={markers}
               cellSize={BOARD_CELL_PX[settings.boardScale]}
               lineWidth={LINE_STROKE[settings.lineWeight]}

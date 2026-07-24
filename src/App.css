@@ -1215,6 +1215,57 @@ html[data-reduce-motion='1'] .legal-dot--blink {
   gap: 8px;
 }
 
+.learn-layout {
+  display: grid;
+  grid-template-columns: minmax(200px, 260px) 1fr;
+  gap: 20px;
+  align-items: start;
+}
+
+@media (max-width: 900px) {
+  .learn-layout {
+    grid-template-columns: 1fr;
+  }
+}
+
+.learn-stages {
+  position: sticky;
+  top: 12px;
+}
+
+.stage-list {
+  list-style: none;
+  padding: 0;
+  margin: 12px 0 0;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.toc-btn.stage-cleared {
+  border-color: var(--accent);
+}
+
+.toc-btn:disabled,
+.toc-btn[aria-disabled='true'] {
+  opacity: 0.55;
+  cursor: not-allowed;
+}
+
+.learn-blurb {
+  margin: 8px 0 12px;
+}
+
+.learn-refs {
+  margin-bottom: 12px;
+}
+
+.learn .tab-btn .nav-btn-sub {
+  display: block;
+  font-size: 0.85em;
+  margin-top: 2px;
+}
+
 .score-box {
   margin: 16px 0;
   padding: 14px 16px;

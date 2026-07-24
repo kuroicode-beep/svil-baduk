@@ -3,8 +3,18 @@ import { playMoveSound } from '../audio/moveSound'
 import { Board } from '../components/Board'
 import { tryPlay } from '../engine/board'
 import type { GameState, Point } from '../engine/types'
-import { lessonsFor, puzzlesFor } from '../learn/localize'
-import { puzzleState, type Puzzle } from '../learn/puzzles'
+import { problemState } from '../learn/boardSetup'
+import { STAGES, stagesForTrack } from '../learn/curriculum'
+import {
+  isStageCleared,
+  isStageUnlocked,
+  loadLearnProgress,
+  markSolved,
+  saveLearnProgress,
+  trackClearCount,
+  type LearnProgress,
+} from '../learn/progress'
+import { loc, type LearnProblem, type LearnStage, type TrackId } from '../learn/types'
 import type { Lang } from '../i18n/dict'
 import { t } from '../i18n/dict'
 import { BOARD_CELL_PX, LINE_STROKE, type Settings } from '../settings/store'
@@ -15,234 +25,285 @@ interface LearnProps {
   onBack: () => void
 }
 
-type Tab = 'lessons' | 'practice'
+const TRACKS: { id: TrackId; titleKey: 'learnBasics' | 'learnFuseki' | 'learnTsumego' }[] = [
+  { id: 'basics', titleKey: 'learnBasics' },
+  { id: 'fuseki', titleKey: 'learnFuseki' },
+  { id: 'tsumego', titleKey: 'learnTsumego' },
+]
+
+function evaluatePlay(
+  problem: LearnProblem,
+  board: GameState,
+  x: number,
+  y: number,
+): { ok: boolean; next?: GameState; msgKo: string; msgEn: string } {
+  const isSol = problem.solutions.some((s) => s.x === x && s.y === y)
+  if (!isSol) {
+    return { ok: false, msgKo: '다른 자리입니다. 힌트를 보거나 다시 시도하세요.', msgEn: 'Wrong point. Try a hint or retry.' }
+  }
+  const r = tryPlay(board, x, y)
+  if (!r.ok) {
+    return { ok: false, msgKo: '둘 수 없는 자리입니다.', msgEn: 'Illegal move.' }
+  }
+  if (problem.goal === 'capture') {
+    if (r.move.captured.length > 0) {
+      return { ok: true, next: r.state, msgKo: '정답 — 따냈습니다!', msgEn: 'Correct — captured!' }
+    }
+    return {
+      ok: false,
+      next: board,
+      msgKo: '착수는 맞았지만 따냄이 없습니다. 다시 시도하세요.',
+      msgEn: 'Right point but no capture. Retry.',
+    }
+  }
+  // place / kill / live — 정답 교차점 착수면 클리어
+  return {
+    ok: true,
+    next: r.state,
+    msgKo: problem.note?.ko ? `정답! ${problem.note.ko}` : '정답입니다!',
+    msgEn: problem.note?.en ? `Correct! ${problem.note.en}` : 'Correct!',
+  }
+}
+
+function findStageSafe(id: string) {
+  return STAGES.find((s) => s.id === id)
+}
+
+function initialLearnView(p: LearnProgress) {
+  const track = p.lastTrack
+  const trackStages = stagesForTrack(track)
+  const stage =
+    trackStages.find((s) => s.id === p.lastStageId && isStageUnlocked(s.id, p.solved)) ??
+    trackStages.find((s) => isStageUnlocked(s.id, p.solved)) ??
+    trackStages[0]
+  const pIdx = Math.max(
+    0,
+    stage?.problems.findIndex((pr) => pr.id === p.lastProblemId) ?? 0,
+  )
+  const problem = stage?.problems[pIdx] ?? stage?.problems[0]
+  return { track, stage, pIdx: problem ? stage!.problems.indexOf(problem) : 0, problem }
+}
 
 export function Learn({ lang, settings, onBack }: LearnProps) {
-  const lessons = useMemo(() => lessonsFor(lang), [lang])
-  const puzzles = useMemo(() => puzzlesFor(lang), [lang])
-  const [tab, setTab] = useState<Tab>('lessons')
-  const [lessonIdx, setLessonIdx] = useState(0)
-  const [stepIdx, setStepIdx] = useState(0)
-  const [puzzleIdx, setPuzzleIdx] = useState(0)
-  const [board, setBoard] = useState<GameState>(() => puzzleState(puzzlesFor(lang)[0]))
+  const boot = useMemo(() => initialLearnView(loadLearnProgress()), [])
+  const [progress, setProgress] = useState<LearnProgress>(() => loadLearnProgress())
+  const [track, setTrack] = useState<TrackId>(boot.track)
+  const trackStages = useMemo(() => stagesForTrack(track), [track])
+
+  const [stageId, setStageId] = useState(boot.stage?.id ?? trackStages[0]?.id ?? '')
+  const stage: LearnStage | undefined = findStageSafe(stageId) ?? trackStages[0]
+
+  const [problemIdx, setProblemIdx] = useState(boot.pIdx)
+  const problem = stage?.problems[problemIdx] ?? stage?.problems[0]
+
+  const [board, setBoard] = useState<GameState>(() =>
+    boot.problem ? problemState(boot.problem) : problemState(STAGES[0].problems[0]),
+  )
   const [status, setStatus] = useState<'play' | 'ok' | 'miss'>('play')
   const [showHint, setShowHint] = useState(false)
-  const [msg, setMsg] = useState('')
-
-  const lesson = lessons[lessonIdx]
-  const step = lesson.steps[stepIdx]
-  const lastStep = stepIdx >= lesson.steps.length - 1
-  const lastLesson = lessonIdx >= lessons.length - 1
-  const puzzle = puzzles[puzzleIdx]
-
-  const markers: Point[] = useMemo(
-    () => (showHint || status === 'ok' ? puzzle.solutions : []),
-    [showHint, status, puzzle],
+  const [msg, setMsg] = useState(() =>
+    boot.problem ? loc(lang, boot.problem.goalLabel) : '',
   )
 
-  function loadPuzzle(p: Puzzle, index: number) {
-    setPuzzleIdx(index)
-    setBoard(puzzleState(p))
+  const markers: Array<Point & { label?: string }> = useMemo(() => {
+    if (!problem) return []
+    if (!(showHint || status === 'ok')) return []
+    return problem.solutions.map((pt, i) => ({ ...pt, label: i === 0 ? '정답' : `${i + 1}` }))
+  }, [showHint, status, problem])
+
+  function selectTrack(id: TrackId) {
+    setTrack(id)
+    const stages = stagesForTrack(id)
+    const unlocked = stages.find((s) => isStageUnlocked(s.id, progress.solved)) ?? stages[0]
+    openStage(unlocked, 0)
+    const next = { ...progress, lastTrack: id, lastStageId: unlocked.id }
+    setProgress(next)
+    saveLearnProgress(next)
+  }
+
+  function openStage(s: LearnStage, pIdx: number) {
+    if (!isStageUnlocked(s.id, progress.solved)) return
+    setStageId(s.id)
+    const p = s.problems[Math.min(pIdx, s.problems.length - 1)]
+    setProblemIdx(s.problems.indexOf(p))
+    setBoard(problemState(p))
     setStatus('play')
     setShowHint(false)
-    setMsg(p.goalLabel)
+    setMsg(loc(lang, p.goalLabel))
+    const next = { ...progress, lastStageId: s.id, lastProblemId: p.id, lastTrack: s.track }
+    setProgress(next)
+    saveLearnProgress(next)
   }
 
-  function next() {
-    if (!lastStep) {
-      setStepIdx((s) => s + 1)
-      return
-    }
-    if (!lastLesson) {
-      setLessonIdx((l) => l + 1)
-      setStepIdx(0)
-    }
-  }
-
-  function prev() {
-    if (stepIdx > 0) {
-      setStepIdx((s) => s - 1)
-      return
-    }
-    if (lessonIdx > 0) {
-      const prevLesson = lessons[lessonIdx - 1]
-      setLessonIdx((l) => l - 1)
-      setStepIdx(prevLesson.steps.length - 1)
-    }
+  function loadProblem(s: LearnStage, index: number) {
+    openStage(s, index)
   }
 
   function onPuzzlePlay(x: number, y: number) {
-    if (status === 'ok') return
-    const isSol = puzzle.solutions.some((s) => s.x === x && s.y === y)
-    if (!isSol) {
-      setStatus('miss')
-      setMsg('다른 자리입니다. 힌트를 보거나 다시 시도하세요.')
-      return
+    if (!problem || !stage || status === 'ok') return
+    const result = evaluatePlay(problem, board, x, y)
+    if (result.next && result.ok) {
+      setBoard(result.next)
+      playMoveSound(settings.moveSound)
+    } else if (problem.goal === 'capture' && !result.ok && result.msgKo.includes('따냄이 없습니다')) {
+      setBoard(problemState(problem))
     }
-    const r = tryPlay(board, x, y)
-    if (!r.ok) {
-      setMsg(t(lang, 'illegal'))
-      return
-    }
-    setBoard(r.state)
-    playMoveSound(settings.moveSound)
-    if (r.move.captured.length > 0) {
+    setMsg(lang === 'ko' ? result.msgKo : result.msgEn)
+    if (result.ok) {
       setStatus('ok')
-      setMsg('정답 — 따냈습니다!')
+      const updated = markSolved(problem.id)
+      setProgress(updated)
     } else {
       setStatus('miss')
-      setMsg('착수는 맞았지만 따냄이 없습니다. 다시 시도하세요.')
-      setBoard(puzzleState(puzzle))
     }
   }
+
+  const cleared = stage ? isStageCleared(stage.id, progress.solved) : false
+  const counts = trackClearCount(track, progress.solved)
 
   return (
     <section className="screen learn">
       <header className="screen-head">
         <h2>{t(lang, 'learn')}</h2>
-        <button type="button" className="btn" onClick={onBack}>{t(lang, 'back')}</button>
+        <button type="button" className="btn" onClick={onBack}>
+          {t(lang, 'back')}
+        </button>
       </header>
 
+      <p className="hint learn-refs" role="note">
+        {t(lang, 'learnCurriculumNote')}
+      </p>
+
       <div className="tab-row" role="tablist" aria-label={t(lang, 'learn')}>
-        <button
-          type="button"
-          role="tab"
-          aria-selected={tab === 'lessons'}
-          className={`tab-btn ${tab === 'lessons' ? 'is-active' : ''}`}
-          onClick={() => setTab('lessons')}
-        >
-          {{ ko: '단계별 배우기', en: 'Lessons', ja: '段階学習', zh: '分步学习', vi: 'Học từng bước' }[lang]}
-        </button>
-        <button
-          type="button"
-          role="tab"
-          aria-selected={tab === 'practice'}
-          className={`tab-btn ${tab === 'practice' ? 'is-active' : ''}`}
-          onClick={() => {
-            setTab('practice')
-            loadPuzzle(puzzles[puzzleIdx], puzzleIdx)
-          }}
-        >
-          {{ ko: '따냄 연습', en: 'Capture drills', ja: '取り練習', zh: '提子练习', vi: 'Luyện bắt quân' }[lang]}
-        </button>
+        {TRACKS.map((tr) => {
+          const c = trackClearCount(tr.id, progress.solved)
+          return (
+            <button
+              key={tr.id}
+              type="button"
+              role="tab"
+              aria-selected={track === tr.id}
+              className={`tab-btn ${track === tr.id ? 'is-active' : ''}`}
+              onClick={() => selectTrack(tr.id)}
+            >
+              {t(lang, tr.titleKey)}
+              <span className="nav-btn-sub mono">
+                {c.cleared}/{c.total}
+              </span>
+            </button>
+          )
+        })}
       </div>
 
-      {tab === 'lessons' && (
-        <>
-          <p className="lesson-progress mono">
-            {lessonIdx + 1}/{lessons.length} · {stepIdx + 1}/{lesson.steps.length}
+      <div className="learn-layout">
+        <aside className="learn-stages panel" aria-label={t(lang, 'learnStages')}>
+          <p className="meta mono">
+            {t(lang, 'learnTrackProgress')}: {counts.cleared}/{counts.total}
           </p>
-          <h3>{lesson.title}</h3>
-          <article className="lesson-card">
-            <h4>{step.title}</h4>
-            <p>{step.body}</p>
-            {step.boardHint && (
-              <p className="hint-badge" role="note">
-                <span className="label">힌트</span> {step.boardHint}
+          <ol className="stage-list">
+            {trackStages.map((s) => {
+              const unlocked = isStageUnlocked(s.id, progress.solved)
+              const done = isStageCleared(s.id, progress.solved)
+              return (
+                <li key={s.id}>
+                  <button
+                    type="button"
+                    className={`toc-btn ${s.id === stage?.id ? 'is-active' : ''}${done ? ' stage-cleared' : ''}`}
+                    disabled={!unlocked}
+                    aria-disabled={!unlocked}
+                    onClick={() => openStage(s, 0)}
+                  >
+                    {done ? '✓ ' : unlocked ? '' : '🔒 '}
+                    {loc(lang, s.title)}
+                  </button>
+                </li>
+              )
+            })}
+          </ol>
+        </aside>
+
+        {stage && problem && (
+          <div className="practice learn-main">
+            <h3>{loc(lang, stage.title)}</h3>
+            <p className="lesson-card learn-blurb">{loc(lang, stage.blurb)}</p>
+            <p className="hint">{loc(lang, stage.refs)}</p>
+            {cleared && (
+              <p className="done-msg" role="status">
+                {t(lang, 'learnStageCleared')}
               </p>
             )}
-          </article>
-          <div className="btn-row">
-            <button type="button" className="btn" onClick={prev} disabled={lessonIdx === 0 && stepIdx === 0}>
-              {t(lang, 'prev')}
-            </button>
-            {lastLesson && lastStep ? (
-              <p className="done-msg">{t(lang, 'lessonDone')}</p>
-            ) : (
-              <button type="button" className="btn btn-primary" onClick={next}>
-                {t(lang, 'next')}
-              </button>
-            )}
-            <button type="button" className="btn" onClick={() => setTab('practice')}>
-              {{ ko: '따냄 연습으로', en: 'Go to drills', ja: '取り練習へ', zh: '去做提子练习', vi: 'Sang luyện bắt' }[lang]}
-            </button>
-          </div>
-          <ul className="lesson-toc">
-            {lessons.map((l, i) => (
-              <li key={l.id}>
-                <button
-                  type="button"
-                  className={`toc-btn ${i === lessonIdx ? 'is-active' : ''}`}
-                  onClick={() => {
-                    setLessonIdx(i)
-                    setStepIdx(0)
-                  }}
-                >
-                  {l.title}
-                </button>
-              </li>
-            ))}
-          </ul>
-        </>
-      )}
 
-      {tab === 'practice' && (
-        <div className="practice">
-          <h3>{puzzle.title}</h3>
-          <p className={status === 'ok' ? 'done-msg' : status === 'miss' ? 'error' : 'meta'} role="status">
-            {msg || puzzle.goalLabel}
-          </p>
-          <div className="game-layout">
-            <Board
-              state={board}
-              interactive={status !== 'ok'}
-              blink={settings.blinkIntersections}
-              maxContrast={settings.maxContrastBoard}
-              reduceMotion={settings.reduceMotion}
-              lastMove={null}
-              blackStone={settings.blackStone}
-              whiteStone={settings.whiteStone}
-              markers={markers}
-              cellSize={BOARD_CELL_PX[settings.boardScale]}
-              lineWidth={LINE_STROKE[settings.lineWeight]}
-              onPlay={onPuzzlePlay}
-              ariaLabel={puzzle.title}
-            />
-            <aside className="panel">
-              <p>{puzzle.hint}</p>
-              <div className="btn-row">
-                <button type="button" className="btn" onClick={() => setShowHint(true)}>
-                  정답 위치 보기
-                </button>
-                <button type="button" className="btn" onClick={() => loadPuzzle(puzzle, puzzleIdx)}>
-                  다시 풀기
-                </button>
-              </div>
-              <div className="btn-row">
-                <button
-                  type="button"
-                  className="btn"
-                  disabled={puzzleIdx <= 0}
-                  onClick={() => loadPuzzle(puzzles[puzzleIdx - 1], puzzleIdx - 1)}
-                >
-                  {t(lang, 'prev')}
-                </button>
-                <button
-                  type="button"
-                  className="btn btn-primary"
-                  disabled={puzzleIdx >= puzzles.length - 1}
-                  onClick={() => loadPuzzle(puzzles[puzzleIdx + 1], puzzleIdx + 1)}
-                >
-                  {t(lang, 'next')}
-                </button>
-              </div>
-              <ol className="puzzle-list">
-                {puzzles.map((p, i) => (
-                  <li key={p.id}>
-                    <button
-                      type="button"
-                      className={`toc-btn ${i === puzzleIdx ? 'is-active' : ''}`}
-                      onClick={() => loadPuzzle(p, i)}
-                    >
-                      {p.title}
-                    </button>
-                  </li>
-                ))}
-              </ol>
-            </aside>
+            <h4>
+              {problemIdx + 1}/{stage.problems.length}. {loc(lang, problem.title)}
+              {progress.solved.includes(problem.id) ? ' ✓' : ''}
+            </h4>
+            <p className={status === 'ok' ? 'done-msg' : status === 'miss' ? 'error' : 'meta'} role="status">
+              {msg || loc(lang, problem.goalLabel)}
+            </p>
+
+            <div className="game-layout">
+              <Board
+                state={board}
+                interactive={status !== 'ok'}
+                blink={settings.blinkIntersections}
+                maxContrast={settings.maxContrastBoard}
+                reduceMotion={settings.reduceMotion}
+                lastMove={null}
+                blackStone={settings.blackStone}
+                whiteStone={settings.whiteStone}
+                markers={markers}
+                cellSize={BOARD_CELL_PX[settings.boardScale]}
+                lineWidth={LINE_STROKE[settings.lineWeight]}
+                onPlay={onPuzzlePlay}
+                ariaLabel={loc(lang, problem.title)}
+              />
+              <aside className="panel">
+                <p>{loc(lang, problem.hint)}</p>
+                <div className="btn-row">
+                  <button type="button" className="btn" onClick={() => setShowHint(true)}>
+                    {t(lang, 'learnShowAnswer')}
+                  </button>
+                  <button type="button" className="btn" onClick={() => loadProblem(stage, problemIdx)}>
+                    {t(lang, 'learnRetry')}
+                  </button>
+                </div>
+                <div className="btn-row">
+                  <button
+                    type="button"
+                    className="btn"
+                    disabled={problemIdx <= 0}
+                    onClick={() => loadProblem(stage, problemIdx - 1)}
+                  >
+                    {t(lang, 'prev')}
+                  </button>
+                  <button
+                    type="button"
+                    className="btn btn-primary"
+                    disabled={problemIdx >= stage.problems.length - 1}
+                    onClick={() => loadProblem(stage, problemIdx + 1)}
+                  >
+                    {t(lang, 'next')}
+                  </button>
+                </div>
+                <ol className="puzzle-list">
+                  {stage.problems.map((p, i) => (
+                    <li key={p.id}>
+                      <button
+                        type="button"
+                        className={`toc-btn ${i === problemIdx ? 'is-active' : ''}`}
+                        onClick={() => loadProblem(stage, i)}
+                      >
+                        {progress.solved.includes(p.id) ? '✓ ' : ''}
+                        {loc(lang, p.title)}
+                      </button>
+                    </li>
+                  ))}
+                </ol>
+              </aside>
+            </div>
           </div>
-        </div>
-      )}
+        )}
+      </div>
     </section>
   )
 }

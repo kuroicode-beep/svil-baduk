@@ -6,6 +6,15 @@ export interface HistoryEntry {
 
 export const CHANGELOG: HistoryEntry[] = [
   {
+    version: '0.8.0',
+    date: '2026-07-24',
+    lines: [
+      '배우기: 기본·포석·사활 3트랙 스테이지 클리어 코스',
+      '유명 입문 교재 순서를 참고한 오리지널 문제(따냄·연결·치중·두 눈 등)',
+      '스테이지 해금·클리어 진행 localStorage 저장',
+    ],
+  },
+  {
     version: '0.7.6',
     date: '2026-07-24',
     lines: [

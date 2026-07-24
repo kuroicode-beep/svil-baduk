@@ -4,7 +4,8 @@ import { lessonsFor, puzzlesFor } from './localize'
 describe('learn localize', () => {
   it('keeps Korean as default source', () => {
     expect(lessonsFor('ko')[0].title).toContain('바둑판')
-    expect(puzzlesFor('ko')[0].title).toContain('따냄')
+    expect(puzzlesFor('ko')[0].title).toMatch(/따내|단수|잡기/)
+    expect(puzzlesFor('ko')[0].goalLabel).toContain('따내')
   })
 
   it('switches titles for other languages', () => {
@@ -12,7 +13,7 @@ describe('learn localize', () => {
     expect(lessonsFor('ja')[0].title).toContain('盤')
     expect(lessonsFor('zh')[0].title).toContain('棋盘')
     expect(lessonsFor('vi')[0].title).toMatch(/Bàn/i)
-    expect(puzzlesFor('en')[0].goalLabel).toMatch(/Goal/i)
+    expect(puzzlesFor('en')[0].goalLabel).toMatch(/Goal|capture/i)
     expect(puzzlesFor('ja')[0].setup).toEqual(puzzlesFor('ko')[0].setup)
   })
 })

@@ -293,12 +293,28 @@ export function lessonsFor(lang: Lang): Lesson[] {
   })
 }
 
-export function puzzlesFor(lang: Lang): Puzzle[] {
-  const pack = pickPuzzlePack(lang)
-  if (!pack) return PUZZLES
+/** 문자열로 펼친 퍼즐(레거시 테스트·표시용). 신규 UI는 curriculum + loc() 사용. */
+export type LocalizedPuzzle = Omit<Puzzle, 'title' | 'goalLabel' | 'hint' | 'note'> & {
+  title: string
+  goalLabel: string
+  hint: string
+  note?: string
+}
+
+export function puzzlesFor(lang: Lang): LocalizedPuzzle[] {
   return PUZZLES.map((p) => {
-    const loc = pack[p.id]
-    if (!loc) return p
-    return { ...p, ...loc }
+    const pack = pickPuzzlePack(lang)?.[p.id]
+    return {
+      ...p,
+      title: pack?.title ?? locStr(lang, p.title),
+      goalLabel: pack?.goalLabel ?? locStr(lang, p.goalLabel),
+      hint: pack?.hint ?? locStr(lang, p.hint),
+      note: p.note ? locStr(lang, p.note) : undefined,
+    }
   })
+}
+
+function locStr(lang: Lang, s: { ko: string; en?: string }): string {
+  if (lang === 'ko') return s.ko
+  return s.en ?? s.ko
 }

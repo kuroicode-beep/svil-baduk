@@ -322,6 +322,36 @@ export function Solo({ lang, settings, onBack }: SoloProps) {
     setPly((p) => Math.min(tree.length, p + 1))
   }
 
+  /** 무르기: 내 마지막 수 직전으로 되돌림 (AI 응수 포함 제거) — 복기와 달리 실제 대국 되돌림 */
+  const canTakeback =
+    phase === 'play' &&
+    atTip &&
+    !state.ended &&
+    !aiBusy &&
+    live.history.some((m) => m.player === myColor && !m.pass)
+
+  function onTakeback() {
+    if (!canTakeback) return
+    let cut = -1
+    for (let i = live.history.length - 1; i >= 0; i--) {
+      const m = live.history[i]
+      if (m.player === myColor && !m.pass) {
+        cut = i
+        break
+      }
+    }
+    if (cut < 0) return
+    aiTurnGenRef.current += 1
+    const reverted = replayTo(live.history, size, cut)
+    setLive(reverted)
+    setTree(null)
+    setPly(reverted.history.length)
+    setHintPts([])
+    setError('')
+    setAiBusy(false)
+    persistSnapshot(reverted)
+  }
+
 
   function onLoadSgf(text: string) {
     const loaded = decodeSgf(text)
@@ -524,7 +554,9 @@ export function Solo({ lang, settings, onBack }: SoloProps) {
       {error && <p className="error" role="alert">{error}</p>}
       {state.ended && (
         <p className="hint" role="note">
-          집 표시: <span className="territory-b">흑집</span> / <span className="territory-w">백집</span> (공배는 표시 없음)
+          {t(lang, 'territoryLegend')}:{' '}
+          <span className="territory-b">{t(lang, 'territoryBlack')}</span> /{' '}
+          <span className="territory-w">{t(lang, 'territoryWhite')}</span> ({t(lang, 'territoryDame')})
         </p>
       )}
       {progressNote && (
@@ -534,6 +566,7 @@ export function Solo({ lang, settings, onBack }: SoloProps) {
       )}
       <div className="game-layout">
         <Board
+          lang={lang}
           state={state}
           interactive={humanTurn && !aiBusy}
           blink={settings.blinkIntersections}
@@ -569,6 +602,8 @@ export function Solo({ lang, settings, onBack }: SoloProps) {
           onRedo={onRedo}
           onHint={onHint}
           hintDisabled={!humanTurn || hintBusy || aiBusy || state.ended}
+          onTakeback={onTakeback}
+          takebackDisabled={!canTakeback}
         />
       </div>
     </section>

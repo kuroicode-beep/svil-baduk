@@ -1,4 +1,5 @@
-import { useRef } from 'react'
+// src/components/GamePanel.tsx — 대국 사이드 패널 (상태·계가·조작 버튼)
+import { useEffect, useRef, useState } from 'react'
 import { pointLabel } from '../engine/board'
 import { estimateScore, type GoRules } from '../engine/scoring'
 import type { GameState, Player } from '../engine/types'
@@ -21,6 +22,9 @@ interface GamePanelProps {
   onRedo?: () => void
   onHint?: () => void
   hintDisabled?: boolean
+  /** 무르기 — 내 마지막 수(와 AI 응수)를 되돌림 */
+  onTakeback?: () => void
+  takebackDisabled?: boolean
 }
 
 export function GamePanel({
@@ -38,8 +42,11 @@ export function GamePanel({
   onRedo,
   onHint,
   hintDisabled,
+  onTakeback,
+  takebackDisabled,
 }: GamePanelProps) {
   const fileRef = useRef<HTMLInputElement>(null)
+  const [confirmingResign, setConfirmingResign] = useState(false)
   const last = state.history[state.history.length - 1]
   const turnLabel = state.toPlay === 1 ? t(lang, 'black') : t(lang, 'white')
   const liveScore = estimateScore(state, goRules)
@@ -53,6 +60,11 @@ export function GamePanel({
             : t(lang, 'draw')
       }${state.resignedBy ? ` (${t(lang, 'resignWin')})` : ''}`
     : ''
+
+  useEffect(() => {
+    // 대국이 끝나면 기권 확인 상태 해제
+    if (state.ended) setConfirmingResign(false)
+  }, [state.ended])
 
   function save() {
     const sgf = encodeSgf(state, { black: 'Black', white: 'White' })
@@ -71,8 +83,9 @@ export function GamePanel({
       <header className="panel-head">
         <p className="status-line">{statusText}</p>
         <p className="meta mono">
-          {turnLabel}
-          {state.ended ? ` · ${t(lang, 'gameOver')}` : ` · ${t(lang, 'yourTurn')}`}
+          {state.ended
+            ? t(lang, 'gameOver')
+            : `${turnLabel} ${t(lang, 'toPlaySuffix')}`}
           {reviewLen != null && reviewPly != null ? ` · ${t(lang, 'review')} ${reviewPly}/${reviewLen}` : ''}
         </p>
       </header>
@@ -127,23 +140,54 @@ export function GamePanel({
         </section>
       )}
 
-      <div className="btn-row">
-        <button type="button" className="btn" onClick={onPass} disabled={state.ended}>
-          {t(lang, 'pass')}
-        </button>
-        <button type="button" className="btn btn-danger" onClick={onResign} disabled={state.ended}>
-          {t(lang, 'resign')}
-        </button>
-        <button type="button" className="btn" onClick={onBack}>
-          {t(lang, 'back')}
-        </button>
-      </div>
-
-      {onHint && (
-        <div className="btn-row">
-          <button type="button" className="btn btn-primary" onClick={onHint} disabled={hintDisabled}>
-            {t(lang, 'askHint')}
+      {confirmingResign && !state.ended ? (
+        <div className="btn-row" role="alertdialog" aria-label={t(lang, 'resignConfirm')}>
+          <span className="status-line resign-confirm-label">{t(lang, 'resignConfirm')}</span>
+          <button
+            type="button"
+            className="btn btn-danger"
+            onClick={() => {
+              setConfirmingResign(false)
+              onResign()
+            }}
+          >
+            {t(lang, 'resignYes')}
           </button>
+          <button type="button" className="btn" onClick={() => setConfirmingResign(false)}>
+            {t(lang, 'cancel')}
+          </button>
+        </div>
+      ) : (
+        <div className="btn-row">
+          <button type="button" className="btn" onClick={onPass} disabled={state.ended}>
+            {t(lang, 'pass')}
+          </button>
+          <button
+            type="button"
+            className="btn btn-danger"
+            onClick={() => setConfirmingResign(true)}
+            disabled={state.ended}
+          >
+            {t(lang, 'resign')}
+          </button>
+          <button type="button" className="btn" onClick={onBack}>
+            {t(lang, 'back')}
+          </button>
+        </div>
+      )}
+
+      {(onHint || onTakeback) && (
+        <div className="btn-row">
+          {onHint && (
+            <button type="button" className="btn btn-primary" onClick={onHint} disabled={hintDisabled}>
+              {t(lang, 'askHint')}
+            </button>
+          )}
+          {onTakeback && (
+            <button type="button" className="btn" onClick={onTakeback} disabled={takebackDisabled}>
+              {t(lang, 'takeback')}
+            </button>
+          )}
         </div>
       )}
 

@@ -242,7 +242,7 @@ export function Multi({ lang, settings, onBack }: MultiProps) {
                   {t(lang, 'copyId')}
                 </button>
               </div>
-              {myId && <RoomQr value={myId} label="방 ID QR — 상대가 스캔하거나 ID를 입력" />}
+              {myId && <RoomQr value={myId} label={t(lang, 'roomQrLabel')} />}
             </div>
             <div className="setup-panel field">
               <span className="field-label">{t(lang, 'peerId')}</span>
@@ -326,6 +326,7 @@ export function Multi({ lang, settings, onBack }: MultiProps) {
       )}
       <div className="game-layout">
         <Board
+          lang={lang}
           state={state}
           interactive={humanTurn}
           blink={settings.blinkIntersections}

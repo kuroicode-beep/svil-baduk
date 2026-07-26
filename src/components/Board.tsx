@@ -1,6 +1,7 @@
 import { useEffect, useId, useMemo, useRef, useState } from 'react'
 import { idx, legalMoves, starPoints } from '../engine/board'
 import type { GameState, Point, Stone } from '../engine/types'
+import { t, type Lang } from '../i18n/dict'
 import { BlinkOpacity, PulseRings } from './PulseRings'
 import {
   blackStoneStyle,
@@ -10,6 +11,8 @@ import {
 } from '../settings/stoneColors'
 
 interface BoardProps {
+  /** UI 라벨 언어 (aria·집 표시) */
+  lang?: Lang
   state: GameState
   interactive: boolean
   blink: boolean
@@ -31,6 +34,7 @@ interface BoardProps {
 }
 
 export function Board({
+  lang = 'ko',
   state,
   interactive,
   blink,
@@ -185,7 +189,7 @@ export function Board({
                   strokeWidth={focused ? 4 : 3}
                   onClick={() => onPlay(p.x, p.y)}
                   role="button"
-                  aria-label={`착수 ${p.x + 1},${p.y + 1}${focused ? ' 선택됨' : ''}`}
+                  aria-label={`${t(lang, 'playAt')} ${p.x + 1},${p.y + 1}${focused ? ` ${t(lang, 'selectedLabel')}` : ''}`}
                   tabIndex={-1}
                 />
               )
@@ -206,7 +210,7 @@ export function Board({
                 strokeWidth={2}
                 onClick={() => onPlay(p.x, p.y)}
                 role="button"
-                aria-label={`착수 ${p.x + 1},${p.y + 1}${focused ? ' 선택됨' : ''}`}
+                aria-label={`${t(lang, 'playAt')} ${p.x + 1},${p.y + 1}${focused ? ` ${t(lang, 'selectedLabel')}` : ''}`}
                 tabIndex={-1}
               />
             )
@@ -232,7 +236,7 @@ export function Board({
             const cx = pad + x * cell
             const cy = pad + y * cell
             const fill = owner === 1 ? 'rgba(179,221,255,0.55)' : 'rgba(255,155,155,0.5)'
-            const label = owner === 1 ? '흑집' : '백집'
+            const label = owner === 1 ? t(lang, 'territoryBlack') : t(lang, 'territoryWhite')
             return (
               <g key={`own-${i}`}>
                 <rect
@@ -265,7 +269,7 @@ export function Board({
           const cy = pad + y * cell
           const isLast = lastMove && lastMove.x === x && lastMove.y === y
           const style = stone === 1 ? blackStyle : whiteStyle
-          const label = stone === 1 ? '흑' : '백'
+          const label = stone === 1 ? t(lang, 'black') : t(lang, 'white')
           const blinkStone = Boolean(isLast && blinkLastMove && !reduceMotion)
           const showLastFx = Boolean(isLast && blinkLastMove)
           const body = (
@@ -377,7 +381,7 @@ export function Board({
                 fontFamily="Consolas, monospace"
                 fontWeight={700}
               >
-                {p.label ?? (markers.length === 1 ? '힌트' : '정답')}
+                {p.label ?? (markers.length === 1 ? t(lang, 'hintLabel') : t(lang, 'answerLabel'))}
               </text>
             </g>
           )

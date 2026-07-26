@@ -131,16 +131,3 @@ export function estimateScore(
     ownership,
   }
 }
-
-export function formatScoreSummary(
-  score: ScoreBreakdown,
-  labels: { black: string; white: string; draw: string },
-): string {
-  const result =
-    score.winner === 1
-      ? `${labels.black} 승`
-      : score.winner === 2
-        ? `${labels.white} 승`
-        : labels.draw
-  return `${result} · ${labels.black} ${score.blackTotal} / ${labels.white} ${score.whiteTotal} (덤 ${score.komi})`
-}

@@ -1,5 +1,7 @@
 import type { Lang } from '../i18n/dict'
 import { t } from '../i18n/dict'
+import { STAGES } from '../learn/curriculum'
+import { loadLearnProgress } from '../learn/progress'
 import { hasCharacter, loadProfile, avatarLabel } from '../profile/store'
 import { xpToNextLevel } from '../profile/progress'
 import { APP_VERSION } from '../version'
@@ -13,6 +15,8 @@ export function Home({ lang, onNavigate }: HomeProps) {
   const profile = loadProfile()
   const created = hasCharacter(profile)
   const need = created ? xpToNextLevel(profile.level) : 0
+  const learnTotal = STAGES.reduce((n, s) => n + s.problems.length, 0)
+  const learnSolved = loadLearnProgress().solved.length
 
   return (
     <section className="home home--stitch">
@@ -73,7 +77,10 @@ export function Home({ lang, onNavigate }: HomeProps) {
             <span className="nav-btn-sub">{t(lang, 'soloLead')}</span>
           </button>
           <button type="button" className="btn nav-btn" onClick={() => onNavigate('learn')}>
-            {t(lang, 'learn')}
+            <span className="nav-btn-title">{t(lang, 'learn')}</span>
+            <span className="nav-btn-sub mono">
+              {t(lang, 'learnTrackProgress')} {learnSolved}/{learnTotal}
+            </span>
           </button>
           <button type="button" className="btn nav-btn" onClick={() => onNavigate('multi')}>
             {t(lang, 'multi')}

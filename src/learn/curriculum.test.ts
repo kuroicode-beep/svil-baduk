@@ -6,9 +6,9 @@ import { isStageCleared, isStageUnlocked } from './progress'
 
 describe('learn curriculum', () => {
   it('has three tracks with ordered stages', () => {
-    expect(stagesForTrack('basics').map((s) => s.order)).toEqual([1, 2, 3])
-    expect(stagesForTrack('fuseki').map((s) => s.order)).toEqual([1, 2, 3])
-    expect(stagesForTrack('tsumego').map((s) => s.order)).toEqual([1, 2, 3])
+    expect(stagesForTrack('basics').map((s) => s.order)).toEqual([1, 2, 3, 4])
+    expect(stagesForTrack('fuseki').map((s) => s.order)).toEqual([1, 2, 3, 4])
+    expect(stagesForTrack('tsumego').map((s) => s.order)).toEqual([1, 2, 3, 4])
   })
 
   it('every problem has unique id and at least one legal solution', () => {

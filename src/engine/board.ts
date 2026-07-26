@@ -55,7 +55,8 @@ function neighbors(size: number, x: number, y: number): Point[] {
   return out
 }
 
-function groupAndLibs(
+/** 그룹 돌·활로 조회 (AI 휴리스틱용 공개) */
+export function groupAndLibs(
   board: Stone[],
   size: number,
   sx: number,
@@ -100,15 +101,22 @@ export function opposite(p: Player): Player {
 
 export function legalMoves(state: GameState): Point[] {
   const moves: Point[] = []
+  // 슈퍼코 검사용 해시 집합을 한 번만 구성 (교차점마다 배열 스캔 방지)
+  const hashSet = new Set(state.positionHashes ?? [boardHash(state.board)])
   for (let y = 0; y < state.size; y++) {
     for (let x = 0; x < state.size; x++) {
-      if (tryPlay(state, x, y).ok) moves.push({ x, y })
+      if (tryPlay(state, x, y, hashSet).ok) moves.push({ x, y })
     }
   }
   return moves
 }
 
-export function tryPlay(state: GameState, x: number, y: number): PlayResult {
+export function tryPlay(
+  state: GameState,
+  x: number,
+  y: number,
+  knownHashes?: Set<string>,
+): PlayResult {
   if (state.ended) return { ok: false, reason: 'game_ended' }
   if (!inBounds(state.size, x, y)) return { ok: false, reason: 'oob' }
   if (state.board[idx(state.size, x, y)] !== 0) return { ok: false, reason: 'occupied' }
@@ -138,7 +146,7 @@ export function tryPlay(state: GameState, x: number, y: number): PlayResult {
 
   const hash = boardHash(next.board)
   const hashes = state.positionHashes ?? [boardHash(state.board)]
-  if (hashes.includes(hash)) {
+  if (knownHashes ? knownHashes.has(hash) : hashes.includes(hash)) {
     return { ok: false, reason: 'superko' }
   }
 

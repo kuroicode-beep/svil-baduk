@@ -1,3 +1,4 @@
+// src/screens/Learn.tsx — 단계별 배우기 (트랙·스테이지·문제 진행 + XP 연동)
 import { useMemo, useState } from 'react'
 import { playMoveSound } from '../audio/moveSound'
 import { Board } from '../components/Board'
@@ -15,8 +16,10 @@ import {
   type LearnProgress,
 } from '../learn/progress'
 import { loc, type LearnProblem, type LearnStage, type TrackId } from '../learn/types'
-import type { Lang } from '../i18n/dict'
+import type { DictKey, Lang } from '../i18n/dict'
 import { t } from '../i18n/dict'
+import { recordLearnSolve } from '../profile/progress'
+import { hasCharacter, loadProfile, saveProfile } from '../profile/store'
 import { BOARD_CELL_PX, LINE_STROKE, type Settings } from '../settings/store'
 
 interface LearnProps {
@@ -31,38 +34,32 @@ const TRACKS: { id: TrackId; titleKey: 'learnBasics' | 'learnFuseki' | 'learnTsu
   { id: 'tsumego', titleKey: 'learnTsumego' },
 ]
 
-function evaluatePlay(
-  problem: LearnProblem,
-  board: GameState,
-  x: number,
-  y: number,
-): { ok: boolean; next?: GameState; msgKo: string; msgEn: string } {
+type PlayEval = {
+  ok: boolean
+  next?: GameState
+  msgKey: DictKey
+  /** 정답 시 해설 병기 */
+  withNote?: boolean
+  reset?: boolean
+}
+
+function evaluatePlay(problem: LearnProblem, board: GameState, x: number, y: number): PlayEval {
   const isSol = problem.solutions.some((s) => s.x === x && s.y === y)
   if (!isSol) {
-    return { ok: false, msgKo: '다른 자리입니다. 힌트를 보거나 다시 시도하세요.', msgEn: 'Wrong point. Try a hint or retry.' }
+    return { ok: false, msgKey: 'learnWrongPoint' }
   }
   const r = tryPlay(board, x, y)
   if (!r.ok) {
-    return { ok: false, msgKo: '둘 수 없는 자리입니다.', msgEn: 'Illegal move.' }
+    return { ok: false, msgKey: 'illegal' }
   }
   if (problem.goal === 'capture') {
     if (r.move.captured.length > 0) {
-      return { ok: true, next: r.state, msgKo: '정답 — 따냈습니다!', msgEn: 'Correct — captured!' }
+      return { ok: true, next: r.state, msgKey: 'learnCorrectCapture', withNote: true }
     }
-    return {
-      ok: false,
-      next: board,
-      msgKo: '착수는 맞았지만 따냄이 없습니다. 다시 시도하세요.',
-      msgEn: 'Right point but no capture. Retry.',
-    }
+    return { ok: false, msgKey: 'learnNoCapture', reset: true }
   }
   // place / kill / live — 정답 교차점 착수면 클리어
-  return {
-    ok: true,
-    next: r.state,
-    msgKo: problem.note?.ko ? `정답! ${problem.note.ko}` : '정답입니다!',
-    msgEn: problem.note?.en ? `Correct! ${problem.note.en}` : 'Correct!',
-  }
+  return { ok: true, next: r.state, msgKey: 'learnCorrect', withNote: true }
 }
 
 function findStageSafe(id: string) {
@@ -100,16 +97,21 @@ export function Learn({ lang, settings, onBack }: LearnProps) {
     boot.problem ? problemState(boot.problem) : problemState(STAGES[0].problems[0]),
   )
   const [status, setStatus] = useState<'play' | 'ok' | 'miss'>('play')
-  const [showHint, setShowHint] = useState(false)
+  /** 힌트 단계: 0 없음 → 1 힌트 → 2 정답 */
+  const [hintLevel, setHintLevel] = useState<0 | 1 | 2>(0)
   const [msg, setMsg] = useState(() =>
     boot.problem ? loc(lang, boot.problem.goalLabel) : '',
   )
+  const [xpNote, setXpNote] = useState('')
 
   const markers: Array<Point & { label?: string }> = useMemo(() => {
     if (!problem) return []
-    if (!(showHint || status === 'ok')) return []
-    return problem.solutions.map((pt, i) => ({ ...pt, label: i === 0 ? '정답' : `${i + 1}` }))
-  }, [showHint, status, problem])
+    if (!(hintLevel === 2 || status === 'ok')) return []
+    return problem.solutions.map((pt, i) => ({
+      ...pt,
+      label: i === 0 ? t(lang, 'answerLabel') : `${i + 1}`,
+    }))
+  }, [hintLevel, status, problem, lang])
 
   function selectTrack(id: TrackId) {
     setTrack(id)
@@ -128,8 +130,9 @@ export function Learn({ lang, settings, onBack }: LearnProps) {
     setProblemIdx(s.problems.indexOf(p))
     setBoard(problemState(p))
     setStatus('play')
-    setShowHint(false)
+    setHintLevel(0)
     setMsg(loc(lang, p.goalLabel))
+    setXpNote('')
     const next = { ...progress, lastStageId: s.id, lastProblemId: p.id, lastTrack: s.track }
     setProgress(next)
     saveLearnProgress(next)
@@ -139,19 +142,39 @@ export function Learn({ lang, settings, onBack }: LearnProps) {
     openStage(s, index)
   }
 
+  /** 첫 클리어 시 프로필 XP 지급 (+스테이지 완주 보너스) */
+  function awardXp(solvedProblemId: string, solvedNow: LearnProgress) {
+    const profile = loadProfile()
+    if (!hasCharacter(profile)) return
+    const firstTime = !progress.solved.includes(solvedProblemId)
+    if (!firstTime) return
+    const stageDoneNow =
+      stage != null &&
+      isStageCleared(stage.id, solvedNow.solved) &&
+      !isStageCleared(stage.id, progress.solved)
+    const r = recordLearnSolve(profile, { stageCleared: stageDoneNow })
+    saveProfile(r.profile)
+    const parts = [`${t(lang, 'profileXpGain')} +${r.xpGained}`]
+    if (r.leveledUp > 0) parts.push(`${t(lang, 'profileLevelUp')} → Lv.${r.profile.level}`)
+    setXpNote(parts.join(' · '))
+  }
+
   function onPuzzlePlay(x: number, y: number) {
     if (!problem || !stage || status === 'ok') return
     const result = evaluatePlay(problem, board, x, y)
     if (result.next && result.ok) {
       setBoard(result.next)
       playMoveSound(settings.moveSound)
-    } else if (problem.goal === 'capture' && !result.ok && result.msgKo.includes('따냄이 없습니다')) {
+    } else if (result.reset) {
       setBoard(problemState(problem))
     }
-    setMsg(lang === 'ko' ? result.msgKo : result.msgEn)
+    const base = t(lang, result.msgKey)
+    const note = result.withNote && problem.note ? ` ${loc(lang, problem.note)}` : ''
+    setMsg(`${base}${note}`)
     if (result.ok) {
       setStatus('ok')
       const updated = markSolved(problem.id)
+      awardXp(problem.id, updated)
       setProgress(updated)
     } else {
       setStatus('miss')
@@ -160,6 +183,7 @@ export function Learn({ lang, settings, onBack }: LearnProps) {
 
   const cleared = stage ? isStageCleared(stage.id, progress.solved) : false
   const counts = trackClearCount(track, progress.solved)
+  const isLastProblem = stage ? problemIdx >= stage.problems.length - 1 : true
 
   return (
     <section className="screen learn">
@@ -240,9 +264,15 @@ export function Learn({ lang, settings, onBack }: LearnProps) {
             <p className={status === 'ok' ? 'done-msg' : status === 'miss' ? 'error' : 'meta'} role="status">
               {msg || loc(lang, problem.goalLabel)}
             </p>
+            {xpNote && (
+              <p className="done-msg" role="status">
+                {xpNote}
+              </p>
+            )}
 
             <div className="game-layout">
               <Board
+                lang={lang}
                 state={board}
                 interactive={status !== 'ok'}
                 blink={settings.blinkIntersections}
@@ -258,11 +288,22 @@ export function Learn({ lang, settings, onBack }: LearnProps) {
                 ariaLabel={loc(lang, problem.title)}
               />
               <aside className="panel">
-                <p>{loc(lang, problem.hint)}</p>
+                {hintLevel >= 1 ? (
+                  <p>{loc(lang, problem.hint)}</p>
+                ) : (
+                  <p className="meta">{loc(lang, problem.goalLabel)}</p>
+                )}
                 <div className="btn-row">
-                  <button type="button" className="btn" onClick={() => setShowHint(true)}>
-                    {t(lang, 'learnShowAnswer')}
-                  </button>
+                  {hintLevel === 0 && status !== 'ok' && (
+                    <button type="button" className="btn" onClick={() => setHintLevel(1)}>
+                      {t(lang, 'learnShowHint')}
+                    </button>
+                  )}
+                  {hintLevel === 1 && status !== 'ok' && (
+                    <button type="button" className="btn" onClick={() => setHintLevel(2)}>
+                      {t(lang, 'learnShowAnswer')}
+                    </button>
+                  )}
                   <button type="button" className="btn" onClick={() => loadProblem(stage, problemIdx)}>
                     {t(lang, 'learnRetry')}
                   </button>
@@ -278,8 +319,8 @@ export function Learn({ lang, settings, onBack }: LearnProps) {
                   </button>
                   <button
                     type="button"
-                    className="btn btn-primary"
-                    disabled={problemIdx >= stage.problems.length - 1}
+                    className={`btn${status === 'ok' && !isLastProblem ? ' btn-primary' : ''}`}
+                    disabled={isLastProblem}
                     onClick={() => loadProblem(stage, problemIdx + 1)}
                   >
                     {t(lang, 'next')}

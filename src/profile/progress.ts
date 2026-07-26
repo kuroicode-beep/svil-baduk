@@ -34,6 +34,25 @@ export function xpForResult(opts: {
   return 5 + Math.floor(lv / 2)
 }
 
+/** 학습 문제 XP: 첫 클리어 +8, 스테이지 완주 보너스 +25 */
+export const LEARN_SOLVE_XP = 8
+export const LEARN_STAGE_BONUS_XP = 25
+
+export interface LearnRecordResult {
+  profile: Profile
+  leveledUp: number
+  xpGained: number
+}
+
+export function recordLearnSolve(
+  profile: Profile,
+  opts: { stageCleared: boolean },
+): LearnRecordResult {
+  const xpGained = LEARN_SOLVE_XP + (opts.stageCleared ? LEARN_STAGE_BONUS_XP : 0)
+  const leveled = applyXp(profile, xpGained)
+  return { profile: leveled.profile, leveledUp: leveled.leveledUp, xpGained }
+}
+
 export interface GameRecordInput {
   myColor: 1 | 2
   winner: 0 | 1 | 2

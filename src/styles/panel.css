@@ -1,0 +1,143 @@
+/* src/styles/panel.css — 우측 대국 패널·점수·기보 정보 */
+
+.panel {
+  flex: 1;
+  min-width: 240px;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  padding: var(--space-5);
+}
+
+.status-line {
+  margin: 0 0 var(--space-2);
+  font-size: var(--text-lead);
+  color: var(--accent-strong);
+}
+
+.stats {
+  display: grid;
+  gap: var(--space-3);
+  margin: var(--space-4) 0;
+}
+
+.stats div {
+  display: flex;
+  justify-content: space-between;
+  gap: var(--space-3);
+  border-bottom: 1px solid var(--border);
+  padding-bottom: var(--space-2);
+}
+
+.stats dt {
+  color: var(--text-sub);
+}
+
+.stats dd {
+  margin: 0;
+}
+
+.stats-live {
+  margin-bottom: var(--space-2);
+}
+
+.score-live-note {
+  margin: 0 0 var(--space-4);
+}
+
+.last-move-box {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-1);
+  margin: 0 0 var(--space-4);
+  padding: var(--space-3) var(--space-4);
+  border: var(--bw-strong) solid var(--border-strong);
+  border-radius: var(--radius);
+  background: var(--surface-2);
+}
+
+.last-move-label {
+  color: var(--text-sub);
+  font-size: var(--text-label);
+}
+
+/* 저시력 사용자가 가장 자주 읽는 값 — 화면에서 제일 큰 글자 */
+.last-move-coord {
+  font-size: var(--text-hero);
+  line-height: var(--leading-tight);
+  color: var(--focus);
+  font-weight: 400;
+}
+
+.score-box {
+  margin: var(--space-4) 0;
+  padding: var(--space-4);
+  border: var(--bw-hair) solid var(--accent);
+  border-radius: var(--radius);
+  background: var(--surface-2);
+}
+
+.score-title {
+  margin: 0 0 var(--space-3);
+  font-size: var(--text-lead);
+  font-weight: 400;
+  color: var(--accent-strong);
+}
+
+/* ── 대국 화면 전용 조밀 레이아웃 ─────────────────────────── */
+
+.game-screen .panel {
+  min-width: 0;
+  min-height: 0;
+  max-height: 100%;
+  overflow: auto;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-1);
+  padding: var(--space-4);
+  border-radius: var(--radius);
+}
+
+.game-screen .panel .panel-head {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-1);
+}
+
+.game-screen .panel .status-line {
+  margin: 0;
+  font-size: var(--text-lead);
+  color: var(--focus);
+}
+
+.game-screen .panel .meta {
+  margin: 0;
+  line-height: var(--leading-head);
+}
+
+.game-screen .panel .stats {
+  margin: var(--space-2) 0;
+  gap: var(--space-2);
+}
+
+.game-screen .panel .stats div {
+  align-items: baseline;
+  padding-bottom: var(--space-2);
+}
+
+.game-screen .panel .btn-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: var(--space-3);
+  margin-top: var(--space-2);
+  align-items: stretch;
+}
+
+.game-screen .panel .btn-row .btn {
+  width: 100%;
+  min-height: var(--touch-min);
+}
+
+.game-screen .panel .btn-row:has(.btn:only-child) {
+  grid-template-columns: 1fr;
+}

@@ -13,7 +13,6 @@ interface BoardProps {
   state: GameState
   interactive: boolean
   blink: boolean
-  maxContrast: boolean
   reduceMotion: boolean
   lastMove: Point | null
   /** 상대 직전 수 — 내 착수 전까지 깜빡임 */
@@ -34,7 +33,6 @@ export function Board({
   state,
   interactive,
   blink,
-  maxContrast,
   reduceMotion,
   lastMove,
   blinkLastMove = false,
@@ -72,11 +70,12 @@ export function Board({
   const stroke = Math.max(1, lineWidth)
   /** 화점: 칸 비율 + 최소 크기 — 저시력에서도 격자선과 구분 */
   const starR = Math.max(8, cell * 0.18)
-  const line = maxContrast ? '#f5f5f7' : '#c9c9d4'
-  const starFill = '#ffffff'
-  const starStroke = '#000000'
-  const bg = maxContrast ? '#000000' : '#0d0d12'
-  const gridBg = maxContrast ? '#111111' : '#16161d'
+  /* 색은 전부 토큰. 고대비 전환은 html[data-board-contrast='max'] 한 줄로 처리된다 */
+  const line = 'var(--board-line)'
+  const starFill = 'var(--board-star-fill)'
+  const starStroke = 'var(--board-star-stroke)'
+  const bg = 'var(--board-bg)'
+  const gridBg = 'var(--board-grid-bg)'
 
   const blackStyle = blackStoneStyle(blackStone)
   const whiteStyle = whiteStoneStyle(whiteStone)
@@ -181,7 +180,7 @@ export function Board({
                   cy={cy}
                   r={starR + (focused ? 6 : 4)}
                   fill="none"
-                  stroke="#ffd479"
+                  stroke="var(--board-legal)"
                   strokeWidth={focused ? 4 : 3}
                   onClick={() => onPlay(p.x, p.y)}
                   role="button"
@@ -201,8 +200,8 @@ export function Board({
                 cx={cx}
                 cy={cy}
                 r={focused ? 10 : 7}
-                fill="#ffd479"
-                stroke="#000"
+                fill="var(--board-legal)"
+                stroke="var(--board-star-stroke)"
                 strokeWidth={2}
                 onClick={() => onPlay(p.x, p.y)}
                 role="button"
@@ -231,7 +230,8 @@ export function Board({
             const y = Math.floor(i / state.size)
             const cx = pad + x * cell
             const cy = pad + y * cell
-            const fill = owner === 1 ? 'rgba(179,221,255,0.55)' : 'rgba(255,155,155,0.5)'
+            const fill =
+              owner === 1 ? 'var(--board-terr-black)' : 'var(--board-terr-white)'
             const label = owner === 1 ? '흑집' : '백집'
             return (
               <g key={`own-${i}`}>
@@ -241,16 +241,20 @@ export function Board({
                   width={cell * 0.7}
                   height={cell * 0.7}
                   fill={fill}
-                  stroke={owner === 1 ? '#b3ddff' : '#ff9b9b'}
+                  stroke={
+                    owner === 1
+                      ? 'var(--board-terr-black-line)'
+                      : 'var(--board-terr-white-line)'
+                  }
                   strokeWidth={2}
                 />
                 <text
                   x={cx}
                   y={cy + 4}
                   textAnchor="middle"
-                  fill={owner === 1 ? '#000' : '#000'}
+                  fill="var(--board-star-stroke)"
                   fontSize={Math.max(10, cell * 0.22)}
-                  fontFamily="Consolas, monospace"
+                  fontFamily="var(--font-mono)"
                 >
                   {label}
                 </text>
@@ -298,8 +302,8 @@ export function Board({
                   cx={cx}
                   cy={cy}
                   r={stoneR * 0.28}
-                  fill="#ffd479"
-                  stroke="#000"
+                  fill="var(--board-lastmove)"
+                  stroke="var(--board-star-stroke)"
                   strokeWidth={2}
                 />
               )}
@@ -310,7 +314,7 @@ export function Board({
                     cy={cy}
                     r={stoneR * 1.05}
                     fill="none"
-                    stroke="#000"
+                    stroke="var(--board-star-stroke)"
                     strokeWidth={Math.max(3, cell * 0.06)}
                   />
                   <circle
@@ -318,7 +322,7 @@ export function Board({
                     cy={cy}
                     r={stoneR * 1.05}
                     fill="none"
-                    stroke="#ffd479"
+                    stroke="var(--board-lastmove)"
                     strokeWidth={Math.max(2.5, cell * 0.05)}
                   />
                   <PulseRings
@@ -326,7 +330,7 @@ export function Board({
                     cy={cy}
                     baseR={stoneR * 0.55}
                     thick={pulseThick}
-                    color="#ffd479"
+                    color="var(--board-lastmove)"
                     active={!reduceMotion}
                     periodMs={1200}
                   />
@@ -345,7 +349,7 @@ export function Board({
               cy={cy}
               r={stoneR}
               fill={hintStyle.fill}
-              stroke={primary ? '#7ee2a8' : hintStyle.stroke}
+              stroke={primary ? 'var(--board-hint)' : hintStyle.stroke}
               strokeWidth={primary ? 4 : 3}
               opacity={0.55}
             />
@@ -364,7 +368,7 @@ export function Board({
                 cy={cy}
                 baseR={stoneR * 0.55}
                 thick={pulseThick}
-                color="#7ee2a8"
+                color="var(--board-hint)"
                 active={!reduceMotion}
                 periodMs={750}
               />
@@ -372,7 +376,7 @@ export function Board({
                 x={cx}
                 y={cy + 5}
                 textAnchor="middle"
-                fill={primary ? '#7ee2a8' : hintStyle.label}
+                fill={primary ? 'var(--board-hint)' : hintStyle.label}
                 fontSize={primary ? 14 : 12}
                 fontFamily="Consolas, monospace"
                 fontWeight={700}

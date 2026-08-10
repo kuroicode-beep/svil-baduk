@@ -1,0 +1,26 @@
+/* src/styles/motion.css — 모션 줄이기 전역 처리
+ *
+ * 직전 수·힌트의 동심원과 깜빡임은 0.7.5부터 JS(RAF)로 r·opacity 를 직접 그린다.
+ * (SVG 에서 CSS transform 이 불안정했기 때문)
+ * 따라서 옛 CSS 키프레임 pulse-expand / stone-body-blink / halo-pulse / blink-last 는
+ * 대응 클래스가 TSX 어디에도 없어 삭제했다.
+ * 살아 있는 애니메이션은 board.css 의 blink-dot(빈 교차점 깜빡임) 하나뿐이다.
+ */
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}
+
+html[data-reduce-motion='1'] *,
+html[data-reduce-motion='1'] *::before,
+html[data-reduce-motion='1'] *::after {
+  animation-duration: 0.01ms !important;
+  animation-iteration-count: 1 !important;
+  transition-duration: 0.01ms !important;
+}

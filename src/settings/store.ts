@@ -16,6 +16,9 @@ export type FontSizeId = 'small' | 'medium' | 'large'
 export type BoardScaleId = 'small' | 'medium' | 'large'
 export type LineWeightId = 'thin' | 'normal' | 'thick'
 
+/** 'system' 은 OS 설정을 그때그때 따른다 (한 번만 시딩하면 나중에 켠 사용자에게 반영되지 않는다) */
+export type ReduceMotionSetting = boolean | 'system'
+
 export interface Settings {
   lang: Lang
   font: FontId
@@ -24,7 +27,7 @@ export interface Settings {
   maxContrastBoard: boolean
   /** 버튼 글자·테두리 대비를 WCAG 이상으로 강제 */
   strongButtonContrast: boolean
-  reduceMotion: boolean
+  reduceMotion: ReduceMotionSetting
   moveSound: boolean
   boardScale: BoardScaleId
   lineWeight: LineWeightId
@@ -69,6 +72,27 @@ export const LINE_STROKE: Record<LineWeightId, number> = {
   thick: 4,
 }
 
+/** 저장 스키마 버전 — 구조가 바뀌면 올리고 migrateSettings 에 분기를 추가한다 */
+export const SETTINGS_VERSION = 1
+
+function media(query: string): boolean {
+  if (typeof window === 'undefined' || !window.matchMedia) return false
+  return window.matchMedia(query).matches
+}
+
+export function prefersReducedMotion(): boolean {
+  return media('(prefers-reduced-motion: reduce)')
+}
+
+export function prefersMoreContrast(): boolean {
+  return media('(prefers-contrast: more)')
+}
+
+/** 'system' 을 지금 시점의 OS 설정으로 해석 */
+export function resolveReduceMotion(v: ReduceMotionSetting): boolean {
+  return v === 'system' ? prefersReducedMotion() : v
+}
+
 export const defaultSettings = (): Settings => ({
   lang: 'ko',
   font: 'kyobo',
@@ -76,7 +100,7 @@ export const defaultSettings = (): Settings => ({
   blinkIntersections: true,
   maxContrastBoard: true,
   strongButtonContrast: true,
-  reduceMotion: false,
+  reduceMotion: 'system',
   moveSound: true,
   boardScale: 'medium',
   lineWeight: 'normal',
@@ -90,16 +114,57 @@ export const defaultSettings = (): Settings => ({
   katagoAutoConnect: true,
 })
 
+type StoredSettings = Settings & { v?: number }
+
+/**
+ * 저장값을 현재 스키마로 올린다.
+ * v 가 없으면 0.8.x 이하(버전 필드 없음)로 보고 v1 로 승격한다.
+ */
+export function migrateSettings(raw: unknown): Settings {
+  const base = defaultSettings()
+  if (!raw || typeof raw !== 'object') return base
+  const stored = raw as StoredSettings
+  const merged: Settings = { ...base, ...stored }
+
+  if (stored.v === undefined) {
+    // v0: reduceMotion 이 boolean 뿐이었다. 명시적으로 켠 값만 유지하고
+    // 꺼둔(=기본값) 사용자는 OS 설정을 따르도록 'system' 으로 올린다.
+    merged.reduceMotion = stored.reduceMotion === true ? true : 'system'
+  }
+
+  // 값 검증 — 손상된 저장값이 앱을 깨뜨리지 않게
+  if (!['small', 'medium', 'large'].includes(merged.fontSize)) merged.fontSize = base.fontSize
+  if (!FONT_OPTIONS.some((f) => f.id === merged.font)) merged.font = base.font
+  if (!['small', 'medium', 'large'].includes(merged.boardScale)) merged.boardScale = base.boardScale
+  if (!['thin', 'normal', 'thick'].includes(merged.lineWeight)) merged.lineWeight = base.lineWeight
+  if (merged.reduceMotion !== 'system' && typeof merged.reduceMotion !== 'boolean') {
+    merged.reduceMotion = base.reduceMotion
+  }
+  return merged
+}
+
 export function loadSettings(): Settings {
   try {
     const raw = localStorage.getItem(KEY)
-    if (!raw) return defaultSettings()
-    return { ...defaultSettings(), ...JSON.parse(raw) }
+    if (!raw) {
+      // 첫 실행: OS 고대비 선호를 반영
+      const s = defaultSettings()
+      if (prefersMoreContrast()) s.maxContrastBoard = true
+      return s
+    }
+    return migrateSettings(JSON.parse(raw))
   } catch {
     return defaultSettings()
   }
 }
 
 export function saveSettings(s: Settings) {
-  localStorage.setItem(KEY, JSON.stringify(s))
+  localStorage.setItem(KEY, JSON.stringify({ v: SETTINGS_VERSION, ...s }))
+}
+
+/** 설정 전체 초기화 */
+export function resetSettings(): Settings {
+  const s = defaultSettings()
+  saveSettings(s)
+  return s
 }

@@ -1,5 +1,123 @@
 import { describe, expect, it } from 'vitest'
-import { createGame, pass, tryPlay } from './board'
+import {
+  boardHash,
+  createGame,
+  legalMoves,
+  pass,
+  pointLabel,
+  rebuildPositionHashes,
+  replayHistory,
+  starPoints,
+  tryPlay,
+} from './board'
+import type { Stone } from './types'
+
+describe('boardHash', () => {
+  it('is injective over the states we care about', () => {
+    const seen = new Map<string, string>()
+    // 9칸 판을 3진 전수 탐색 — 19683가지 배치가 전부 다른 해시여야 한다
+    for (let n = 0; n < 3 ** 9; n++) {
+      const board: Stone[] = []
+      let v = n
+      for (let i = 0; i < 9; i++) {
+        board.push((v % 3) as Stone)
+        v = Math.floor(v / 3)
+      }
+      const h = boardHash(board)
+      expect(seen.has(h)).toBe(false)
+      seen.set(h, board.join(''))
+    }
+    expect(seen.size).toBe(3 ** 9)
+  })
+
+  it('stays inside the safe BMP range (no lone surrogates in localStorage)', () => {
+    const board = Array<Stone>(19 * 19).fill(2)
+    const h = boardHash(board)
+    for (const ch of h) {
+      const code = ch.charCodeAt(0)
+      expect(code).toBeLessThan(0xd800)
+      expect(code).toBeGreaterThanOrEqual(0x30)
+    }
+    // JSON 왕복이 손실 없이 되는지 (스냅샷 저장 경로)
+    expect(JSON.parse(JSON.stringify({ h })).h).toBe(h)
+  })
+
+  it('is much shorter than the old join()', () => {
+    const board = Array<Stone>(19 * 19).fill(1)
+    expect(boardHash(board).length).toBeLessThan(board.length / 5)
+  })
+})
+
+describe('rebuildPositionHashes', () => {
+  it('restores superko protection when the stored hashes are garbage', () => {
+    let g = createGame(9)
+    for (const [x, y] of [[3, 3], [5, 5], [3, 4], [5, 4]] as [number, number][]) {
+      const r = tryPlay(g, x, y)
+      expect(r.ok).toBe(true)
+      if (r.ok) g = r.state
+    }
+    const corrupted = { ...g, positionHashes: ['nonsense'] }
+    const fixed = rebuildPositionHashes(corrupted)
+    expect(fixed.positionHashes).toEqual(g.positionHashes)
+    // history 밖 정보는 보존
+    expect(fixed.ended).toBe(g.ended)
+    expect(fixed.board).toEqual(g.board)
+  })
+
+  it('replayHistory reproduces the live board', () => {
+    let g = createGame(9)
+    for (const [x, y] of [[2, 2], [6, 6], [2, 3], [6, 5], [4, 4]] as [number, number][]) {
+      const r = tryPlay(g, x, y)
+      if (r.ok) g = r.state
+    }
+    const replayed = replayHistory(9, g.history)
+    expect(replayed.board).toEqual(g.board)
+    expect(replayed.toPlay).toBe(g.toPlay)
+    expect(replayed.positionHashes).toEqual(g.positionHashes)
+  })
+})
+
+describe('legalMoves', () => {
+  it('excludes occupied points and matches tryPlay exactly', () => {
+    let g = createGame(9)
+    for (const [x, y] of [[4, 4], [3, 3], [5, 5]] as [number, number][]) {
+      const r = tryPlay(g, x, y)
+      if (r.ok) g = r.state
+    }
+    const fast = new Set(legalMoves(g).map((p) => `${p.x},${p.y}`))
+    for (let y = 0; y < 9; y++) {
+      for (let x = 0; x < 9; x++) {
+        expect(fast.has(`${x},${y}`)).toBe(tryPlay(g, x, y).ok)
+      }
+    }
+    expect(fast.size).toBe(81 - 3)
+  })
+})
+
+describe('pointLabel', () => {
+  it('puts row 1 at the bottom (standard Go notation)', () => {
+    // board 배열은 y=0 이 위쪽 줄 → 세로 반전
+    expect(pointLabel(0, 18, 19)).toBe('A1') // 좌하단
+    expect(pointLabel(0, 0, 19)).toBe('A19') // 좌상단
+    expect(pointLabel(3, 3, 19)).toBe('D16') // 좌상 화점
+    expect(pointLabel(3, 15, 19)).toBe('D4') // 좌하 화점
+    expect(pointLabel(4, 4, 9)).toBe('E5') // 9줄 천원
+  })
+
+  it('skips the letter I', () => {
+    expect(pointLabel(7, 0, 9)).toBe('H9')
+    expect(pointLabel(8, 0, 9)).toBe('J9')
+  })
+
+  it('labels 19x19 star points the way Go books do', () => {
+    const labels = starPoints(19).map((p) => pointLabel(p.x, p.y, 19))
+    expect(labels).toContain('D16')
+    expect(labels).toContain('Q16')
+    expect(labels).toContain('K10') // 천원
+    expect(labels).toContain('D4')
+    expect(labels).toContain('Q4')
+  })
+})
 
 describe('go engine', () => {
   it('places stones and alternates', () => {

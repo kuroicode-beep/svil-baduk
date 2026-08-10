@@ -14,10 +14,9 @@ import { t } from '../i18n/dict'
 
 interface ProfileProps {
   lang: Lang
-  onBack: () => void
 }
 
-export function ProfileScreen({ lang, onBack }: ProfileProps) {
+export function ProfileScreen({ lang }: ProfileProps) {
   const [profile, setProfile] = useState<ProfileState>(() => loadProfile())
   const [nameDraft, setNameDraft] = useState(profile.name)
   const [avatarDraft, setAvatarDraft] = useState<AvatarId>(profile.avatar)
@@ -54,13 +53,6 @@ export function ProfileScreen({ lang, onBack }: ProfileProps) {
 
   return (
     <section className="screen profile-screen">
-      <header className="screen-head">
-        <h2>{t(lang, 'profile')}</h2>
-        <button type="button" className="btn" onClick={onBack}>
-          {t(lang, 'back')}
-        </button>
-      </header>
-
       {!created && <p className="solo-lead">{t(lang, 'profileLead')}</p>}
 
       <div className={`profile-grid${!created ? ' profile-grid--create' : ''}`}>

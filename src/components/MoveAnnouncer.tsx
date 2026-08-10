@@ -19,7 +19,7 @@ export function MoveAnnouncer({ lang, state }: MoveAnnouncerProps) {
     )
   }
   const color = last.player === 1 ? t(lang, 'black') : t(lang, 'white')
-  const where = last.pass ? t(lang, 'pass') : pointLabel(last.x, last.y)
+  const where = last.pass ? t(lang, 'pass') : pointLabel(last.x, last.y, state.size)
   const cap =
     last.captured.length > 0
       ? ` · ${t(lang, 'captures')} ${last.captured.length}`

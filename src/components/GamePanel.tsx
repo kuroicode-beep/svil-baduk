@@ -21,6 +21,8 @@ interface GamePanelProps {
   onRedo?: () => void
   onHint?: () => void
   hintDisabled?: boolean
+  /** 복기 중처럼 기권이 위험한 상태에서 잠근다 */
+  resignDisabled?: boolean
 }
 
 export function GamePanel({
@@ -38,6 +40,7 @@ export function GamePanel({
   onRedo,
   onHint,
   hintDisabled,
+  resignDisabled,
 }: GamePanelProps) {
   const fileRef = useRef<HTMLInputElement>(null)
   const last = state.history[state.history.length - 1]
@@ -63,7 +66,7 @@ export function GamePanel({
   const lastCoord = last
     ? last.pass
       ? t(lang, 'pass')
-      : pointLabel(last.x, last.y)
+      : pointLabel(last.x, last.y, state.size)
     : '—'
 
   return (
@@ -131,7 +134,12 @@ export function GamePanel({
         <button type="button" className="btn" onClick={onPass} disabled={state.ended}>
           {t(lang, 'pass')}
         </button>
-        <button type="button" className="btn btn-danger" onClick={onResign} disabled={state.ended}>
+        <button
+          type="button"
+          className="btn btn-danger"
+          onClick={onResign}
+          disabled={state.ended || resignDisabled}
+        >
           {t(lang, 'resign')}
         </button>
         <button type="button" className="btn" onClick={onBack}>

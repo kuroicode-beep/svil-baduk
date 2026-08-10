@@ -1,0 +1,129 @@
+/* src/styles/forms.css — 입력·라디오·체크·상세 */
+
+.field {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+  margin-bottom: var(--space-4);
+}
+
+.field input,
+.field select {
+  min-height: var(--touch-min);
+  padding: var(--space-3) var(--space-4);
+  border: var(--bw-strong) solid var(--border-strong);
+  border-radius: var(--radius);
+  background: var(--surface-2);
+  color: var(--text-bright);
+}
+
+.field input:focus-visible,
+.field select:focus-visible {
+  border-color: var(--focus);
+}
+
+.field legend {
+  margin-bottom: var(--space-2);
+}
+
+.field-label {
+  display: block;
+  margin-bottom: var(--space-2);
+  color: var(--text-sub);
+}
+
+.radio,
+.check {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  min-height: var(--touch-min);
+  margin-right: var(--space-4);
+}
+
+.radio input,
+.check input {
+  width: 22px;
+  height: 22px;
+}
+
+.details {
+  margin-top: var(--space-5);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: var(--space-3) var(--space-4);
+}
+
+.hint-block {
+  white-space: pre-wrap;
+  color: var(--text-sub);
+  font-size: var(--text-label);
+}
+
+.error {
+  color: var(--negative);
+  border: var(--bw-hair) solid var(--negative);
+  border-radius: var(--radius);
+  padding: var(--space-3) var(--space-4);
+}
+
+.error-block {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-3);
+  align-items: center;
+  margin-bottom: var(--space-3);
+}
+
+.error-block .error {
+  margin: 0;
+  flex: 1;
+}
+
+.id-row {
+  display: flex;
+  gap: var(--space-3);
+  flex-wrap: wrap;
+}
+
+.id-box {
+  display: inline-flex;
+  align-items: center;
+  min-height: var(--touch-min);
+  padding: 0 var(--space-4);
+  background: var(--surface-2);
+  border: var(--bw) solid var(--border-strong);
+  border-radius: var(--radius);
+  flex: 1;
+}
+
+.contrast-preview {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: var(--space-3);
+  margin: var(--space-2) 0 var(--space-5);
+  padding: var(--space-4);
+  border: var(--bw) solid var(--border-strong);
+  border-radius: var(--radius);
+  background: var(--surface);
+}
+
+.changelog {
+  padding-left: var(--space-5);
+}
+
+.changelog h4 {
+  margin: 0 0 var(--space-2);
+  font-weight: 400;
+}
+
+.changelog h4 span {
+  color: var(--text-sub);
+  margin-left: var(--space-2);
+}
+
+@media (max-width: 720px) {
+  .contrast-preview {
+    grid-template-columns: 1fr;
+  }
+}

@@ -4,6 +4,7 @@ import { isKataGoAvailable, katagoGenmove } from '../ai/katago'
 import { DEFAULT_RANK, RANKS, getRank, rankLabel, usesKataGoEngine, type RankId } from '../ai/ranks'
 import { playMoveSound } from '../audio/moveSound'
 import { Board } from '../components/Board'
+import { ConfirmDialog } from '../components/ConfirmDialog'
 import { GamePanel } from '../components/GamePanel'
 import { MoveAnnouncer } from '../components/MoveAnnouncer'
 import { createGame, tryPlay, pass, resign } from '../engine/board'
@@ -14,7 +15,7 @@ import { t } from '../i18n/dict'
 import { recordSoloResult } from '../profile/progress'
 import { hasCharacter, loadProfile, saveProfile } from '../profile/store'
 import { enterFullscreen, exitFullscreen } from '../platform/fullscreen'
-import { BOARD_CELL_PX, LINE_STROKE, type Settings } from '../settings/store'
+import { BOARD_CELL_PX, LINE_STROKE, resolveReduceMotion, type Settings } from '../settings/store'
 import { decodeSgf, replayTo } from '../sgf/sgf'
 import { clearSoloSnapshot, loadSoloSnapshot, saveSoloSnapshot, type SoloSnapshot } from '../solo/snapshot'
 
@@ -70,10 +71,9 @@ function bootSolo(): {
 interface SoloProps {
   lang: Lang
   settings: Settings
-  onBack: () => void
 }
 
-export function Solo({ lang, settings, onBack }: SoloProps) {
+export function Solo({ lang, settings }: SoloProps) {
   const boot = useMemo(() => bootSolo(), [])
   const [phase, setPhase] = useState<'setup' | 'play'>(boot.phase)
   const [size, setSize] = useState<BoardSize>(boot.prefs.size)
@@ -88,6 +88,7 @@ export function Solo({ lang, settings, onBack }: SoloProps) {
   const [hintBusy, setHintBusy] = useState(false)
   const [progressNote, setProgressNote] = useState('')
   const [snapshotMeta, setSnapshotMeta] = useState<SoloSnapshot | null>(() => boot.snap)
+  const [confirmResign, setConfirmResign] = useState(false)
   const recordedEndRef = useRef(false)
   /** AI 착수 요청 세대 — aiBusy를 deps에 넣으면 setAiBusy(true)가 effect를 취소해 영구 정지됨 */
   const aiTurnGenRef = useRef(0)
@@ -377,10 +378,6 @@ export function Solo({ lang, settings, onBack }: SoloProps) {
     const hasChar = hasCharacter(profile)
     return (
       <section className="screen solo-setup">
-        <header className="screen-head">
-          <h2>{t(lang, 'solo')}</h2>
-          <button type="button" className="btn" onClick={onBack}>{t(lang, 'back')}</button>
-        </header>
         <p className="solo-lead">{t(lang, 'soloLead')}</p>
         <p className={`hint${hasChar ? '' : ' error'}`} role="status">
           {hasChar
@@ -537,8 +534,7 @@ export function Solo({ lang, settings, onBack }: SoloProps) {
           state={state}
           interactive={humanTurn && !aiBusy}
           blink={settings.blinkIntersections}
-          maxContrast={settings.maxContrastBoard}
-          reduceMotion={settings.reduceMotion}
+          reduceMotion={resolveReduceMotion(settings.reduceMotion)}
           lastMove={lastMove}
           blinkLastMove={blinkLastMove}
           blackStone={settings.blackStone}
@@ -562,7 +558,9 @@ export function Solo({ lang, settings, onBack }: SoloProps) {
             const r = pass(state)
             if (r.ok) commitLive(r.state)
           }}
-          onResign={() => commitLive(resign(state, myColor))}
+          onResign={() => setConfirmResign(true)}
+          /* 복기 중에는 기권 금지 — state 가 되감긴 판이라 잘린 대국이 커밋된다 */
+          resignDisabled={reviewing}
           onBack={leaveToSetup}
           onLoadSgf={onLoadSgf}
           onUndo={onUndo}
@@ -571,6 +569,21 @@ export function Solo({ lang, settings, onBack }: SoloProps) {
           hintDisabled={!humanTurn || hintBusy || aiBusy || state.ended}
         />
       </div>
+
+      <ConfirmDialog
+        open={confirmResign}
+        lang={lang}
+        tone="danger"
+        title={t(lang, 'resignConfirmTitle')}
+        body={t(lang, 'resignConfirmBody')}
+        confirmLabel={t(lang, 'resign')}
+        onCancel={() => setConfirmResign(false)}
+        onConfirm={() => {
+          setConfirmResign(false)
+          // 되감긴 state 가 아니라 실전(live)에서 기권한다
+          commitLive(resign(live, myColor))
+        }}
+      />
     </section>
   )
 }

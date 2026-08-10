@@ -8,8 +8,64 @@ export function inBounds(size: number, x: number, y: number): boolean {
   return x >= 0 && y >= 0 && x < size && y < size
 }
 
+/** 한 문자에 담는 교차점 수 — 6칸 × 2비트 = 12비트(0..4095) */
+const HASH_PACK = 6
+/** 서로게이트 영역(0xD800~)을 피하려는 오프셋 — localStorage·JSON 안전 */
+const HASH_BASE = 0x30
+
+/**
+ * 위치 해시. 돌 하나를 2비트로 보고 6칸씩 묶어 한 문자로 압축한다.
+ * 19줄에서 361자 → 61자 (약 6배). 착수 시도마다 만들어지므로 할당량이 곧 성능이다.
+ */
 export function boardHash(board: Stone[]): string {
-  return board.join('')
+  let out = ''
+  for (let i = 0; i < board.length; i += HASH_PACK) {
+    let code = 0
+    for (let j = 0; j < HASH_PACK; j++) {
+      code = (code << 2) | (board[i + j] ?? 0)
+    }
+    out += String.fromCharCode(HASH_BASE + code)
+  }
+  return out
+}
+
+/**
+ * state별 위치 해시 집합 캐시.
+ * `legalMoves`는 같은 state로 n²번 `tryPlay`를 부르는데, 예전엔 매번
+ * `positionHashes.includes()` 선형 탐색을 했다. 집합은 state당 한 번만 만든다.
+ */
+const hashSetCache = new WeakMap<GameState, Set<string>>()
+
+function seenHashes(state: GameState): Set<string> {
+  let set = hashSetCache.get(state)
+  if (!set) {
+    set = new Set(state.positionHashes ?? [boardHash(state.board)])
+    hashSetCache.set(state, set)
+  }
+  return set
+}
+
+/** history를 처음부터 재생 — 저장된 board·해시를 믿지 않는 정본 계산 */
+export function replayHistory(size: BoardSize, history: Move[]): GameState {
+  let cur = createGame(size)
+  // 첫 수가 백이면(접바둑 등) 차례를 맞춰서 시작
+  if (history.length > 0) cur.toPlay = history[0].player
+  for (const m of history) {
+    const r = m.pass ? pass(cur) : tryPlay(cur, m.x, m.y)
+    if (!r.ok) break
+    cur = r.state
+  }
+  return cur
+}
+
+/**
+ * 저장된 `positionHashes`를 믿지 않고 history에서 다시 만든다.
+ * 해시 형식이 바뀌었거나 스냅샷이 오래된 경우에도 슈퍼코 판정이 맞게 유지된다.
+ * `ended`·`resignedBy` 같은 history 밖 정보는 원본을 그대로 둔다.
+ */
+export function rebuildPositionHashes(state: GameState): GameState {
+  const replayed = replayHistory(state.size, state.history)
+  return { ...cloneState(state), positionHashes: replayed.positionHashes }
 }
 
 export function createGame(size: BoardSize = 19): GameState {
@@ -137,10 +193,10 @@ export function tryPlay(state: GameState, x: number, y: number): PlayResult {
   if (own.libs.length === 0) return { ok: false, reason: 'suicide' }
 
   const hash = boardHash(next.board)
-  const hashes = state.positionHashes ?? [boardHash(state.board)]
-  if (hashes.includes(hash)) {
+  if (seenHashes(state).has(hash)) {
     return { ok: false, reason: 'superko' }
   }
+  const hashes = state.positionHashes ?? [boardHash(state.board)]
 
   let koPoint: Point | null = null
   if (captured.length === 1) {
@@ -195,7 +251,12 @@ export function starPoints(size: BoardSize): Point[] {
   ]
 }
 
-export function pointLabel(x: number, y: number): string {
+/**
+ * 사람이 읽는 좌표 (A1 = 좌하단, 표준 바둑/GTP 표기).
+ * board 배열은 y=0 이 위쪽 줄이므로 세로를 뒤집어야 한다.
+ * SGF(`sgfCoord`)는 원래 위쪽이 'a' 라서 뒤집지 않는다.
+ */
+export function pointLabel(x: number, y: number, size: number): string {
   const letters = 'ABCDEFGHJKLMNOPQRST'
-  return `${letters[x]}${y + 1}`
+  return `${letters[x]}${size - y}`
 }

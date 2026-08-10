@@ -1,4 +1,5 @@
 import type { RankId } from '../ai/ranks'
+import { rebuildPositionHashes } from '../engine/board'
 import type { BoardSize, GameState, Move, Player } from '../engine/types'
 
 const KEY = 'svil-baduk-solo-snapshot'
@@ -44,7 +45,8 @@ export function loadSoloSnapshot(): SoloSnapshot | null {
     if (data?.v !== 1 || !isGameState(data.state)) return null
     if (data.size !== data.state.size) return null
     if (data.myColor !== 1 && data.myColor !== 2) return null
-    return data
+    // 저장된 positionHashes는 형식이 바뀌었을 수 있으므로 history에서 다시 만든다
+    return { ...data, state: rebuildPositionHashes(data.state) }
   } catch {
     return null
   }

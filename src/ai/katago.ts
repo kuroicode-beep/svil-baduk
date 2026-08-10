@@ -31,20 +31,21 @@ export function isKataGoAvailable(): boolean {
   return !!transport?.isConnected()
 }
 
-function gtpCoord(x: number, y: number): string {
-  return pointLabel(x, y)
+/** GTP 좌표 = 사람이 읽는 좌표 (A1 좌하단) */
+function gtpCoord(x: number, y: number, size: number): string {
+  return pointLabel(x, y, size)
 }
 
 function colorToken(player: 1 | 2): string {
   return player === 1 ? 'B' : 'W'
 }
 
-async function playMove(m: Move): Promise<void> {
+async function playMove(m: Move, size: number): Promise<void> {
   if (!transport) return
   if (m.pass) {
     await transport.send(`play ${colorToken(m.player)} pass`)
   } else {
-    await transport.send(`play ${colorToken(m.player)} ${gtpCoord(m.x, m.y)}`)
+    await transport.send(`play ${colorToken(m.player)} ${gtpCoord(m.x, m.y, size)}`)
   }
 }
 
@@ -78,7 +79,7 @@ async function syncBoard(state: GameState): Promise<void> {
     engineSize = state.size
     engineHistory = []
     for (const m of state.history) {
-      await playMove(m)
+      await playMove(m, state.size)
       engineHistory.push(m)
     }
     return
@@ -87,7 +88,7 @@ async function syncBoard(state: GameState): Promise<void> {
   // 공통 prefix 이후 새 수만 play
   for (let i = common; i < state.history.length; i++) {
     const m = state.history[i]
-    await playMove(m)
+    await playMove(m, state.size)
     engineHistory.push(m)
   }
 }
@@ -130,7 +131,7 @@ export async function katagoGenmove(
   }
 
   const resp = await transport.send(`genmove ${color}`)
-  const move = parseGenmoveToken(resp)
+  const move = parseGenmoveToken(resp, state.size)
   // genmove 가 실제 착수를 엔진 보드에 반영하므로 이력도 맞춤
   if (move === 'pass') {
     engineHistory.push({

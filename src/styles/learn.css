@@ -1,0 +1,79 @@
+/* src/styles/learn.css — 배우기 화면(트랙 탭·스테이지 목록·문제 카드) */
+
+.learn-layout {
+  display: grid;
+  grid-template-columns: minmax(200px, 260px) 1fr;
+  gap: var(--space-5);
+  align-items: start;
+}
+
+.learn-stages {
+  position: sticky;
+  top: var(--space-3);
+}
+
+.stage-list,
+.puzzle-list {
+  list-style: none;
+  padding: 0;
+  margin: var(--space-3) 0 0;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+}
+
+.toc-btn.stage-cleared {
+  border-color: var(--accent);
+}
+
+.learn-blurb {
+  margin: var(--space-2) 0 var(--space-3);
+}
+
+.learn-refs {
+  margin-bottom: var(--space-3);
+}
+
+.learn .tab-btn .nav-btn-sub {
+  display: block;
+  font-size: 0.85em;
+  margin-top: 2px;
+}
+
+.lesson-card {
+  background: var(--surface);
+  border: var(--bw) solid var(--border-strong);
+  border-radius: var(--radius);
+  padding: var(--space-5);
+}
+
+.lesson-card h4 {
+  margin: 0 0 var(--space-3);
+  font-size: var(--text-title);
+  font-weight: 400;
+  color: var(--accent-strong);
+}
+
+.learn .lesson-card {
+  border-width: var(--bw-strong);
+}
+
+.learn .practice .game-layout {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(240px, 320px);
+  gap: var(--space-5);
+  align-items: start;
+}
+
+.learn .practice .panel {
+  border: var(--bw-strong) solid var(--border-strong);
+  background: var(--surface);
+  border-radius: var(--radius);
+}
+
+@media (max-width: 900px) {
+  .learn-layout,
+  .learn .practice .game-layout {
+    grid-template-columns: 1fr;
+  }
+}

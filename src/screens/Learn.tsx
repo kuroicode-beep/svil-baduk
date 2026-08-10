@@ -17,12 +17,11 @@ import {
 import { loc, type LearnProblem, type LearnStage, type TrackId } from '../learn/types'
 import type { Lang } from '../i18n/dict'
 import { t } from '../i18n/dict'
-import { BOARD_CELL_PX, LINE_STROKE, type Settings } from '../settings/store'
+import { BOARD_CELL_PX, LINE_STROKE, resolveReduceMotion, type Settings } from '../settings/store'
 
 interface LearnProps {
   lang: Lang
   settings: Settings
-  onBack: () => void
 }
 
 const TRACKS: { id: TrackId; titleKey: 'learnBasics' | 'learnFuseki' | 'learnTsumego' }[] = [
@@ -84,7 +83,7 @@ function initialLearnView(p: LearnProgress) {
   return { track, stage, pIdx: problem ? stage!.problems.indexOf(problem) : 0, problem }
 }
 
-export function Learn({ lang, settings, onBack }: LearnProps) {
+export function Learn({ lang, settings }: LearnProps) {
   const boot = useMemo(() => initialLearnView(loadLearnProgress()), [])
   const [progress, setProgress] = useState<LearnProgress>(() => loadLearnProgress())
   const [track, setTrack] = useState<TrackId>(boot.track)
@@ -163,13 +162,6 @@ export function Learn({ lang, settings, onBack }: LearnProps) {
 
   return (
     <section className="screen learn">
-      <header className="screen-head">
-        <h2>{t(lang, 'learn')}</h2>
-        <button type="button" className="btn" onClick={onBack}>
-          {t(lang, 'back')}
-        </button>
-      </header>
-
       <p className="hint learn-refs" role="note">
         {t(lang, 'learnCurriculumNote')}
       </p>
@@ -246,8 +238,7 @@ export function Learn({ lang, settings, onBack }: LearnProps) {
                 state={board}
                 interactive={status !== 'ok'}
                 blink={settings.blinkIntersections}
-                maxContrast={settings.maxContrastBoard}
-                reduceMotion={settings.reduceMotion}
+                reduceMotion={resolveReduceMotion(settings.reduceMotion)}
                 lastMove={null}
                 blackStone={settings.blackStone}
                 whiteStone={settings.whiteStone}

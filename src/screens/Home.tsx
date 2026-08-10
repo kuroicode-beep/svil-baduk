@@ -2,7 +2,6 @@ import type { Lang } from '../i18n/dict'
 import { t } from '../i18n/dict'
 import { hasCharacter, loadProfile, avatarLabel } from '../profile/store'
 import { xpToNextLevel } from '../profile/progress'
-import { APP_VERSION } from '../version'
 
 interface HomeProps {
   lang: Lang
@@ -18,12 +17,10 @@ export function Home({ lang, onNavigate }: HomeProps) {
     <section className="home home--stitch">
       <div className="home-grid">
         <div className="home-brand-col">
+          {/* 버전 배지는 앱 셸 헤더가 전 화면에서 보여준다 */}
           <header className="hero">
-            <h1 className="brand">{t(lang, 'appTitle')}</h1>
+            <p className="brand">{t(lang, 'appTitle')}</p>
             <p className="tagline">{t(lang, 'tagline')}</p>
-            <p className="version-badge mono" aria-label={`version ${APP_VERSION}`}>
-              v{APP_VERSION}
-            </p>
           </header>
 
           <button

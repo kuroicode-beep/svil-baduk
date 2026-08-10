@@ -1,0 +1,103 @@
+/* src/styles/shell.css — 앱 셸(스킵 링크·헤더·본문) */
+
+.app-shell {
+  display: flex;
+  flex-direction: column;
+  min-height: 100%;
+  gap: var(--space-4);
+}
+
+.app-shell--immersive {
+  height: 100%;
+  min-height: 0;
+  gap: var(--space-2);
+}
+
+/* 키보드 사용자가 헤더를 건너뛰고 본문으로 */
+.skip-link {
+  position: absolute;
+  left: var(--space-2);
+  top: var(--space-2);
+  z-index: 20;
+  transform: translateY(-200%);
+  padding: var(--space-3) var(--space-4);
+  border: var(--bw-strong) solid var(--focus);
+  border-radius: var(--radius);
+  background: var(--bg);
+  color: var(--text-bright);
+  text-decoration: none;
+}
+
+.skip-link:focus-visible {
+  transform: translateY(0);
+}
+
+.app-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-4);
+  flex-wrap: wrap;
+  padding-bottom: var(--space-3);
+  border-bottom: var(--bw) solid var(--border);
+}
+
+.app-header-left,
+.app-header-right {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  min-width: 0;
+}
+
+.app-header-title {
+  margin: 0;
+  font-size: var(--text-headline);
+  font-weight: 400;
+  color: var(--text-bright);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.app-header .version-badge {
+  margin-top: 0;
+}
+
+/* 헤더 버튼도 터치 최소 크기를 지킨다 */
+.app-header-btn {
+  min-height: var(--touch-min);
+  padding: var(--space-2) var(--space-4);
+}
+
+.app-main {
+  flex: 1;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+}
+
+/* 포커스를 옮기기 위한 tabindex 라서 외곽선은 그리지 않는다 */
+.app-main:focus {
+  outline: none;
+}
+
+/* 대국 화면: 헤더를 최소로 줄이고 보드에 자리를 준다 */
+.app-shell--immersive .app-header {
+  padding-bottom: var(--space-2);
+}
+
+.app-shell--immersive .app-header-title {
+  font-size: var(--text-lead);
+}
+
+.app-shell--immersive .app-header-btn {
+  min-height: var(--touch-min);
+  padding: var(--space-1) var(--space-3);
+}
+
+@media (max-width: 720px) {
+  .app-header-title {
+    font-size: var(--text-title);
+  }
+}

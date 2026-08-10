@@ -59,7 +59,7 @@ export function PulseRings({
   if (!active) {
     return (
       <g pointerEvents="none" aria-hidden>
-        <circle cx={cx} cy={cy} r={baseR * 1.06} fill="none" stroke="#000" strokeWidth={thick + 3} />
+        <circle cx={cx} cy={cy} r={baseR * 1.06} fill="none" stroke="var(--board-star-stroke)" strokeWidth={thick + 3} />
         <circle cx={cx} cy={cy} r={baseR * 1.06} fill="none" stroke={color} strokeWidth={thick} />
       </g>
     )
@@ -79,7 +79,7 @@ export function PulseRings({
               cy={cy}
               r={r}
               fill="none"
-              stroke="#000000"
+              stroke="var(--board-star-stroke)"
               strokeWidth={thick + 3}
               strokeLinecap="round"
             />

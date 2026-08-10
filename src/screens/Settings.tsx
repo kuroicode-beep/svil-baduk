@@ -12,12 +12,15 @@ import { CHANGELOG } from '../history/changelog'
 import { LANG_LABELS, type Lang, t } from '../i18n/dict'
 import {
   FONT_OPTIONS,
+  prefersReducedMotion,
+  resetSettings,
   type BoardScaleId,
   type FontId,
   type FontSizeId,
   type LineWeightId,
   type Settings as SettingsState,
 } from '../settings/store'
+import { ConfirmDialog } from '../components/ConfirmDialog'
 import {
   BLACK_STONE_OPTIONS,
   WHITE_STONE_OPTIONS,
@@ -29,10 +32,10 @@ interface SettingsProps {
   lang: Lang
   settings: SettingsState
   onChange: (s: SettingsState) => void
-  onBack: () => void
 }
 
-export function SettingsScreen({ lang, settings, onChange, onBack }: SettingsProps) {
+export function SettingsScreen({ lang, settings, onChange }: SettingsProps) {
+  const [confirmReset, setConfirmReset] = useState(false)
   const [kgMsg, setKgMsg] = useState('')
   const [kgBusy, setKgBusy] = useState(false)
   const [connected, setConnected] = useState(() => isKataGoAvailable())
@@ -80,11 +83,6 @@ export function SettingsScreen({ lang, settings, onChange, onBack }: SettingsPro
 
   return (
     <section className="screen">
-      <header className="screen-head">
-        <h2>{t(lang, 'settings')}</h2>
-        <button type="button" className="btn" onClick={onBack}>{t(lang, 'back')}</button>
-      </header>
-
       <fieldset className="field">
         <legend>{t(lang, 'goRules')}</legend>
         <label className="radio">
@@ -237,14 +235,33 @@ export function SettingsScreen({ lang, settings, onChange, onBack }: SettingsPro
         </div>
       )}
 
-      <label className="check">
-        <input
-          type="checkbox"
-          checked={settings.reduceMotion}
-          onChange={(e) => onChange({ ...settings, reduceMotion: e.target.checked })}
-        />
-        {t(lang, 'reduceMotionLabel')}
-      </label>
+      {/* 3단계 — '시스템 설정 따름'이 기본이라 나중에 OS에서 켜도 반영된다 */}
+      <fieldset className="field">
+        <legend>{t(lang, 'reduceMotionLabel')}</legend>
+        {(
+          [
+            ['system', t(lang, 'followSystem')],
+            [true, t(lang, 'on')],
+            [false, t(lang, 'off')],
+          ] as const
+        ).map(([value, label]) => (
+          <label className="radio" key={String(value)}>
+            <input
+              type="radio"
+              name="reduce-motion"
+              checked={settings.reduceMotion === value}
+              onChange={() => onChange({ ...settings, reduceMotion: value })}
+            />
+            {label}
+            {value === 'system' && (
+              <span className="hint">
+                {' '}
+                ({prefersReducedMotion() ? t(lang, 'on') : t(lang, 'off')})
+              </span>
+            )}
+          </label>
+        ))}
+      </fieldset>
 
       <label className="check">
         <input
@@ -390,6 +407,26 @@ export function SettingsScreen({ lang, settings, onChange, onBack }: SettingsPro
           ))}
         </ol>
       </details>
+
+      <div className="btn-row">
+        <button type="button" className="btn btn-danger" onClick={() => setConfirmReset(true)}>
+          {t(lang, 'resetSettings')}
+        </button>
+      </div>
+
+      <ConfirmDialog
+        open={confirmReset}
+        lang={lang}
+        tone="danger"
+        title={t(lang, 'resetSettings')}
+        body={t(lang, 'resetSettingsBody')}
+        confirmLabel={t(lang, 'resetSettings')}
+        onCancel={() => setConfirmReset(false)}
+        onConfirm={() => {
+          setConfirmReset(false)
+          onChange(resetSettings())
+        }}
+      />
     </section>
   )
 }

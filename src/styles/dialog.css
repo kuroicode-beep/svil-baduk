@@ -1,0 +1,42 @@
+/* src/styles/dialog.css — 확인창 */
+
+.confirm-dialog {
+  max-width: 32rem;
+  padding: var(--space-5);
+  border: var(--bw-strong) solid var(--border-btn);
+  border-radius: var(--radius-lg);
+  background: var(--surface-2);
+  color: var(--text);
+}
+
+.confirm-dialog--danger {
+  border-color: var(--negative);
+}
+
+/* 디자인 원칙상 blur 금지 — 불투명한 어둠만 */
+.confirm-dialog::backdrop {
+  background: rgba(0, 0, 0, 0.8);
+}
+
+.confirm-title {
+  margin: 0 0 var(--space-3);
+  font-size: var(--text-title);
+  font-weight: 400;
+  color: var(--text-bright);
+}
+
+.confirm-body {
+  margin: 0 0 var(--space-5);
+  line-height: var(--leading-body);
+}
+
+.confirm-actions {
+  display: flex;
+  gap: var(--space-3);
+  justify-content: flex-end;
+  flex-wrap: wrap;
+}
+
+.confirm-actions .btn {
+  min-width: 8rem;
+}

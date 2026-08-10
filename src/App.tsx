@@ -1,5 +1,8 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { connectBridge } from './ai/bridgeTransport'
+import { AppShell } from './components/AppShell'
+import { isEmptyHash } from './router/routes'
+import { useHashRoute } from './router/useHashRoute'
 import { Home } from './screens/Home'
 import { Learn } from './screens/Learn'
 import { Multi } from './screens/Multi'
@@ -10,46 +13,53 @@ import {
   FONT_OPTIONS,
   FONT_SIZE_PX,
   loadSettings,
+  resolveReduceMotion,
   saveSettings,
   type Settings,
 } from './settings/store'
 import { loadSoloSnapshot } from './solo/snapshot'
 import './App.css'
 
-type Screen = 'home' | 'learn' | 'solo' | 'multi' | 'settings' | 'profile'
-
-function initialScreen(): Screen {
-  const snap = loadSoloSnapshot()
-  if (snap && !snap.state.ended) return 'solo'
-  return 'home'
-}
-
 export default function App() {
-  const [screen, setScreen] = useState<Screen>(() => initialScreen())
+  const { screen, navigate } = useHashRoute()
   const [settings, setSettings] = useState<Settings>(() => loadSettings())
+  const restored = useRef(false)
+
+  /* 미종료 스냅샷이 있으면 대국 화면으로 복원한다.
+     단 해시가 비어 있을 때만 — 딥링크(#/settings 등)를 가로채면 안 된다. */
+  useEffect(() => {
+    if (restored.current) return
+    restored.current = true
+    if (!isEmptyHash(window.location.hash)) return
+    const snap = loadSoloSnapshot()
+    if (snap && !snap.state.ended) navigate('solo', { replace: true })
+  }, [navigate])
+
+  /* reduceMotion:'system' 을 해석한 값. OS 설정이 바뀌면 즉시 따라간다 —
+     한 번만 시딩하면 나중에 켠 사용자에게 영영 반영되지 않는다. */
+  const [systemMotionTick, setSystemMotionTick] = useState(0)
+  useEffect(() => {
+    if (!window.matchMedia) return
+    const mq = window.matchMedia('(prefers-reduced-motion: reduce)')
+    const onChange = () => setSystemMotionTick((n) => n + 1)
+    mq.addEventListener?.('change', onChange)
+    return () => mq.removeEventListener?.('change', onChange)
+  }, [])
+  void systemMotionTick // OS 변경 시 재계산 트리거
+  const reduceMotion = resolveReduceMotion(settings.reduceMotion)
 
   useEffect(() => {
     saveSettings(settings)
-    document.documentElement.lang = settings.lang
-    document.documentElement.style.setProperty('--font-base', `${FONT_SIZE_PX[settings.fontSize]}px`)
+    const root = document.documentElement
+    root.lang = settings.lang
+    root.style.setProperty('--font-base', `${FONT_SIZE_PX[settings.fontSize]}px`)
     const font = FONT_OPTIONS.find((f) => f.id === settings.font)?.css
-    if (font) document.documentElement.style.setProperty('--font-ui', font)
-    document.documentElement.dataset.reduceMotion = settings.reduceMotion ? '1' : '0'
-    document.documentElement.dataset.buttonContrast = settings.strongButtonContrast
-      ? 'strong'
-      : 'normal'
-  }, [settings])
-
-  useEffect(() => {
-    const onKey = (e: KeyboardEvent) => {
-      if (e.altKey && e.key === 'ArrowLeft') {
-        e.preventDefault()
-        setScreen('home')
-      }
-    }
-    window.addEventListener('keydown', onKey)
-    return () => window.removeEventListener('keydown', onKey)
-  }, [])
+    if (font) root.style.setProperty('--font-ui', font)
+    root.dataset.reduceMotion = reduceMotion ? '1' : '0'
+    root.dataset.buttonContrast = settings.strongButtonContrast ? 'strong' : 'normal'
+    // 바둑판 고대비 — Board.tsx 의 색 분기를 대신한다
+    root.dataset.boardContrast = settings.maxContrastBoard ? 'max' : 'normal'
+  }, [settings, reduceMotion])
 
   useEffect(() => {
     if (!settings.katagoAutoConnect) return
@@ -76,31 +86,30 @@ export default function App() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [settings.katagoAutoConnect, settings.katagoBridgeUrl])
 
+  const immersive = screen === 'solo' || screen === 'multi'
+
   return (
     <div className="app">
-      {screen === 'home' && (
-        <Home lang={settings.lang} onNavigate={(s) => setScreen(s)} />
-      )}
-      {screen === 'learn' && (
-        <Learn lang={settings.lang} settings={settings} onBack={() => setScreen('home')} />
-      )}
-      {screen === 'solo' && (
-        <Solo lang={settings.lang} settings={settings} onBack={() => setScreen('home')} />
-      )}
-      {screen === 'multi' && (
-        <Multi lang={settings.lang} settings={settings} onBack={() => setScreen('home')} />
-      )}
-      {screen === 'settings' && (
-        <SettingsScreen
-          lang={settings.lang}
-          settings={settings}
-          onChange={setSettings}
-          onBack={() => setScreen('home')}
-        />
-      )}
-      {screen === 'profile' && (
-        <ProfileScreen lang={settings.lang} onBack={() => setScreen('home')} />
-      )}
+      <AppShell lang={settings.lang} screen={screen} immersive={immersive} onNavigate={navigate}>
+        {screen === 'home' && <Home lang={settings.lang} onNavigate={navigate} />}
+        {screen === 'learn' && (
+          <Learn lang={settings.lang} settings={settings} />
+        )}
+        {screen === 'solo' && (
+          <Solo lang={settings.lang} settings={settings} />
+        )}
+        {screen === 'multi' && (
+          <Multi lang={settings.lang} settings={settings} />
+        )}
+        {screen === 'settings' && (
+          <SettingsScreen
+            lang={settings.lang}
+            settings={settings}
+            onChange={setSettings}
+          />
+        )}
+        {screen === 'profile' && <ProfileScreen lang={settings.lang} />}
+      </AppShell>
     </div>
   )
 }

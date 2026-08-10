@@ -1,0 +1,114 @@
+/* src/styles/buttons.css — Stitch Vision: Primary 흰/검정, Secondary 검정+3px 테두리 */
+
+.btn {
+  min-height: var(--touch-min);
+  padding: var(--space-3) var(--space-5);
+  border: var(--bw-strong) solid var(--border-btn);
+  border-radius: var(--radius);
+  background: var(--bg);
+  color: var(--text-bright);
+  cursor: pointer;
+  text-align: center;
+}
+
+/* 터치 기기에서 hover 가 들러붙지 않도록 */
+@media (hover: hover) {
+  .btn:hover:not(:disabled) {
+    border-color: #ffffff;
+    color: #ffffff;
+    background: var(--surface-high);
+  }
+
+  .btn-primary:hover:not(:disabled) {
+    background: var(--accent-max);
+    border-color: var(--accent-max);
+    color: var(--on-accent);
+  }
+
+  .btn-danger:hover:not(:disabled) {
+    border-color: var(--negative-bright);
+    color: var(--negative-bright);
+    background: #1a1010;
+  }
+}
+
+.btn:disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+}
+
+.btn-primary {
+  background: var(--text-bright);
+  color: var(--on-accent);
+  border-color: var(--text-bright);
+}
+
+.btn-danger {
+  background: var(--bg);
+  border-color: var(--negative);
+  color: var(--negative);
+}
+
+.nav-btn-muted {
+  background: var(--surface-2);
+  border-color: var(--border-strong);
+}
+
+html[data-button-contrast='normal'] .btn {
+  border-width: var(--bw);
+  border-color: var(--border-strong);
+  background: var(--surface-2);
+  color: var(--text);
+}
+
+html[data-button-contrast='normal'] .btn-primary {
+  background: var(--accent-strong);
+  color: #000;
+  border-color: var(--accent-strong);
+}
+
+html[data-button-contrast='normal'] .btn-danger {
+  background: var(--surface-2);
+}
+
+/* 선택 상태 공통 강조 */
+.diff-level.is-active,
+.diff-level[aria-pressed='true'],
+.toc-btn.is-active,
+.tab-btn.is-active,
+.avatar-btn-on {
+  border-color: var(--focus);
+  box-shadow: inset 0 0 0 1px var(--focus);
+}
+
+.btn-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-3);
+  align-items: center;
+  margin-top: var(--space-4);
+}
+
+.toc-btn {
+  width: 100%;
+  min-height: var(--touch-min);
+  text-align: left;
+  padding: var(--space-3) var(--space-4);
+  border: var(--bw) solid var(--border);
+  border-radius: var(--radius);
+  background: transparent;
+  cursor: pointer;
+}
+
+/* 목록 선택은 강조색 밑줄 — 위 그룹 규칙(노란 focus)을 일부러 덮어쓴다 */
+.toc-btn.is-active {
+  border-color: var(--accent);
+  color: var(--accent-strong);
+  box-shadow: inset 0 -3px 0 var(--accent);
+}
+
+.toc-btn:disabled,
+.toc-btn[aria-disabled='true'] {
+  opacity: 0.55;
+  cursor: not-allowed;
+}

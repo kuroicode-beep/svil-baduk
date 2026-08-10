@@ -1,0 +1,77 @@
+/* src/styles/board.css — 바둑판 컨테이너·교차점 표시 */
+
+.board-wrap {
+  position: relative;
+  width: min(100%, 72vmin);
+  aspect-ratio: 1;
+  /* 동심원 퍼짐이 잘리지 않도록 — CSS scale 대신 JS r 애니메이션 사용 */
+  overflow: visible;
+  border: var(--bw) solid var(--border-strong);
+  border-radius: var(--radius);
+  background: var(--board-star-stroke);
+}
+
+.game-screen .board-wrap {
+  width: 100%;
+  height: 100%;
+  max-width: none;
+  aspect-ratio: auto;
+  min-height: 0;
+}
+
+.board-svg {
+  display: block;
+  width: 100%;
+  height: 100%;
+}
+
+.board-svg:focus-visible {
+  outline: var(--bw-strong) solid var(--focus);
+  outline-offset: var(--space-1);
+}
+
+/* 착수 가능 교차점 — 클릭은 .hit-target 이 받는다 */
+.legal-dot {
+  cursor: pointer;
+  pointer-events: none;
+}
+
+.legal-dot--blink {
+  animation: blink-dot 1s steps(2, jump-none) infinite;
+}
+
+.legal-dot--focus {
+  animation: none;
+  fill: var(--board-legal-focus);
+}
+
+@keyframes blink-dot {
+  50% {
+    opacity: 0.15;
+  }
+}
+
+html[data-reduce-motion='1'] .legal-dot--blink {
+  animation: none;
+  opacity: 1;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .legal-dot--blink {
+    animation: none;
+  }
+}
+
+.hit-target {
+  cursor: pointer;
+}
+
+.territory-b {
+  color: var(--accent-strong);
+  border-bottom: var(--bw) solid var(--accent);
+}
+
+.territory-w {
+  color: var(--negative);
+  border-bottom: var(--bw) solid var(--negative);
+}

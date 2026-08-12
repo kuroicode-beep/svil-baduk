@@ -11,6 +11,7 @@ import 'package:flutter/material.dart';
 import '../../application/app_container.dart';
 import '../../data/db/settings_store.dart';
 import '../../domain/ai/ranks.dart';
+import '../../domain/changelog.dart';
 import '../../domain/engine/types.dart';
 import '../../i18n/strings.g.dart';
 import '../theme/board_theme.dart';
@@ -216,6 +217,25 @@ class SettingsScreen extends StatelessWidget {
                   _set(_st.copyWith(verbosity: v)),
             ),
 
+            _section(context, S.history(_lang)),
+            // 하우스 규칙: 설정에 버전별 업데이트 히스토리를 최신순으로
+            for (final HistoryEntry h in changelog)
+              Padding(
+                padding: const EdgeInsets.only(bottom: 12),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: <Widget>[
+                    Text('v${h.version}  ${h.date}',
+                        style: monoStyle(size: 16)),
+                    for (final String line in h.lines)
+                      Padding(
+                        padding: const EdgeInsets.only(left: 8, top: 2),
+                        child: Text('· $line',
+                            style: Theme.of(context).textTheme.bodySmall),
+                      ),
+                  ],
+                ),
+              ),
             const SizedBox(height: 24),
             Text('v$appVersion', style: monoStyle(size: 16)),
           ],

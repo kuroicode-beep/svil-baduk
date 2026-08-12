@@ -7,6 +7,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:svil_baduk/application/app_container.dart';
+import 'package:svil_baduk/domain/changelog.dart';
 import 'package:svil_baduk/i18n/strings.g.dart';
 import 'package:svil_baduk/ui/screens/settings_screen.dart';
 import 'package:svil_baduk/ui/theme/svil_theme.dart';
@@ -113,5 +114,15 @@ void main() {
     await tester.tap(find.text('10'));
     await tester.pumpAndSettle();
     expect(c.settings.settings.rankId, 'lv10');
+  });
+
+  testWidgets('설정에 업데이트 히스토리가 있다 (하우스 규칙)',
+      (WidgetTester tester) async {
+    await pump(tester);
+    await scrollTo(tester, find.text(S.history(Lang.ko)));
+    expect(find.text(S.history(Lang.ko)), findsOneWidget);
+    // 최신 버전이 맨 위에 온다
+    await scrollTo(tester, find.textContaining('v${changelog.first.version}'));
+    expect(find.textContaining('v${changelog.first.version}'), findsWidgets);
   });
 }

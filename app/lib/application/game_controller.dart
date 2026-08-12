@@ -4,7 +4,11 @@
 
 import 'package:flutter/foundation.dart';
 
+import '../domain/ai/builtin.dart';
 import '../domain/engine/board.dart';
+import '../domain/engine/scoring.dart';
+import '../domain/engine/sgf.dart';
+import '../domain/engine/snapshot.dart';
 import '../domain/engine/types.dart';
 import '../domain/input/board_speech.dart';
 import '../domain/input/coord_input.dart';
@@ -199,20 +203,91 @@ class GameController extends ChangeNotifier {
         BoardCommand.repeat => SpokeOnly(lastSpoken ?? cursorSpeech),
         BoardCommand.pass => pass(),
         BoardCommand.resign => resignGame(_state.toPlay),
-        // 아래는 화면이 처리한다 (확인창·엔진 호출이 필요)
-        BoardCommand.undo ||
-        BoardCommand.score ||
-        BoardCommand.hint ||
-        BoardCommand.help =>
-          const SpokeOnly(''),
+        BoardCommand.score => scoreGame(),
+        BoardCommand.hint => hint(),
+        BoardCommand.undo => undo(),
+        // 도움말만 화면이 연다 (별도 페이지다)
+        BoardCommand.help => const SpokeOnly(''),
       };
 
   /// 화면이 직접 다뤄야 하는 명령인지
-  static bool needsScreen(BoardCommand c) =>
-      c == BoardCommand.undo ||
-      c == BoardCommand.score ||
-      c == BoardCommand.hint ||
-      c == BoardCommand.help;
+  static bool needsScreen(BoardCommand c) => c == BoardCommand.help;
+
+  /// 계가 추정. 사석을 판정하지 못하므로 문장에 "추정" 이 들어간다.
+  GoRules rules = GoRules.japanese;
+  double? komiOverride;
+
+  ScoreBreakdown currentScore() =>
+      estimateScore(_state, rules: rules, komiOverride: komiOverride);
+
+  PlayOutcome scoreGame() => SpokeOnly(speech.score(currentScore()));
+
+  /// 내장 AI 의 추천 수. KataGo 가 있어도 힌트는 여기서 낸다 —
+  /// 즉시 응답이 필요하고 결정적이어야 하기 때문이다.
+  List<RankedMove> topMoves({int n = 3}) => pickBuiltinTopMoves(_state, n: n);
+
+  PlayOutcome hint() {
+    final List<RankedMove> moves = topMoves();
+    if (moves.isNotEmpty) {
+      // 커서를 1순위로 옮겨 둔다 — 듣고 바로 엔터를 칠 수 있게
+      setCursor(moves.first.point);
+    }
+    return SpokeOnly(speech.hint(moves, lines));
+  }
+
+  /// [plies] 수만큼 무른다. AI 대국에서는 2수(내 수 + AI 응수)를 무른다.
+  PlayOutcome undo({int plies = 1}) {
+    if (_state.history.isEmpty) {
+      return SpokeOnly(speech.noLastMoveWord);
+    }
+    final int n = plies.clamp(1, _state.history.length);
+    final Move removed = _state.history[_state.history.length - n];
+    _state = replayTo(_state.size, _state.history, _state.history.length - n);
+    _armed = false;
+    _clampCursor();
+    notifyListeners();
+    return SpokeOnly(speech.undone(removed, lines));
+  }
+
+  bool get canUndo => _state.history.isNotEmpty;
+
+  /// 진행 중 대국 저장 — 판이 아니라 수순을 남긴다 (패·슈퍼코 보존)
+  String saveSnapshot() => encodeSnapshot(_state);
+
+  /// 복원. 실패하면 현재 대국을 건드리지 않는다.
+  SnapshotResult loadSnapshot(String text) {
+    final SnapshotResult r = decodeSnapshot(text);
+    if (r is SnapshotOk) {
+      _state = r.state;
+      _armed = false;
+      _clampCursor();
+      notifyListeners();
+    }
+    return r;
+  }
+
+  String toSgf({String? black, String? white}) =>
+      encodeSgf(_state, black: black, white: white);
+
+  /// SGF 읽기. 실패하면 현재 대국을 건드리지 않는다.
+  SgfResult loadSgf(String text) {
+    final SgfResult r = decodeSgf(text);
+    if (r is SgfOk) {
+      _state = r.state;
+      _armed = false;
+      _clampCursor();
+      notifyListeners();
+    }
+    return r;
+  }
+
+  /// 판 크기가 바뀌었을 수 있으므로 커서를 판 안으로 되돌린다
+  void _clampCursor() {
+    _cursor = Point(
+      _cursor.x.clamp(0, lines - 1),
+      _cursor.y.clamp(0, lines - 1),
+    );
+  }
 
   void reset(BoardSize size) {
     _state = createGame(size);

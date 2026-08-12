@@ -4,7 +4,9 @@
 // 스크린리더 발화가 중간에 끊기는 일이 잦은데(특히 커서를 빠르게 옮길 때),
 // 위치만은 반드시 전달되어야 하기 때문이다.
 
+import '../ai/builtin.dart';
 import '../engine/board.dart';
+import '../engine/scoring.dart';
 import '../engine/types.dart';
 
 /// 낭독 상세도 — UI 의 AnnounceVerbosity 와 짝을 이룬다
@@ -25,6 +27,13 @@ class BoardSpeech {
     required this.rowWord,
     required this.noLastMoveWord,
     required this.passWord,
+    required this.territoryWord,
+    required this.komiWord,
+    required this.winsWord,
+    required this.drawWord,
+    required this.estimateWord,
+    required this.hintWord,
+    required this.undoneWord,
   });
 
   final String blackWord;
@@ -42,6 +51,16 @@ class BoardSpeech {
 
   /// 패스는 좌표가 없다 (x=-1) — 좌표를 만들려 하면 터진다
   final String passWord;
+
+  final String territoryWord;
+  final String komiWord;
+  final String winsWord;
+  final String drawWord;
+
+  /// 사석을 판정하지 않으므로 결과는 반드시 "추정" 이라고 말한다
+  final String estimateWord;
+  final String hintWord;
+  final String undoneWord;
 
   String _who(Stone s) => switch (s) {
         Stone.black => blackWord,
@@ -170,6 +189,42 @@ class BoardSpeech {
         '$last, '
         '${_who(g.toPlay)}$turnSuffix';
   }
+
+  /// 계가 결과. 승패를 먼저 말하고 근거를 뒤에 붙인다.
+  ///
+  /// 반드시 "추정" 을 붙인다 — estimateScore 는 사석을 판정하지 못한다.
+  String score(ScoreBreakdown s) {
+    final String verdict = switch (s.winner) {
+      Stone.black => '$blackWord ${_num(s.margin)}$winsWord',
+      Stone.white => '$whiteWord ${_num(s.margin)}$winsWord',
+      _ => drawWord,
+    };
+    return '$verdict ($estimateWord). '
+        '$blackWord ${_num(s.blackTotal)}, $whiteWord ${_num(s.whiteTotal)}. '
+        '$territoryWord $blackWord ${s.blackTerritory} $whiteWord ${s.whiteTerritory}, '
+        '$captureWord $blackWord ${s.blackCaptures} $whiteWord ${s.whiteCaptures}, '
+        '$komiWord ${_num(s.komi)}.';
+  }
+
+  /// 힌트 — 좌표가 먼저 나오도록 순위를 뒤에 붙인다
+  String hint(List<RankedMove> moves, int lines) {
+    if (moves.isEmpty) return noStonesWord;
+    final String list = moves
+        .map((RankedMove m) =>
+            '${pointLabel(m.point.x, m.point.y, lines)} ${m.rank}')
+        .join(', ');
+    return '$hintWord: $list';
+  }
+
+  /// 무르기 — 되돌린 수를 말해 준다
+  String undone(Move m, int lines) {
+    final String where = m.isPass ? passWord : pointLabel(m.x, m.y, lines);
+    return '$where, ${_who(m.player)} $undoneWord';
+  }
+
+  /// 5.5 는 "5.5", 6.0 은 "6" 으로 — 스크린리더가 ".0" 을 읽지 않게
+  String _num(double v) =>
+      v == v.roundToDouble() ? v.toInt().toString() : v.toString();
 }
 
 const String columnLetters = 'ABCDEFGHJKLMNOPQRST';

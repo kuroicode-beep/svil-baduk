@@ -33,6 +33,13 @@ BoardSpeech speechFor(Lang lang) => BoardSpeech(
       rowWord: S.rowSuffix(lang),
       noLastMoveWord: S.noLastMove(lang),
       passWord: S.pass(lang),
+      territoryWord: S.territoryLabel(lang),
+      komiWord: S.komiLabel(lang),
+      winsWord: S.winsBy(lang),
+      drawWord: S.drawResult(lang),
+      estimateWord: S.scoreEstimate(lang),
+      hintWord: S.hintLabel(lang),
+      undoneWord: S.undoneLabel(lang),
     );
 
 String moveErrorPhraseFor(Lang lang, MoveError e) => switch (e) {

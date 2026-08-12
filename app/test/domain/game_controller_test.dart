@@ -2,24 +2,10 @@
 import 'package:flutter_test/flutter_test.dart';
 import 'package:svil_baduk/application/game_controller.dart';
 import 'package:svil_baduk/domain/engine/types.dart';
-import 'package:svil_baduk/domain/input/board_speech.dart';
+
+import '../support/speech_fixture.dart';
 import 'package:svil_baduk/domain/input/coord_input.dart';
 
-const BoardSpeech speech = BoardSpeech(
-  blackWord: '흑',
-  whiteWord: '백',
-  emptyWord: '빈 점',
-  starWord: '화점',
-  lastMoveWord: '직전 수',
-  libertyWord: '활로',
-  turnSuffix: ' 차례',
-  captureWord: '점 따냄',
-  stoneCountWord: '점',
-  noStonesWord: '돌 없음',
-  rowWord: '줄',
-  noLastMoveWord: '직전 수 없음',
-  passWord: '패스',
-);
 
 String moveErr(MoveError e) => switch (e) {
       MoveError.occupied => '둘 수 없음: 이미 돌이 있습니다',
@@ -40,7 +26,7 @@ String coordErr(CoordError e, int lines) => switch (e.kind) {
 
 GameController make([BoardSize size = BoardSize.s19]) => GameController(
       size: size,
-      speech: speech,
+      speech: testSpeech,
       moveErrorPhrase: moveErr,
       coordErrorPhrase: coordErr,
     );

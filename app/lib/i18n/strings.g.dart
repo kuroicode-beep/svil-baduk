@@ -96,6 +96,25 @@ abstract final class S {
   static const LocString noStones = LocString("돌 없음", "no stones", "石なし", "无子", "không có quân");
   static const LocString rowSuffix = LocString("줄", "line", "路", "路", "dòng");
   static const LocString noLastMove = LocString("직전 수 없음", "no last move", "直前の手なし", "无上一手", "chưa có nước đi");
+  static const LocString territoryLabel = LocString("집", "territory", "地", "目", "đất");
+  static const LocString komiLabel = LocString("덤", "komi", "コミ", "贴目", "komi");
+  static const LocString winsBy = LocString("집 승", " wins by", "目勝ち", "目胜", " thắng");
+  static const LocString drawResult = LocString("무승부", "draw", "引き分け", "和棋", "hòa");
+  static const LocString scoreEstimate = LocString("추정", "estimate", "推定", "估算", "ước tính");
+  static const LocString hintLabel = LocString("추천", "hint", "候補", "推荐", "gợi ý");
+  static const LocString undoneLabel = LocString("무름", "undone", "取り消し", "悔棋", "đã hoàn tác");
+  static const LocString scoreRulesJapanese = LocString("일본룰 (집계법)", "Japanese (territory)", "日本ルール", "日本规则", "Luật Nhật");
+  static const LocString scoreRulesChinese = LocString("중국룰 (영역법)", "Chinese (area)", "中国ルール", "中国规则", "Luật Trung");
+  static const LocString scoreDeadStonesNote = LocString("사석을 자동으로 가려내지 못합니다. 죽은 돌이 판에 남아 있으면 결과가 달라집니다.", "Dead stones are not detected. If dead stones remain on the board the result will differ.", "死に石は自動判定しません。盤上に残っていると結果が変わります。", "不会自动判定死子。若死子仍在盘上，结果会有出入。", "Không tự nhận diện quân chết. Nếu quân chết còn trên bàn, kết quả sẽ khác.");
+  static const LocString snapshotCorrupt = LocString("저장 파일이 손상되었습니다", "The saved file is damaged", "保存ファイルが壊れています", "存档已损坏", "Tệp lưu bị hỏng");
+  static const LocString snapshotTooNew = LocString("더 새로운 버전에서 저장된 파일입니다", "Saved by a newer version", "新しいバージョンで保存されています", "由更新版本保存", "Được lưu bởi phiên bản mới hơn");
+  static const LocString snapshotBadSize = LocString("지원하지 않는 판 크기입니다", "Unsupported board size", "対応していない盤サイズです", "不支持的棋盘大小", "Kích thước bàn không hỗ trợ");
+  static const LocString snapshotReplayFailed = LocString("수순을 재생할 수 없습니다", "The move list could not be replayed", "手順を再生できません", "无法重放棋谱", "Không thể phát lại nước đi");
+  static const LocString sgfNotSgf = LocString("SGF 파일이 아닙니다", "Not an SGF file", "SGFファイルではありません", "不是 SGF 文件", "Không phải tệp SGF");
+  static const LocString sgfUnsupportedSize = LocString("지원하지 않는 판 크기입니다", "Unsupported board size", "対応していない盤サイズです", "不支持的棋盘大小", "Kích thước bàn không hỗ trợ");
+  static const LocString sgfTurnMismatch = LocString("차례가 맞지 않습니다", "Move order does not alternate", "手番が合いません", "落子顺序不符", "Thứ tự đi không khớp");
+  static const LocString sgfBadCoord = LocString("좌표를 읽을 수 없습니다", "Could not read a coordinate", "座標を読めません", "无法读取坐标", "Không đọc được tọa độ");
+  static const LocString sgfIllegalMove = LocString("규칙에 어긋나는 수가 있습니다", "The file contains an illegal move", "ルール違反の手があります", "含有违规着法", "Có nước đi phạm luật");
   static const LocString boardLabel = LocString("바둑판", "board", "碁盤", "棋盘", "bàn cờ");
   static const LocString boardHint = LocString("화살표로 이동, 엔터로 착수, 물음표로 판 요약. 좌표 입력칸에 D16처럼 직접 칠 수도 있습니다", "Arrows move, Enter plays, ? summarises the board. You can also type a coordinate like D16.", "矢印で移動、エンターで着手、?で盤面要約。座標欄にD16のように入力もできます", "方向键移动，回车落子，? 查看棋盘摘要。也可在坐标框输入 D16。", "Mũi tên di chuyển, Enter đặt quân, ? tóm tắt bàn cờ. Cũng có thể gõ toạ độ như D16.");
   static const LocString coordInputLabel = LocString("좌표 입력", "Coordinate", "座標入力", "坐标输入", "Toạ độ");
@@ -235,7 +254,7 @@ abstract final class S {
 }
 
 /// 완전성 테스트용 — 생성된 문자열 개수
-const int generatedStringCount = 187;
+const int generatedStringCount = 206;
 
 /// 완전성 테스트용 — 키 이름과 값 목록
 const Map<String, LocString> allStrings = <String, LocString>{
@@ -290,6 +309,25 @@ const Map<String, LocString> allStrings = <String, LocString>{
   "noStones": S.noStones,
   "rowSuffix": S.rowSuffix,
   "noLastMove": S.noLastMove,
+  "territoryLabel": S.territoryLabel,
+  "komiLabel": S.komiLabel,
+  "winsBy": S.winsBy,
+  "drawResult": S.drawResult,
+  "scoreEstimate": S.scoreEstimate,
+  "hintLabel": S.hintLabel,
+  "undoneLabel": S.undoneLabel,
+  "scoreRulesJapanese": S.scoreRulesJapanese,
+  "scoreRulesChinese": S.scoreRulesChinese,
+  "scoreDeadStonesNote": S.scoreDeadStonesNote,
+  "snapshotCorrupt": S.snapshotCorrupt,
+  "snapshotTooNew": S.snapshotTooNew,
+  "snapshotBadSize": S.snapshotBadSize,
+  "snapshotReplayFailed": S.snapshotReplayFailed,
+  "sgfNotSgf": S.sgfNotSgf,
+  "sgfUnsupportedSize": S.sgfUnsupportedSize,
+  "sgfTurnMismatch": S.sgfTurnMismatch,
+  "sgfBadCoord": S.sgfBadCoord,
+  "sgfIllegalMove": S.sgfIllegalMove,
   "boardLabel": S.boardLabel,
   "boardHint": S.boardHint,
   "coordInputLabel": S.coordInputLabel,

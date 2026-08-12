@@ -447,6 +447,17 @@ const dict = {
   pass: { ko: '패스', en: 'Pass', ja: 'パス', zh: '停着', vi: 'Bỏ lượt' },
   resign: { ko: '기권', en: 'Resign', ja: '投了', zh: '认输', vi: 'Bỏ cuộc' },
   scoreNow: { ko: '계가', en: 'Score', ja: '計算', zh: '点目', vi: 'Đếm điểm' },
+  // 배우기 — 왜 틀렸는지 구별해서 말한다
+  learnNoProblem: { ko: '문제가 없습니다', en: 'No problem loaded', ja: '問題がありません', zh: '没有题目', vi: 'Chưa có bài tập' },
+  learnWrongPoint: { ko: '그 자리가 아닙니다', en: 'Not that point', ja: 'その場所ではありません', zh: '不是这个点', vi: 'Không phải điểm đó' },
+  learnIllegal: { ko: '규칙에 어긋납니다', en: 'That move is illegal', ja: 'ルール違反です', zh: '这一手违规', vi: 'Nước đi phạm luật' },
+  learnGoalUnmet: { ko: '자리는 맞지만 목표를 이루지 못했습니다', en: 'Right point, but the goal is not met', ja: '場所は合っていますが目標を達成していません', zh: '位置对了，但没有达成目标', vi: 'Đúng điểm nhưng chưa đạt mục tiêu' },
+  learnCorrect: { ko: '정답입니다', en: 'Correct', ja: '正解です', zh: '正确', vi: 'Chính xác' },
+  learnTrackCleared: { ko: '이 과정을 모두 끝냈습니다', en: 'Track complete', ja: 'このコースを修了しました', zh: '本课程全部完成', vi: 'Hoàn thành toàn bộ khóa' },
+  learnNextProblem: { ko: '다음 문제', en: 'Next problem', ja: '次の問題', zh: '下一题', vi: 'Bài tiếp theo' },
+  learnPrevProblem: { ko: '이전 문제', en: 'Previous problem', ja: '前の問題', zh: '上一题', vi: 'Bài trước' },
+  learnProgress: { ko: '진행', en: 'Progress', ja: '進捗', zh: '进度', vi: 'Tiến độ' },
+  learnTryHint: { ko: '두 번 틀렸습니다. 힌트를 들어보세요', en: 'Two misses. Try the hint', ja: '2回間違えました。ヒントを聞いてみてください', zh: '错了两次，试试提示', vi: 'Sai hai lần. Hãy nghe gợi ý' },
   // KataGo 오류 — 사유마다 다른 문장이어야 한다 (체크리스트 K2)
   engineKataGo: { ko: 'KataGo', en: 'KataGo', ja: 'KataGo', zh: 'KataGo', vi: 'KataGo' },
   katagoExeMissing: { ko: 'KataGo 실행 파일을 찾지 못했습니다', en: 'KataGo executable not found', ja: 'KataGo の実行ファイルが見つかりません', zh: '未找到 KataGo 可执行文件', vi: 'Không tìm thấy tệp thực thi KataGo' },

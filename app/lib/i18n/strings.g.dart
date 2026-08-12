@@ -162,6 +162,16 @@ abstract final class S {
   static const LocString pass = LocString("패스", "Pass", "パス", "停着", "Bỏ lượt");
   static const LocString resign = LocString("기권", "Resign", "投了", "认输", "Bỏ cuộc");
   static const LocString scoreNow = LocString("계가", "Score", "計算", "点目", "Đếm điểm");
+  static const LocString learnNoProblem = LocString("문제가 없습니다", "No problem loaded", "問題がありません", "没有题目", "Chưa có bài tập");
+  static const LocString learnWrongPoint = LocString("그 자리가 아닙니다", "Not that point", "その場所ではありません", "不是这个点", "Không phải điểm đó");
+  static const LocString learnIllegal = LocString("규칙에 어긋납니다", "That move is illegal", "ルール違反です", "这一手违规", "Nước đi phạm luật");
+  static const LocString learnGoalUnmet = LocString("자리는 맞지만 목표를 이루지 못했습니다", "Right point, but the goal is not met", "場所は合っていますが目標を達成していません", "位置对了，但没有达成目标", "Đúng điểm nhưng chưa đạt mục tiêu");
+  static const LocString learnCorrect = LocString("정답입니다", "Correct", "正解です", "正确", "Chính xác");
+  static const LocString learnTrackCleared = LocString("이 과정을 모두 끝냈습니다", "Track complete", "このコースを修了しました", "本课程全部完成", "Hoàn thành toàn bộ khóa");
+  static const LocString learnNextProblem = LocString("다음 문제", "Next problem", "次の問題", "下一题", "Bài tiếp theo");
+  static const LocString learnPrevProblem = LocString("이전 문제", "Previous problem", "前の問題", "上一题", "Bài trước");
+  static const LocString learnProgress = LocString("진행", "Progress", "進捗", "进度", "Tiến độ");
+  static const LocString learnTryHint = LocString("두 번 틀렸습니다. 힌트를 들어보세요", "Two misses. Try the hint", "2回間違えました。ヒントを聞いてみてください", "错了两次，试试提示", "Sai hai lần. Hãy nghe gợi ý");
   static const LocString engineKataGo = LocString("KataGo", "KataGo", "KataGo", "KataGo", "KataGo");
   static const LocString katagoExeMissing = LocString("KataGo 실행 파일을 찾지 못했습니다", "KataGo executable not found", "KataGo の実行ファイルが見つかりません", "未找到 KataGo 可执行文件", "Không tìm thấy tệp thực thi KataGo");
   static const LocString katagoModelMissing = LocString("KataGo 신경망 파일을 찾지 못했습니다", "KataGo model file not found", "KataGo のモデルが見つかりません", "未找到 KataGo 模型文件", "Không tìm thấy tệp mô hình KataGo");
@@ -266,7 +276,7 @@ abstract final class S {
 }
 
 /// 완전성 테스트용 — 생성된 문자열 개수
-const int generatedStringCount = 218;
+const int generatedStringCount = 228;
 
 /// 완전성 테스트용 — 키 이름과 값 목록
 const Map<String, LocString> allStrings = <String, LocString>{
@@ -387,6 +397,16 @@ const Map<String, LocString> allStrings = <String, LocString>{
   "pass": S.pass,
   "resign": S.resign,
   "scoreNow": S.scoreNow,
+  "learnNoProblem": S.learnNoProblem,
+  "learnWrongPoint": S.learnWrongPoint,
+  "learnIllegal": S.learnIllegal,
+  "learnGoalUnmet": S.learnGoalUnmet,
+  "learnCorrect": S.learnCorrect,
+  "learnTrackCleared": S.learnTrackCleared,
+  "learnNextProblem": S.learnNextProblem,
+  "learnPrevProblem": S.learnPrevProblem,
+  "learnProgress": S.learnProgress,
+  "learnTryHint": S.learnTryHint,
   "engineKataGo": S.engineKataGo,
   "katagoExeMissing": S.katagoExeMissing,
   "katagoModelMissing": S.katagoModelMissing,

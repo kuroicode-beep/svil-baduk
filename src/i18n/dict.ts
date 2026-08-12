@@ -447,6 +447,18 @@ const dict = {
   pass: { ko: '패스', en: 'Pass', ja: 'パス', zh: '停着', vi: 'Bỏ lượt' },
   resign: { ko: '기권', en: 'Resign', ja: '投了', zh: '认输', vi: 'Bỏ cuộc' },
   scoreNow: { ko: '계가', en: 'Score', ja: '計算', zh: '点目', vi: 'Đếm điểm' },
+  // KataGo 오류 — 사유마다 다른 문장이어야 한다 (체크리스트 K2)
+  engineKataGo: { ko: 'KataGo', en: 'KataGo', ja: 'KataGo', zh: 'KataGo', vi: 'KataGo' },
+  katagoExeMissing: { ko: 'KataGo 실행 파일을 찾지 못했습니다', en: 'KataGo executable not found', ja: 'KataGo の実行ファイルが見つかりません', zh: '未找到 KataGo 可执行文件', vi: 'Không tìm thấy tệp thực thi KataGo' },
+  katagoModelMissing: { ko: 'KataGo 신경망 파일을 찾지 못했습니다', en: 'KataGo model file not found', ja: 'KataGo のモデルが見つかりません', zh: '未找到 KataGo 模型文件', vi: 'Không tìm thấy tệp mô hình KataGo' },
+  katagoConfigMissing: { ko: 'KataGo 설정 파일을 찾지 못했습니다', en: 'KataGo config file not found', ja: 'KataGo の設定ファイルが見つかりません', zh: '未找到 KataGo 配置文件', vi: 'Không tìm thấy tệp cấu hình KataGo' },
+  katagoNotRunning: { ko: 'KataGo 가 실행 중이 아닙니다', en: 'KataGo is not running', ja: 'KataGo が動作していません', zh: 'KataGo 未在运行', vi: 'KataGo chưa chạy' },
+  katagoExited: { ko: 'KataGo 가 종료되었습니다. 내장 AI 로 이어서 둡니다', en: 'KataGo exited. Continuing with the built-in AI', ja: 'KataGo が終了しました。内蔵AIで続けます', zh: 'KataGo 已退出，改用内置 AI 继续', vi: 'KataGo đã thoát. Tiếp tục với AI tích hợp' },
+  katagoEmptyResponse: { ko: 'KataGo 가 응답을 보내지 않았습니다', en: 'KataGo sent no response', ja: 'KataGo が応答を返しませんでした', zh: 'KataGo 没有返回响应', vi: 'KataGo không phản hồi' },
+  katagoRejected: { ko: 'KataGo 가 명령을 거절했습니다', en: 'KataGo rejected the command', ja: 'KataGo がコマンドを拒否しました', zh: 'KataGo 拒绝了该命令', vi: 'KataGo từ chối lệnh' },
+  katagoTimeout: { ko: 'KataGo 응답이 시간을 넘겼습니다', en: 'KataGo timed out', ja: 'KataGo の応答がタイムアウトしました', zh: 'KataGo 响应超时', vi: 'KataGo hết thời gian chờ' },
+  katagoStartFailed: { ko: 'KataGo 를 시작하지 못했습니다', en: 'Could not start KataGo', ja: 'KataGo を起動できませんでした', zh: '无法启动 KataGo', vi: 'Không khởi động được KataGo' },
+  katagoTuning: { ko: 'KataGo 가 처음 실행되어 GPU 최적화 중입니다. 몇 분 걸릴 수 있습니다', en: 'KataGo is tuning for your GPU on first run. This can take a few minutes', ja: 'KataGo が初回のGPU最適化を行っています。数分かかる場合があります', zh: 'KataGo 首次运行正在针对 GPU 调优，可能需要几分钟', vi: 'KataGo đang tối ưu cho GPU lần đầu. Có thể mất vài phút' },
   resignWin: {
     ko: '기권승',
     en: 'Win by resignation',

@@ -162,6 +162,17 @@ abstract final class S {
   static const LocString pass = LocString("패스", "Pass", "パス", "停着", "Bỏ lượt");
   static const LocString resign = LocString("기권", "Resign", "投了", "认输", "Bỏ cuộc");
   static const LocString scoreNow = LocString("계가", "Score", "計算", "点目", "Đếm điểm");
+  static const LocString engineKataGo = LocString("KataGo", "KataGo", "KataGo", "KataGo", "KataGo");
+  static const LocString katagoExeMissing = LocString("KataGo 실행 파일을 찾지 못했습니다", "KataGo executable not found", "KataGo の実行ファイルが見つかりません", "未找到 KataGo 可执行文件", "Không tìm thấy tệp thực thi KataGo");
+  static const LocString katagoModelMissing = LocString("KataGo 신경망 파일을 찾지 못했습니다", "KataGo model file not found", "KataGo のモデルが見つかりません", "未找到 KataGo 模型文件", "Không tìm thấy tệp mô hình KataGo");
+  static const LocString katagoConfigMissing = LocString("KataGo 설정 파일을 찾지 못했습니다", "KataGo config file not found", "KataGo の設定ファイルが見つかりません", "未找到 KataGo 配置文件", "Không tìm thấy tệp cấu hình KataGo");
+  static const LocString katagoNotRunning = LocString("KataGo 가 실행 중이 아닙니다", "KataGo is not running", "KataGo が動作していません", "KataGo 未在运行", "KataGo chưa chạy");
+  static const LocString katagoExited = LocString("KataGo 가 종료되었습니다. 내장 AI 로 이어서 둡니다", "KataGo exited. Continuing with the built-in AI", "KataGo が終了しました。内蔵AIで続けます", "KataGo 已退出，改用内置 AI 继续", "KataGo đã thoát. Tiếp tục với AI tích hợp");
+  static const LocString katagoEmptyResponse = LocString("KataGo 가 응답을 보내지 않았습니다", "KataGo sent no response", "KataGo が応答を返しませんでした", "KataGo 没有返回响应", "KataGo không phản hồi");
+  static const LocString katagoRejected = LocString("KataGo 가 명령을 거절했습니다", "KataGo rejected the command", "KataGo がコマンドを拒否しました", "KataGo 拒绝了该命令", "KataGo từ chối lệnh");
+  static const LocString katagoTimeout = LocString("KataGo 응답이 시간을 넘겼습니다", "KataGo timed out", "KataGo の応答がタイムアウトしました", "KataGo 响应超时", "KataGo hết thời gian chờ");
+  static const LocString katagoStartFailed = LocString("KataGo 를 시작하지 못했습니다", "Could not start KataGo", "KataGo を起動できませんでした", "无法启动 KataGo", "Không khởi động được KataGo");
+  static const LocString katagoTuning = LocString("KataGo 가 처음 실행되어 GPU 최적화 중입니다. 몇 분 걸릴 수 있습니다", "KataGo is tuning for your GPU on first run. This can take a few minutes", "KataGo が初回のGPU最適化を行っています。数分かかる場合があります", "KataGo 首次运行正在针对 GPU 调优，可能需要几分钟", "KataGo đang tối ưu cho GPU lần đầu. Có thể mất vài phút");
   static const LocString resignWin = LocString("기권승", "Win by resignation", "投了勝ち", "中盘胜", "Thắng do đối thủ bỏ cuộc");
   static const LocString yourTurn = LocString("당신 차례", "Your turn", "あなたの番", "轮到你", "Lượt của bạn");
   static const LocString aiTurn = LocString("AI 생각 중…", "AI thinking…", "AI思考中…", "AI思考中…", "AI đang nghĩ…");
@@ -255,7 +266,7 @@ abstract final class S {
 }
 
 /// 완전성 테스트용 — 생성된 문자열 개수
-const int generatedStringCount = 207;
+const int generatedStringCount = 218;
 
 /// 완전성 테스트용 — 키 이름과 값 목록
 const Map<String, LocString> allStrings = <String, LocString>{
@@ -376,6 +387,17 @@ const Map<String, LocString> allStrings = <String, LocString>{
   "pass": S.pass,
   "resign": S.resign,
   "scoreNow": S.scoreNow,
+  "engineKataGo": S.engineKataGo,
+  "katagoExeMissing": S.katagoExeMissing,
+  "katagoModelMissing": S.katagoModelMissing,
+  "katagoConfigMissing": S.katagoConfigMissing,
+  "katagoNotRunning": S.katagoNotRunning,
+  "katagoExited": S.katagoExited,
+  "katagoEmptyResponse": S.katagoEmptyResponse,
+  "katagoRejected": S.katagoRejected,
+  "katagoTimeout": S.katagoTimeout,
+  "katagoStartFailed": S.katagoStartFailed,
+  "katagoTuning": S.katagoTuning,
   "resignWin": S.resignWin,
   "yourTurn": S.yourTurn,
   "aiTurn": S.aiTurn,

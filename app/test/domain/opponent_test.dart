@@ -6,6 +6,18 @@ import 'package:svil_baduk/domain/ai/ranks.dart';
 import 'package:svil_baduk/domain/engine/board.dart';
 import 'package:svil_baduk/domain/engine/types.dart';
 
+/// 항상 실패하는 상대 — 강등 경로를 재현한다
+class _AlwaysFails implements Opponent {
+  bool disposed = false;
+  @override
+  String get labelKey => 'fake';
+  @override
+  Future<OpponentReply> nextMove(GameState state) async =>
+      const OpponentFailed('katagoExited', detail: 'x');
+  @override
+  void dispose() => disposed = true;
+}
+
 void main() {
   test('내장 상대가 합법적인 수를 낸다', () async {
     final BuiltinOpponent o = BuiltinOpponent('lv3');
@@ -64,4 +76,63 @@ void main() {
         lessThan(getRank('lv10').maxTime.inMilliseconds),
         reason: '${sw.elapsedMilliseconds}ms');
   });
+
+  group('K7 · 주 엔진이 죽으면 내장 AI 로 이어 둔다', () {
+    test('첫 실패에서 강등되고 그 사실을 알린다', () async {
+      String? reported;
+      final _AlwaysFails dead = _AlwaysFails();
+      final FallbackOpponent o = FallbackOpponent(
+        primary: dead,
+        backup: BuiltinOpponent('lv3'),
+        onFallback: (String key, String? _) => reported = key,
+      );
+
+      final OpponentReply r = await o.nextMove(createGame(BoardSize.s9));
+      expect(r, isA<OpponentMove>(), reason: '강등 후에도 수가 나와야 한다');
+      expect(reported, 'katagoExited', reason: '조용히 바뀌면 안 된다');
+      expect(o.usingBackup, isTrue);
+      expect(dead.disposed, isTrue, reason: '죽은 엔진을 정리하지 않았습니다');
+    });
+
+    test('한 번 강등되면 다시 시도하지 않는다 — 매 수 타임아웃을 기다리게 된다', () async {
+      int attempts = 0;
+      final Opponent counting = _CountingFail(() => attempts++);
+      final FallbackOpponent o = FallbackOpponent(
+        primary: counting,
+        backup: BuiltinOpponent('lv1'),
+      );
+      GameState g = createGame(BoardSize.s9);
+      for (int i = 0; i < 5; i++) {
+        final OpponentReply r = await o.nextMove(g);
+        if (r is OpponentMove) {
+          g = (tryPlay(g, r.point.x, r.point.y) as PlayOk).state;
+        }
+      }
+      expect(attempts, 1);
+    });
+
+    test('라벨이 실제로 두는 쪽을 가리킨다', () async {
+      final FallbackOpponent o = FallbackOpponent(
+        primary: _AlwaysFails(),
+        backup: BuiltinOpponent('lv3'),
+      );
+      expect(o.labelKey, 'fake');
+      await o.nextMove(createGame(BoardSize.s9));
+      expect(o.labelKey, 'rank_lv3');
+    });
+  });
+}
+
+class _CountingFail implements Opponent {
+  _CountingFail(this.onTry);
+  final void Function() onTry;
+  @override
+  String get labelKey => 'fake';
+  @override
+  Future<OpponentReply> nextMove(GameState state) async {
+    onTry();
+    return const OpponentFailed('katagoTimeout');
+  }
+  @override
+  void dispose() {}
 }

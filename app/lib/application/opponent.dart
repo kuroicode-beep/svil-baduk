@@ -63,3 +63,47 @@ class BuiltinOpponent implements Opponent {
   @override
   void dispose() {}
 }
+
+/// 주 엔진이 실패하면 예비 엔진으로 넘어간다 (체크리스트 K7).
+///
+/// 한 번 넘어가면 되돌아오지 않는다. KataGo 가 죽은 뒤 매 수 재시도하면
+/// 그때마다 90초 타임아웃을 기다리게 되고, 그건 멈춘 것과 구별되지 않는다.
+class FallbackOpponent implements Opponent {
+  FallbackOpponent({
+    required this.primary,
+    required this.backup,
+    this.onFallback,
+  });
+
+  final Opponent primary;
+  final Opponent backup;
+
+  /// 강등이 일어났음을 화면에 알린다 — 조용히 바뀌면 안 된다
+  final void Function(String reasonKey, String? detail)? onFallback;
+
+  bool _fellBack = false;
+
+  bool get usingBackup => _fellBack;
+
+  @override
+  String get labelKey => _fellBack ? backup.labelKey : primary.labelKey;
+
+  @override
+  Future<OpponentReply> nextMove(GameState state) async {
+    if (_fellBack) return backup.nextMove(state);
+
+    final OpponentReply r = await primary.nextMove(state);
+    if (r is! OpponentFailed) return r;
+
+    _fellBack = true;
+    onFallback?.call(r.reasonKey, r.detail);
+    primary.dispose();
+    return backup.nextMove(state);
+  }
+
+  @override
+  void dispose() {
+    if (!_fellBack) primary.dispose();
+    backup.dispose();
+  }
+}

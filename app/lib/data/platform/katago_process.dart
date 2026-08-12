@@ -135,7 +135,15 @@ GtpResponse parseGtpBlock(String block) {
   return const GtpEmpty();
 }
 
-class KataGoProcess {
+/// GTP 로 말할 수 있는 것. KataGoProcess 가 유일한 실제 구현이고,
+/// 테스트는 가짜를 넣어 동기화 로직만 본다 (K4·K5 는 설치본 없이 검증된다).
+abstract class GtpChannel {
+  Future<String> send(String command, {Duration timeout});
+  Future<String> genmove(String color);
+  Future<void> stop();
+}
+
+class KataGoProcess implements GtpChannel {
   KataGoProcess();
 
   Process? _proc;
@@ -216,6 +224,7 @@ class KataGoProcess {
     }
   }
 
+  @override
   Future<String> send(
     String command, {
     Duration timeout = const Duration(seconds: 15),
@@ -234,11 +243,13 @@ class KataGoProcess {
   }
 
   /// 탐색은 오래 걸린다 — 브리지가 쓰던 90초를 그대로 유지
+  @override
   Future<String> genmove(String color) =>
       send('genmove $color', timeout: const Duration(seconds: 90));
 
   /// quit → 종료 대기 → 강제 종료.
   /// 앱이 닫힐 때 katago.exe 가 남으면 GPU 메모리를 물고 있다.
+  @override
   Future<void> stop() async {
     final Process? proc = _proc;
     if (proc == null) return;

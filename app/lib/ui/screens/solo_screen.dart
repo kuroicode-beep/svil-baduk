@@ -8,8 +8,11 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 
 import '../../application/game_controller.dart';
+import '../../application/katago_opponent.dart';
 import '../../application/opponent.dart';
 import '../../data/db/settings_store.dart';
+import '../../data/platform/katago_process.dart';
+import '../../domain/platform_caps.dart';
 import '../../domain/engine/types.dart';
 import '../../domain/input/board_speech.dart';
 import '../../domain/input/coord_input.dart';
@@ -70,12 +73,14 @@ class SoloScreen extends StatefulWidget {
     required this.settings,
     required this.vision,
     required this.size,
+    required this.caps,
     super.key,
   });
 
   final AppSettings settings;
   final VisionSettings vision;
   final BoardSize size;
+  final PlatformCaps caps;
 
   @override
   State<SoloScreen> createState() => _SoloScreenState();
@@ -91,6 +96,8 @@ class _SoloScreenState extends State<SoloScreen> {
   String _status = '';
 
   Opponent? _opponent;
+  KataGoProcess? _katago;
+  StreamSubscription<String>? _tuningSub;
 
   /// AI 응수를 기다리는 중. 이 동안 사람의 착수를 막는다 —
   /// 두 수가 겹치면 판이 어긋난다.
@@ -121,13 +128,7 @@ class _SoloScreenState extends State<SoloScreen> {
     });
     _game.addListener(_onGameChanged);
     _value = _game.cursorSpeech;
-    _opponent = switch (widget.settings.opponent) {
-      OpponentKind.none => null,
-      // KataGo 는 5단계에서 붙는다. 그때까지 내장 AI 로 떨어뜨린다 —
-      // 버튼만 있고 안 되는 것보다 낫다.
-      OpponentKind.builtin || OpponentKind.katago =>
-        BuiltinOpponent(widget.settings.rankId),
-    };
+    _opponent = _makeOpponent();
   }
 
   @override
@@ -139,7 +140,10 @@ class _SoloScreenState extends State<SoloScreen> {
   @override
   void dispose() {
     _game.removeListener(_onGameChanged);
+    unawaited(_tuningSub?.cancel());
+    // 앱이 닫힐 때 katago.exe 가 남으면 GPU 메모리를 물고 있다 (K8)
     _opponent?.dispose();
+    unawaited(_katago?.stop());
     _announcer.dispose();
     _game.dispose();
     super.dispose();
@@ -170,6 +174,68 @@ class _SoloScreenState extends State<SoloScreen> {
         _announcer.critical(speech);
         setState(() => _status = speech);
         return true;
+    }
+  }
+
+  /// 설정과 이 기기의 능력에 맞는 상대를 만든다.
+  ///
+  /// KataGo 는 데스크톱에서만 돌아가고(모바일에 Process 가 없다), 죽으면
+  /// 내장 AI 로 이어 둔다. 어느 경우든 대국이 멈추지는 않는다.
+  Opponent? _makeOpponent() {
+    final AppSettings st = widget.settings;
+    if (st.opponent == OpponentKind.none) return null;
+
+    final BuiltinOpponent builtin = BuiltinOpponent(st.rankId);
+    if (st.opponent != OpponentKind.katago) return builtin;
+    if (!widget.caps.canRunKataGo) {
+      // 설정에는 KataGo 로 되어 있지만 이 기기에서는 안 된다.
+      // 조용히 바꾸지 않고 한 번 알린다.
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (!mounted) return;
+        _announcer.critical(S.katagoMobileUnavailable(_lang));
+      });
+      return builtin;
+    }
+
+    final KataGoProcess proc = KataGoProcess();
+    _katago = proc;
+    // OpenCL 최초 튜닝은 몇 분 걸린다. 진행을 보여주지 않으면 멈춘 것처럼
+    // 보이고, 그게 K3 이 요구하는 것이다.
+    _tuningSub = proc.stderrLog.listen((String line) {
+      if (mounted && line.toLowerCase().contains('tuning')) {
+        setState(() => _status = S.katagoTuning(_lang));
+      }
+    });
+    unawaited(_startKataGo(proc, st));
+
+    return FallbackOpponent(
+      primary: KataGoOpponent(proc, st.rankId),
+      backup: builtin,
+      onFallback: (String key, String? detail) {
+        if (!mounted) return;
+        final String msg = allStrings[key]?.call(_lang) ?? key;
+        _announcer.critical(msg);
+        setState(() => _status = msg);
+      },
+    );
+  }
+
+  Future<void> _startKataGo(KataGoProcess proc, AppSettings st) async {
+    try {
+      await proc.start(KataGoPaths.resolve(
+        root: st.katagoExe.isEmpty ? '.' : st.katagoExe,
+        exeOverride: st.katagoExe.isEmpty ? null : st.katagoExe,
+        modelOverride: st.katagoModel.isEmpty ? null : st.katagoModel,
+        configOverride: st.katagoConfig.isEmpty ? null : st.katagoConfig,
+      ));
+    } on KataGoException catch (e) {
+      // 여기서 실패해도 첫 착수에서 FallbackOpponent 가 내장 AI 로 넘긴다.
+      // 다만 이유는 지금 알려 준다 — 나중에 알면 원인을 못 잇는다.
+      if (!mounted) return;
+      final String msg =
+          allStrings[kataGoErrorKey(e.error)]?.call(_lang) ?? e.error.name;
+      _announcer.critical(msg);
+      setState(() => _status = msg);
     }
   }
 

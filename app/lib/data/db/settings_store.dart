@@ -6,6 +6,7 @@
 
 import 'dart:convert';
 
+import '../../domain/ai/ranks.dart';
 import '../../i18n/strings.g.dart';
 import '../../ui/theme/board_theme.dart';
 import '../../ui/theme/svil_theme.dart';
@@ -24,6 +25,9 @@ enum LineWeight { thin, normal, thick }
 enum CoordMode { auto, on, off }
 
 enum PlaceMode { direct, confirm }
+
+/// 혼자 두기(양쪽 다 사람) / 내장 AI / KataGo
+enum OpponentKind { none, builtin, katago }
 
 /// 'system' 은 OS 설정을 그때그때 따른다.
 /// 한 번만 시딩하면 나중에 OS 에서 켠 사용자에게 영영 반영되지 않는다.
@@ -49,6 +53,8 @@ class AppSettings {
     this.katagoModel = '',
     this.katagoConfig = '',
     this.katagoAutoStart = true,
+    this.opponent = OpponentKind.builtin,
+    this.rankId = kDefaultRank,
   });
 
   final Lang lang;
@@ -69,6 +75,10 @@ class AppSettings {
   final String katagoModel;
   final String katagoConfig;
   final bool katagoAutoStart;
+  final OpponentKind opponent;
+
+  /// ai/ranks.dart 의 id. 저장값이 손상돼도 getRank 가 기본값으로 떨어진다.
+  final String rankId;
 
   VisionSettings toVision({required bool systemReduceMotion}) => VisionSettings(
         contrast: contrast,
@@ -100,6 +110,8 @@ class AppSettings {
     String? katagoModel,
     String? katagoConfig,
     bool? katagoAutoStart,
+    OpponentKind? opponent,
+    String? rankId,
   }) =>
       AppSettings(
         lang: lang ?? this.lang,
@@ -120,6 +132,8 @@ class AppSettings {
         katagoModel: katagoModel ?? this.katagoModel,
         katagoConfig: katagoConfig ?? this.katagoConfig,
         katagoAutoStart: katagoAutoStart ?? this.katagoAutoStart,
+        opponent: opponent ?? this.opponent,
+        rankId: rankId ?? this.rankId,
       );
 
   Map<String, dynamic> toJson() => <String, dynamic>{
@@ -146,6 +160,8 @@ class AppSettings {
         'katagoModel': katagoModel,
         'katagoConfig': katagoConfig,
         'katagoAutoStart': katagoAutoStart,
+        'opponent': opponent.name,
+        'rankId': rankId,
       };
 }
 
@@ -203,6 +219,9 @@ AppSettings migrateSettings(Object? raw) {
     katagoModel: m['katagoModel'] as String? ?? base.katagoModel,
     katagoConfig: m['katagoConfig'] as String? ?? base.katagoConfig,
     katagoAutoStart: m['katagoAutoStart'] as bool? ?? base.katagoAutoStart,
+    opponent: _enumOr(OpponentKind.values, m['opponent'], base.opponent),
+    // 없는 난이도가 저장돼 있어도 getRank 가 기본값을 준다
+    rankId: m['rankId'] is String ? m['rankId'] as String : base.rankId,
   );
 }
 

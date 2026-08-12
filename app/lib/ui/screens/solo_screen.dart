@@ -3,9 +3,12 @@
 // 접근성 모델의 조립 지점. 판(포커스 노드 1개) + 좌표 입력(1급 경로) +
 // 화면상 쌍둥이 readout + 큰 동작 버튼.
 
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 
 import '../../application/game_controller.dart';
+import '../../application/opponent.dart';
 import '../../data/db/settings_store.dart';
 import '../../domain/engine/types.dart';
 import '../../domain/input/board_speech.dart';
@@ -87,6 +90,17 @@ class _SoloScreenState extends State<SoloScreen> {
   String _value = '';
   String _status = '';
 
+  Opponent? _opponent;
+
+  /// AI 응수를 기다리는 중. 이 동안 사람의 착수를 막는다 —
+  /// 두 수가 겹치면 판이 어긋난다.
+  bool _thinking = false;
+
+  /// 사람이 쥔 색. 상대가 있을 때만 의미가 있다.
+  Player get _humanSide => Stone.black;
+
+  bool get _vsEngine => _opponent != null;
+
   Lang get _lang => widget.settings.lang;
 
   @override
@@ -107,6 +121,13 @@ class _SoloScreenState extends State<SoloScreen> {
     });
     _game.addListener(_onGameChanged);
     _value = _game.cursorSpeech;
+    _opponent = switch (widget.settings.opponent) {
+      OpponentKind.none => null,
+      // KataGo 는 5단계에서 붙는다. 그때까지 내장 AI 로 떨어뜨린다 —
+      // 버튼만 있고 안 되는 것보다 낫다.
+      OpponentKind.builtin || OpponentKind.katago =>
+        BuiltinOpponent(widget.settings.rankId),
+    };
   }
 
   @override
@@ -118,6 +139,7 @@ class _SoloScreenState extends State<SoloScreen> {
   @override
   void dispose() {
     _game.removeListener(_onGameChanged);
+    _opponent?.dispose();
     _announcer.dispose();
     _game.dispose();
     super.dispose();
@@ -151,6 +173,45 @@ class _SoloScreenState extends State<SoloScreen> {
     }
   }
 
+  /// 사람이 둔 뒤 상대에게 차례를 넘긴다.
+  ///
+  /// 상대 수는 포커스가 어디에 있든 낭독돼야 한다(체크리스트 A7).
+  /// _handle 이 critical 채널로 보내므로 좌표 입력칸에 있어도 들린다.
+  Future<void> _letOpponentPlay() async {
+    final Opponent? engine = _opponent;
+    if (engine == null || _game.state.ended) return;
+    if (_game.state.toPlay == _humanSide) return;
+
+    setState(() => _thinking = true);
+    try {
+      final OpponentReply reply = await engine.nextMove(_game.state);
+      if (!mounted) return;
+      switch (reply) {
+        case OpponentMove(:final Point point):
+          _handle(_game.applyOpponent(point.x, point.y));
+        case OpponentPass():
+          _handle(_game.pass());
+        case OpponentFailed(:final String reasonKey, :final String? detail):
+          // 조용히 멈추지 않는다 — 차례가 왜 안 넘어오는지 말해 준다
+          final String msg = allStrings[reasonKey]?.call(_lang) ?? reasonKey;
+          _announcer.critical(detail == null ? msg : '$msg ($detail)');
+          setState(() => _status = msg);
+      }
+    } finally {
+      if (mounted) setState(() => _thinking = false);
+    }
+  }
+
+  /// 사람 착수 처리 + 상대 응수.
+  ///
+  /// 반환값은 좌표 입력칸이 쓴다 — 성공이면 비우고, 실패면 텍스트를
+  /// 선택 상태로 남겨 고쳐 칠 수 있게 한다(체크리스트 A11·A12).
+  bool _handleAndReply(PlayOutcome outcome) {
+    final bool ok = _handle(outcome);
+    if (ok && _vsEngine) unawaited(_letOpponentPlay());
+    return ok;
+  }
+
   void _onIntent(BoardIntent intent) {
     switch (intent) {
       case BoardIntent.arm:
@@ -159,7 +220,7 @@ class _SoloScreenState extends State<SoloScreen> {
           _announcer.critical('${_game.cursorLabel} ${S.selectedPoint(_lang)}');
         } else {
           _announcer.flush();
-          _handle(_game.placeAtCursor());
+          _handleAndReply(_game.placeAtCursor());
         }
       case BoardIntent.place:
         _announcer.flush();
@@ -167,7 +228,7 @@ class _SoloScreenState extends State<SoloScreen> {
           _game.arm();
           _announcer.critical('${_game.cursorLabel} ${S.selectedPoint(_lang)}');
         } else {
-          _handle(_game.placeAtCursor());
+          _handleAndReply(_game.placeAtCursor());
         }
       case BoardIntent.disarm:
         _game.disarm();
@@ -180,7 +241,8 @@ class _SoloScreenState extends State<SoloScreen> {
   Widget build(BuildContext context) {
     final BoardPalette palette = BoardPalette.byId(widget.settings.palette);
     final VisionSettings v = widget.vision;
-    final bool interactive = !_game.state.ended;
+    // AI 가 생각하는 동안은 사람 착수를 막는다. 두 수가 겹치면 판이 어긋난다.
+    final bool interactive = !_game.state.ended && !_thinking;
 
     return Scaffold(
       appBar: AppBar(title: Text(S.solo(_lang))),
@@ -263,8 +325,8 @@ class _SoloScreenState extends State<SoloScreen> {
           helper: S.coordInputHelper(_lang),
           vision: v,
           enabled: interactive,
-          onSubmit: (String raw) =>
-              _handle(_game.submitInput(raw, lastSpoken: _announcer.lastSpoken)),
+          onSubmit: (String raw) => _handleAndReply(
+              _game.submitInput(raw, lastSpoken: _announcer.lastSpoken)),
         ),
         const SizedBox(height: 12),
         if (interactive && widget.settings.placeMode == PlaceMode.confirm)
@@ -277,7 +339,7 @@ class _SoloScreenState extends State<SoloScreen> {
                 minimumSize: const Size.fromHeight(kListItemMin),
               ),
               onPressed: _game.armed && !_game.cursorOccupied
-                  ? () => _handle(_game.placeAtCursor())
+                  ? () => _handleAndReply(_game.placeAtCursor())
                   : null,
               child: Text('${S.confirmPlace(_lang)} (${_game.cursorLabel})'),
             ),
@@ -286,11 +348,12 @@ class _SoloScreenState extends State<SoloScreen> {
           spacing: 8,
           runSpacing: 8,
           children: <Widget>[
-            _action(S.pass(_lang), interactive, () => _handle(_game.pass())),
+            _action(S.pass(_lang), interactive,
+                () => _handleAndReply(_game.pass())),
             _action(S.askHint(_lang), interactive, () => _handle(_game.hint())),
             // 무를 것이 없으면 눌러도 아무 일이 없는 대신 비활성으로 알린다
             _action(S.undoMove(_lang), interactive && _game.canUndo,
-                () => _handle(_game.undo())),
+                () => _handle(_game.undo(plies: _vsEngine ? 2 : 1))),
             _action(S.scoreNow(_lang), true, () => _handle(_game.scoreGame())),
             _action(S.resign(_lang), interactive,
                 () => _handle(_game.resignGame(_game.state.toPlay))),

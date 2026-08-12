@@ -87,6 +87,30 @@ abstract final class S {
   static const LocString home = LocString("홈", "Home", "ホーム", "主页", "Trang chủ");
   static const LocString confirm = LocString("확인", "Confirm", "確認", "确认", "Xác nhận");
   static const LocString on = LocString("켬", "On", "オン", "开", "Bật");
+  static const LocString starPoint = LocString("화점", "star point", "星", "星位", "điểm sao");
+  static const LocString liberties = LocString("활로", "liberties", "呼吸点", "气", "khí");
+  static const LocString turnSuffix = LocString("차례", "to play", "番", "行棋", "lượt");
+  static const LocString capturedSuffix = LocString("점 따냄", "captured", "子アゲ", "子被提", "quân bị bắt");
+  static const LocString stoneCountSuffix = LocString("점", "stones", "子", "子", "quân");
+  static const LocString noStones = LocString("돌 없음", "no stones", "石なし", "无子", "không có quân");
+  static const LocString rowSuffix = LocString("줄", "line", "路", "路", "dòng");
+  static const LocString noLastMove = LocString("직전 수 없음", "no last move", "直前の手なし", "无上一手", "chưa có nước đi");
+  static const LocString boardLabel = LocString("바둑판", "board", "碁盤", "棋盘", "bàn cờ");
+  static const LocString boardHint = LocString("화살표로 이동, 엔터로 착수, 물음표로 판 요약. 좌표 입력칸에 D16처럼 직접 칠 수도 있습니다", "Arrows move, Enter plays, ? summarises the board. You can also type a coordinate like D16.", "矢印で移動、エンターで着手、?で盤面要約。座標欄にD16のように入力もできます", "方向键移动，回车落子，? 查看棋盘摘要。也可在坐标框输入 D16。", "Mũi tên di chuyển, Enter đặt quân, ? tóm tắt bàn cờ. Cũng có thể gõ toạ độ như D16.");
+  static const LocString coordInputLabel = LocString("좌표 입력", "Coordinate", "座標入力", "坐标输入", "Toạ độ");
+  static const LocString coordInputHint = LocString("예: D16, 패스, ?", "e.g. D16, pass, ?", "例: D16、パス、?", "例：D16、停着、?", "VD: D16, bỏ lượt, ?");
+  static const LocString coordInputHelper = LocString("엔터로 착수. ? 판 요약, ?D16 그 지점, ?16 그 줄, r 다시 듣기", "Enter to play. ? board summary, ?D16 that point, ?16 that line, r repeat", "エンターで着手。? 盤面要約、?D16 その点、?16 その路、r 再読", "回车落子。? 棋盘摘要，?D16 该点，?16 该路，r 重复", "Enter để đi. ? tóm tắt, ?D16 điểm đó, ?16 dòng đó, r nhắc lại");
+  static const LocString errOccupied = LocString("둘 수 없음: 이미 돌이 있습니다", "illegal: already occupied", "着手不可: すでに石があります", "无法落子：该处已有子", "không hợp lệ: đã có quân");
+  static const LocString errKo = LocString("둘 수 없음: 패입니다", "illegal: ko", "着手不可: コウです", "无法落子：打劫", "không hợp lệ: kiếp");
+  static const LocString errSuperko = LocString("둘 수 없음: 같은 판이 반복됩니다", "illegal: repeats a position", "着手不可: 同形反復です", "无法落子：同形再现", "không hợp lệ: lặp thế cờ");
+  static const LocString errSuicide = LocString("둘 수 없음: 자살수입니다", "illegal: suicide", "着手不可: 自殺手です", "无法落子：自杀手", "không hợp lệ: tự sát");
+  static const LocString errGameEnded = LocString("대국이 끝났습니다", "the game has ended", "対局は終了しました", "对局已结束", "ván cờ đã kết thúc");
+  static const LocString errOutOfBounds = LocString("판 밖입니다", "off the board", "盤外です", "棋盘之外", "ngoài bàn cờ");
+  static const LocString errSkippedLetter = LocString("I 는 쓰지 않습니다. H 다음은 J 입니다", "the letter I is not used; H is followed by J", "I は使いません。H の次は J です", "不使用字母 I，H 之后是 J", "không dùng chữ I; sau H là J");
+  static const LocString errBadColumn = LocString("없는 열입니다", "no such column", "存在しない列です", "没有该列", "không có cột đó");
+  static const LocString errBadRow = LocString("범위 밖입니다", "out of range", "範囲外です", "超出范围", "ngoài phạm vi");
+  static const LocString errEmptyInput = LocString("입력이 비어 있습니다", "the input is empty", "入力が空です", "输入为空", "chưa nhập gì");
+  static const LocString errUnknownInput = LocString("알 수 없습니다. 예: D16, 패스, 물음표", "not recognised. e.g. D16, pass, ?", "認識できません。例: D16、パス、?", "无法识别。例：D16、停着、?", "không nhận ra. VD: D16, bỏ lượt, ?");
   static const LocString pointEmpty = LocString("빈 점", "empty", "空点", "空点", "điểm trống");
   static const LocString selectedPoint = LocString("선택됨", "selected", "選択中", "已选择", "đã chọn");
   static const LocString confirmPlace = LocString("착수 확정", "Place stone", "着手確定", "确认落子", "Đặt quân");
@@ -210,7 +234,7 @@ abstract final class S {
 }
 
 /// 완전성 테스트용 — 생성된 문자열 개수
-const int generatedStringCount = 162;
+const int generatedStringCount = 186;
 
 /// 완전성 테스트용 — 키 이름과 값 목록
 const Map<String, LocString> allStrings = <String, LocString>{
@@ -256,6 +280,30 @@ const Map<String, LocString> allStrings = <String, LocString>{
   "home": S.home,
   "confirm": S.confirm,
   "on": S.on,
+  "starPoint": S.starPoint,
+  "liberties": S.liberties,
+  "turnSuffix": S.turnSuffix,
+  "capturedSuffix": S.capturedSuffix,
+  "stoneCountSuffix": S.stoneCountSuffix,
+  "noStones": S.noStones,
+  "rowSuffix": S.rowSuffix,
+  "noLastMove": S.noLastMove,
+  "boardLabel": S.boardLabel,
+  "boardHint": S.boardHint,
+  "coordInputLabel": S.coordInputLabel,
+  "coordInputHint": S.coordInputHint,
+  "coordInputHelper": S.coordInputHelper,
+  "errOccupied": S.errOccupied,
+  "errKo": S.errKo,
+  "errSuperko": S.errSuperko,
+  "errSuicide": S.errSuicide,
+  "errGameEnded": S.errGameEnded,
+  "errOutOfBounds": S.errOutOfBounds,
+  "errSkippedLetter": S.errSkippedLetter,
+  "errBadColumn": S.errBadColumn,
+  "errBadRow": S.errBadRow,
+  "errEmptyInput": S.errEmptyInput,
+  "errUnknownInput": S.errUnknownInput,
   "pointEmpty": S.pointEmpty,
   "selectedPoint": S.selectedPoint,
   "confirmPlace": S.confirmPlace,

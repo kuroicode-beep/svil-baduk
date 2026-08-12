@@ -161,6 +161,7 @@ abstract final class S {
   static const LocString skipToMain = LocString("본문으로 건너뛰기", "Skip to main content", "本文へスキップ", "跳到主要内容", "Chuyển đến nội dung chính");
   static const LocString pass = LocString("패스", "Pass", "パス", "停着", "Bỏ lượt");
   static const LocString resign = LocString("기권", "Resign", "投了", "认输", "Bỏ cuộc");
+  static const LocString scoreNow = LocString("계가", "Score", "計算", "点目", "Đếm điểm");
   static const LocString resignWin = LocString("기권승", "Win by resignation", "投了勝ち", "中盘胜", "Thắng do đối thủ bỏ cuộc");
   static const LocString yourTurn = LocString("당신 차례", "Your turn", "あなたの番", "轮到你", "Lượt của bạn");
   static const LocString aiTurn = LocString("AI 생각 중…", "AI thinking…", "AI思考中…", "AI思考中…", "AI đang nghĩ…");
@@ -254,7 +255,7 @@ abstract final class S {
 }
 
 /// 완전성 테스트용 — 생성된 문자열 개수
-const int generatedStringCount = 206;
+const int generatedStringCount = 207;
 
 /// 완전성 테스트용 — 키 이름과 값 목록
 const Map<String, LocString> allStrings = <String, LocString>{
@@ -374,6 +375,7 @@ const Map<String, LocString> allStrings = <String, LocString>{
   "skipToMain": S.skipToMain,
   "pass": S.pass,
   "resign": S.resign,
+  "scoreNow": S.scoreNow,
   "resignWin": S.resignWin,
   "yourTurn": S.yourTurn,
   "aiTurn": S.aiTurn,

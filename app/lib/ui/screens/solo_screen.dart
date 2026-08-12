@@ -287,7 +287,11 @@ class _SoloScreenState extends State<SoloScreen> {
           runSpacing: 8,
           children: <Widget>[
             _action(S.pass(_lang), interactive, () => _handle(_game.pass())),
-            _action(S.askHint(_lang), false, () {}),
+            _action(S.askHint(_lang), interactive, () => _handle(_game.hint())),
+            // 무를 것이 없으면 눌러도 아무 일이 없는 대신 비활성으로 알린다
+            _action(S.undoMove(_lang), interactive && _game.canUndo,
+                () => _handle(_game.undo())),
+            _action(S.scoreNow(_lang), true, () => _handle(_game.scoreGame())),
             _action(S.resign(_lang), interactive,
                 () => _handle(_game.resignGame(_game.state.toPlay))),
           ],

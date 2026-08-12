@@ -37,6 +37,20 @@ if (entries.length === 0) {
   process.exit(1)
 }
 
+// 중복 키 검사 — TS 객체 리터럴은 뒤에 온 값이 조용히 이깁니다.
+// 여기서 안 잡으면 Dart 컴파일 오류로 밀려나고, 원인이 dict.ts 라는 게
+// 한눈에 안 보입니다.
+const seen = new Map()
+const dupes = []
+for (const e of entries) {
+  if (seen.has(e.key)) dupes.push(`${e.key} (${seen.get(e.key)}번째와 중복)`)
+  else seen.set(e.key, entries.indexOf(e) + 1)
+}
+if (dupes.length > 0) {
+  console.error(`중복 키 ${dupes.length}건:\n  ${dupes.join('\n  ')}`)
+  process.exit(1)
+}
+
 // 누락 언어 검사 — 빌드를 깨뜨려서 조용한 폴백을 막는다
 const missing = []
 for (const e of entries) {

@@ -446,6 +446,7 @@ const dict = {
   },
   pass: { ko: '패스', en: 'Pass', ja: 'パス', zh: '停着', vi: 'Bỏ lượt' },
   resign: { ko: '기권', en: 'Resign', ja: '投了', zh: '认输', vi: 'Bỏ cuộc' },
+  scoreNow: { ko: '계가', en: 'Score', ja: '計算', zh: '点目', vi: 'Đếm điểm' },
   resignWin: {
     ko: '기권승',
     en: 'Win by resignation',

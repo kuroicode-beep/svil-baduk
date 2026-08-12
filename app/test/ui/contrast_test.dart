@@ -48,24 +48,24 @@ void expectStoneVisible(Color fill, Color stroke, Color board, String what) {
 void main() {
   group('V1·V2 · 텍스트 대비', () {
     for (final ContrastProfile p in ContrastProfile.values) {
-      test('${p.label} 프로파일: 본문 ≥ 7:1, 보조 텍스트 ≥ 4.5:1', () {
+      test('${p.name} 프로파일: 본문 ≥ 7:1, 보조 텍스트 ≥ 4.5:1', () {
         final VisionSettings v = VisionSettings(contrast: p);
         // 저시력 대상이라 본문은 AAA(7:1) 를 목표로 한다
-        expectContrast(v.textColor, v.backgroundColor, 7.0, '${p.label} 본문');
-        expectContrast(v.subTextColor, v.backgroundColor, 4.5, '${p.label} 보조 텍스트');
+        expectContrast(v.textColor, v.backgroundColor, 7.0, '${p.name} 본문');
+        expectContrast(v.subTextColor, v.backgroundColor, 4.5, '${p.name} 보조 텍스트');
       });
 
-      test('${p.label} 프로파일: 테두리 ≥ 3:1', () {
+      test('${p.name} 프로파일: 테두리 ≥ 3:1', () {
         final VisionSettings v = VisionSettings(contrast: p);
-        expectContrast(v.borderColor, v.backgroundColor, 3.0, '${p.label} 테두리');
+        expectContrast(v.borderColor, v.backgroundColor, 3.0, '${p.name} 테두리');
       });
     }
 
     test('표면 위 본문도 대비를 지킨다', () {
       for (final ContrastProfile p in ContrastProfile.values) {
         final VisionSettings v = VisionSettings(contrast: p);
-        expectContrast(v.textColor, SvilColors.surface, 7.0, '${p.label} 표면 위 본문');
-        expectContrast(v.textColor, SvilColors.surface2, 7.0, '${p.label} 입력면 위 본문');
+        expectContrast(v.textColor, SvilColors.surface, 7.0, '${p.name} 표면 위 본문');
+        expectContrast(v.textColor, SvilColors.surface2, 7.0, '${p.name} 입력면 위 본문');
       }
     });
   });
@@ -75,31 +75,31 @@ void main() {
       for (final FocusRingColor f in FocusRingColor.values) {
         for (final ContrastProfile p in ContrastProfile.values) {
           final VisionSettings v = VisionSettings(contrast: p, focusRing: f);
-          expectContrast(v.focusColor, v.backgroundColor, 3.0, '${f.label} on ${p.label}');
+          expectContrast(v.focusColor, v.backgroundColor, 3.0, '${f.name} on ${p.name}');
         }
-        expectContrast(f.color, SvilColors.surface2, 3.0, '${f.label} on 입력면');
+        expectContrast(f.color, SvilColors.surface2, 3.0, '${f.name} on 입력면');
       }
     });
   });
 
   group('V4 · 바둑판 팔레트', () {
     for (final BoardPalette p in BoardPalette.all) {
-      test('${p.id.label}: 돌↔판, 돌↔돌 대비', () {
+      test('${p.id.name}: 돌↔판, 돌↔돌 대비', () {
         // 돌이 판과 구분되어야 한다 — 채움이든 테두리든 하나는 판과 갈려야 한다.
         // (어두운 판에서는 백돌의 채움이, 밝은 판에서는 백돌의 테두리가 그 역할을 한다)
-        expectStoneVisible(p.blackFill, p.blackStroke, p.gridBackground, '${p.id.label} 흑돌');
-        expectStoneVisible(p.whiteFill, p.whiteStroke, p.gridBackground, '${p.id.label} 백돌');
+        expectStoneVisible(p.blackFill, p.blackStroke, p.gridBackground, '${p.id.name} 흑돌');
+        expectStoneVisible(p.whiteFill, p.whiteStroke, p.gridBackground, '${p.id.name} 백돌');
         // 테두리는 자기 돌 안에서 보여야 한다 (돌의 윤곽)
-        expectContrast(p.whiteStroke, p.whiteFill, 4.5, '${p.id.label} 백 테두리↔백');
-        expectContrast(p.blackStroke, p.blackFill, 1.0, '${p.id.label} 흑 테두리↔흑');
+        expectContrast(p.whiteStroke, p.whiteFill, 4.5, '${p.id.name} 백 테두리↔백');
+        expectContrast(p.blackStroke, p.blackFill, 1.0, '${p.id.name} 흑 테두리↔흑');
         // 흑↔백 은 색만으로 구분하지 않더라도 충분히 갈려야 한다
-        expectContrast(p.blackFill, p.whiteFill, 4.5, '${p.id.label} 흑↔백');
+        expectContrast(p.blackFill, p.whiteFill, 4.5, '${p.id.name} 흑↔백');
         // 돌 위 글자(흑/백)가 읽혀야 한다 — 색맹·저시력 대비 이중 표기의 근거
-        expectContrast(p.blackLabel, p.blackFill, 4.5, '${p.id.label} 흑 글자');
-        expectContrast(p.whiteLabel, p.whiteFill, 4.5, '${p.id.label} 백 글자');
+        expectContrast(p.blackLabel, p.blackFill, 4.5, '${p.id.name} 흑 글자');
+        expectContrast(p.whiteLabel, p.whiteFill, 4.5, '${p.id.name} 백 글자');
         // 격자선이 보여야 한다
-        expectContrast(p.line, p.gridBackground, 3.0, '${p.id.label} 격자선');
-        expectContrast(p.coord, p.background, 4.5, '${p.id.label} 좌표 글자');
+        expectContrast(p.line, p.gridBackground, 3.0, '${p.id.name} 격자선');
+        expectContrast(p.coord, p.background, 4.5, '${p.id.name} 좌표 글자');
       });
     }
 

@@ -7,16 +7,7 @@ import 'package:flutter/material.dart';
 
 import 'svil_theme.dart';
 
-enum BoardPaletteId {
-  classic('기본'),
-  maxContrast('최대 대비'),
-  amberBlue('호박·파랑'),
-  warmGray('따뜻한 회색'),
-  inverted('반전');
-
-  const BoardPaletteId(this.label);
-  final String label;
-}
+enum BoardPaletteId { classic, maxContrast, amberBlue, warmGray, inverted }
 
 class BoardPalette {
   const BoardPalette({

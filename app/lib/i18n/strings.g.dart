@@ -244,6 +244,40 @@ abstract final class S {
   static const LocString territory = LocString("집", "Territory", "地", "目", "Đất");
   static const LocString komi = LocString("덤", "Komi", "コミ", "贴目", "Komi");
   static const LocString goRules = LocString("룰", "Rules", "ルール", "规则", "Luật");
+  static const LocString settingsVision = LocString("보기", "Vision", "表示", "显示", "Hiển thị");
+  static const LocString settingsBoard = LocString("바둑판", "Board", "碁盤", "棋盘", "Bàn cờ");
+  static const LocString settingsGame = LocString("대국", "Game", "対局", "对局", "Ván cờ");
+  static const LocString settingsSpeech = LocString("낭독", "Speech", "読み上げ", "朗读", "Đọc");
+  static const LocString contrastProfile = LocString("대비", "Contrast", "コントラスト", "对比度", "Tương phản");
+  static const LocString contrastHigh = LocString("고대비 (기본)", "High (default)", "高 (既定)", "高 (默认)", "Cao (mặc định)");
+  static const LocString contrastMax = LocString("최대 대비", "Maximum", "最大", "最大", "Tối đa");
+  static const LocString contrastInverted = LocString("반전 (밝은 판)", "Inverted (light board)", "反転 (明るい盤)", "反色 (亮底)", "Đảo (nền sáng)");
+  static const LocString focusRingLabel = LocString("포커스 테두리 색", "Focus ring colour", "フォーカス枠の色", "焦点框颜色", "Màu viền tiêu điểm");
+  static const LocString focusRingAmber = LocString("호박색 (기본)", "Amber (default)", "琥珀 (既定)", "琥珀 (默认)", "Hổ phách (mặc định)");
+  static const LocString focusRingYellow = LocString("노랑 (최대 대비)", "Yellow (max contrast)", "黄 (最大)", "黄 (最大)", "Vàng (tối đa)");
+  static const LocString paletteLabel = LocString("판 색", "Board colours", "盤の配色", "棋盘配色", "Màu bàn cờ");
+  static const LocString verbosityLabel = LocString("낭독 상세도", "Speech detail", "読み上げの詳しさ", "朗读详细度", "Mức chi tiết");
+  static const LocString verbosityTerse = LocString("간단히", "Brief", "簡潔", "简洁", "Ngắn gọn");
+  static const LocString verbosityFull = LocString("자세히", "Detailed", "詳しく", "详细", "Chi tiết");
+  static const LocString coordModeLabel = LocString("좌표 눈금", "Coordinate labels", "座標表示", "坐标标注", "Nhãn tọa độ");
+  static const LocString coordAuto = LocString("자동", "Auto", "自動", "自动", "Tự động");
+  static const LocString coordOn = LocString("항상 표시", "Always", "常に表示", "始终显示", "Luôn hiện");
+  static const LocString coordOff = LocString("숨김", "Never", "非表示", "隐藏", "Ẩn");
+  static const LocString opponentLabel = LocString("상대", "Opponent", "対戦相手", "对手", "Đối thủ");
+  static const LocString opponentNone = LocString("없음 (양쪽 다 내가)", "None (play both sides)", "なし (両方自分で)", "无 (自己下两边)", "Không (tự đi cả hai");
+  static const LocString opponentBuiltin = LocString("내장 AI", "Built-in AI", "内蔵AI", "内置 AI", "AI tích hợp");
+  static const LocString opponentKataGo = LocString("KataGo", "KataGo", "KataGo", "KataGo", "KataGo");
+  static const LocString reduceMotionSystem = LocString("시스템 설정 따름", "Follow system", "システムに従う", "跟随系统", "Theo hệ thống");
+  static const LocString onLabel = LocString("켜기", "On", "オン", "开", "Bật");
+  static const LocString offLabel = LocString("끄기", "Off", "オフ", "关", "Tắt");
+  static const LocString goRulesJapanese = LocString("일본룰 (집계법)", "Japanese (territory)", "日本ルール", "日本规则", "Luật Nhật");
+  static const LocString goRulesChinese = LocString("중국룰 (영역법)", "Chinese (area)", "中国ルール", "中国规则", "Luật Trung");
+  static const LocString contrastStandard = LocString("표준", "Standard", "標準", "标准", "Tiêu chuẩn");
+  static const LocString paletteClassic = LocString("기본", "Classic", "標準", "经典", "Cổ điển");
+  static const LocString paletteMaxContrast = LocString("최대 대비", "Max contrast", "最大コントラスト", "最大对比", "Tương phản tối đa");
+  static const LocString paletteAmberBlue = LocString("호박·파랑", "Amber and blue", "琥珀・青", "琥珀·蓝", "Hổ phách và xanh");
+  static const LocString paletteWarmGray = LocString("따뜻한 회색", "Warm gray", "暖かいグレー", "暖灰", "Xám ấm");
+  static const LocString paletteInverted = LocString("반전 (밝은 판)", "Inverted (light board)", "反転 (明るい盤)", "反色 (亮底)", "Đảo (nền sáng)");
   static const LocString rulesJapanese = LocString("일본식 (집+사석+덤)", "Japanese (territory + captives + komi)", "日本式（地+アゲハマ+コミ）", "日式（目+提子+贴目）", "Nhật (đất + quân bắt + komi)");
   static const LocString rulesChinese = LocString("중국식 (집+돌수+덤)", "Chinese (area + stones + komi)", "中国式（地+石数+コミ）", "中式（目+子数+贴目）", "Trung (đất + số quân + komi)");
   static const LocString total = LocString("합계", "Total", "合計", "合计", "Tổng");
@@ -280,7 +314,7 @@ abstract final class S {
 }
 
 /// 완전성 테스트용 — 생성된 문자열 개수
-const int generatedStringCount = 232;
+const int generatedStringCount = 266;
 
 /// 완전성 테스트용 — 키 이름과 값 목록
 const Map<String, LocString> allStrings = <String, LocString>{
@@ -483,6 +517,40 @@ const Map<String, LocString> allStrings = <String, LocString>{
   "territory": S.territory,
   "komi": S.komi,
   "goRules": S.goRules,
+  "settingsVision": S.settingsVision,
+  "settingsBoard": S.settingsBoard,
+  "settingsGame": S.settingsGame,
+  "settingsSpeech": S.settingsSpeech,
+  "contrastProfile": S.contrastProfile,
+  "contrastHigh": S.contrastHigh,
+  "contrastMax": S.contrastMax,
+  "contrastInverted": S.contrastInverted,
+  "focusRingLabel": S.focusRingLabel,
+  "focusRingAmber": S.focusRingAmber,
+  "focusRingYellow": S.focusRingYellow,
+  "paletteLabel": S.paletteLabel,
+  "verbosityLabel": S.verbosityLabel,
+  "verbosityTerse": S.verbosityTerse,
+  "verbosityFull": S.verbosityFull,
+  "coordModeLabel": S.coordModeLabel,
+  "coordAuto": S.coordAuto,
+  "coordOn": S.coordOn,
+  "coordOff": S.coordOff,
+  "opponentLabel": S.opponentLabel,
+  "opponentNone": S.opponentNone,
+  "opponentBuiltin": S.opponentBuiltin,
+  "opponentKataGo": S.opponentKataGo,
+  "reduceMotionSystem": S.reduceMotionSystem,
+  "onLabel": S.onLabel,
+  "offLabel": S.offLabel,
+  "goRulesJapanese": S.goRulesJapanese,
+  "goRulesChinese": S.goRulesChinese,
+  "contrastStandard": S.contrastStandard,
+  "paletteClassic": S.paletteClassic,
+  "paletteMaxContrast": S.paletteMaxContrast,
+  "paletteAmberBlue": S.paletteAmberBlue,
+  "paletteWarmGray": S.paletteWarmGray,
+  "paletteInverted": S.paletteInverted,
   "rulesJapanese": S.rulesJapanese,
   "rulesChinese": S.rulesChinese,
   "total": S.total,

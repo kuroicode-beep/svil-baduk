@@ -11,6 +11,7 @@ import '../../i18n/strings.g.dart';
 import '../theme/svil_theme.dart';
 import '../../version.dart';
 import 'learn_screen.dart';
+import 'settings_screen.dart';
 import 'solo_screen.dart';
 
 class HomeScreen extends StatelessWidget {
@@ -28,6 +29,17 @@ class HomeScreen extends StatelessWidget {
       appBar: AppBar(
         // 버전은 늘 보인다 (하우스 규칙)
         title: Text('SVIL Baduk  v$appVersion'),
+        actions: <Widget>[
+          IconButton(
+            icon: const Icon(Icons.settings),
+            tooltip: S.settings(_lang),
+            onPressed: () => Navigator.of(context).push(
+              MaterialPageRoute<void>(
+                builder: (_) => SettingsScreen(container: container),
+              ),
+            ),
+          ),
+        ],
       ),
       body: ListView(
         padding: const EdgeInsets.all(24),

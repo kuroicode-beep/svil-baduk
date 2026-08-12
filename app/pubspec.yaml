@@ -38,6 +38,9 @@ dependencies:
   # 설정·진행 저장. 하우스 관례대로 상태관리 패키지는 쓰지 않는다.
   shared_preferences: ^2.3.3
 
+  # SGF 내보내기·가져오기 (데스크톱 파일 대화상자)
+  file_selector: ^1.0.3
+
 dev_dependencies:
   flutter_test:
     sdk: flutter

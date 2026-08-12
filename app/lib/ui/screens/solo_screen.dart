@@ -12,8 +12,10 @@ import '../../application/katago_opponent.dart';
 import '../../application/opponent.dart';
 import '../../data/db/settings_store.dart';
 import '../../data/platform/katago_process.dart';
+import '../../data/platform/sgf_files.dart';
 import '../../domain/platform_caps.dart';
 import '../../domain/engine/scoring.dart';
+import '../../domain/engine/sgf.dart';
 import '../../domain/engine/types.dart';
 import '../../domain/input/board_speech.dart';
 import '../../domain/input/coord_input.dart';
@@ -75,6 +77,7 @@ class SoloScreen extends StatefulWidget {
     required this.vision,
     required this.size,
     required this.caps,
+    this.files = const DesktopSgfFileIo(),
     super.key,
   });
 
@@ -82,6 +85,9 @@ class SoloScreen extends StatefulWidget {
   final VisionSettings vision;
   final BoardSize size;
   final PlatformCaps caps;
+
+  /// 파일 입출력. 테스트가 가짜를 끼운다.
+  final SgfFileIo files;
 
   @override
   State<SoloScreen> createState() => _SoloScreenState();
@@ -274,6 +280,60 @@ class _SoloScreenState extends State<SoloScreen> {
     }
   }
 
+  Future<void> _exportSgf() async {
+    final FileOutcome r = await widget.files.save(
+      _game.toSgf(),
+      suggestedName: sgfFileName(_game.lines, DateTime.now()),
+    );
+    if (!mounted) return;
+    _sayFileOutcome(r, S.sgfSaved(_lang));
+  }
+
+  Future<void> _importSgf() async {
+    final FileOutcome r = await widget.files.open();
+    if (!mounted) return;
+    if (r is! FileRead) {
+      _sayFileOutcome(r, '');
+      return;
+    }
+    final SgfResult loaded = _game.loadSgf(r.contents);
+    if (loaded is SgfFail) {
+      // 어느 수에서 왜 막혔는지까지 말한다
+      final String why = allStrings[_sgfErrorKey(loaded.error)]?.call(_lang) ??
+          loaded.error.name;
+      _announcer.critical(
+          loaded.detail == null ? why : '$why (${loaded.detail})');
+      setState(() => _status = why);
+      return;
+    }
+    setState(() => _score = null);
+    _announcer.critical(S.sgfLoaded(_lang));
+    setState(() => _status = S.sgfLoaded(_lang));
+  }
+
+  static String _sgfErrorKey(SgfError e) => switch (e) {
+        SgfError.notSgf => 'sgfNotSgf',
+        SgfError.unsupportedSize => 'sgfUnsupportedSize',
+        SgfError.turnMismatch => 'sgfTurnMismatch',
+        SgfError.badCoord => 'sgfBadCoord',
+        SgfError.illegalMove => 'sgfIllegalMove',
+      };
+
+  /// 취소와 실패를 구별해 말한다
+  void _sayFileOutcome(FileOutcome r, String okMessage) {
+    final String msg = switch (r) {
+      FileWritten() => okMessage,
+      FileRead() => okMessage,
+      FileCancelled() => S.sgfCancelled(_lang),
+      FileFailed(:final String reasonKey, :final String? detail) =>
+        '${allStrings[reasonKey]?.call(_lang) ?? reasonKey}'
+            '${detail == null ? '' : ' ($detail)'}',
+    };
+    if (msg.isEmpty) return;
+    _announcer.critical(msg);
+    setState(() => _status = msg);
+  }
+
   /// 사람 착수 처리 + 상대 응수.
   ///
   /// 반환값은 좌표 입력칸이 쓴다 — 성공이면 비우고, 실패면 텍스트를
@@ -441,6 +501,11 @@ class _SoloScreenState extends State<SoloScreen> {
                 _handle(_game.scoreGame());
               },
             ),
+            // 파일 대화상자가 없는 기기에서는 아예 안 보여준다
+            if (widget.caps.hasFileDialog) ...<Widget>[
+              _action(S.sgfExport(_lang), true, _exportSgf),
+              _action(S.sgfImport(_lang), true, _importSgf),
+            ],
             _action(S.resign(_lang), interactive,
                 () => _handle(_game.resignGame(_game.state.toPlay))),
           ],

@@ -272,6 +272,12 @@ abstract final class S {
   static const LocString offLabel = LocString("끄기", "Off", "オフ", "关", "Tắt");
   static const LocString goRulesJapanese = LocString("일본룰 (집계법)", "Japanese (territory)", "日本ルール", "日本规则", "Luật Nhật");
   static const LocString goRulesChinese = LocString("중국룰 (영역법)", "Chinese (area)", "中国ルール", "中国规则", "Luật Trung");
+  static const LocString sgfExport = LocString("기보 내보내기", "Export SGF", "棋譜を書き出す", "导出棋谱", "Xuất kỳ phổ");
+  static const LocString sgfImport = LocString("기보 불러오기", "Import SGF", "棋譜を読み込む", "导入棋谱", "Nhập kỳ phổ");
+  static const LocString sgfSaved = LocString("기보를 저장했습니다", "Game record saved", "棋譜を保存しました", "棋谱已保存", "Đã lưu kỳ phổ");
+  static const LocString sgfCancelled = LocString("취소했습니다", "Cancelled", "キャンセルしました", "已取消", "Đã hủy");
+  static const LocString sgfWriteFailed = LocString("파일을 저장하지 못했습니다", "Could not save the file", "ファイルを保存できませんでした", "无法保存文件", "Không lưu được tệp");
+  static const LocString sgfReadFailed = LocString("파일을 읽지 못했습니다", "Could not read the file", "ファイルを読めませんでした", "无法读取文件", "Không đọc được tệp");
   static const LocString contrastStandard = LocString("표준", "Standard", "標準", "标准", "Tiêu chuẩn");
   static const LocString paletteClassic = LocString("기본", "Classic", "標準", "经典", "Cổ điển");
   static const LocString paletteMaxContrast = LocString("최대 대비", "Max contrast", "最大コントラスト", "最大对比", "Tương phản tối đa");
@@ -314,7 +320,7 @@ abstract final class S {
 }
 
 /// 완전성 테스트용 — 생성된 문자열 개수
-const int generatedStringCount = 266;
+const int generatedStringCount = 272;
 
 /// 완전성 테스트용 — 키 이름과 값 목록
 const Map<String, LocString> allStrings = <String, LocString>{
@@ -545,6 +551,12 @@ const Map<String, LocString> allStrings = <String, LocString>{
   "offLabel": S.offLabel,
   "goRulesJapanese": S.goRulesJapanese,
   "goRulesChinese": S.goRulesChinese,
+  "sgfExport": S.sgfExport,
+  "sgfImport": S.sgfImport,
+  "sgfSaved": S.sgfSaved,
+  "sgfCancelled": S.sgfCancelled,
+  "sgfWriteFailed": S.sgfWriteFailed,
+  "sgfReadFailed": S.sgfReadFailed,
   "contrastStandard": S.contrastStandard,
   "paletteClassic": S.paletteClassic,
   "paletteMaxContrast": S.paletteMaxContrast,

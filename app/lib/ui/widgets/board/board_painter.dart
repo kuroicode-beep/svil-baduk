@@ -28,6 +28,7 @@ class BoardRenderModel {
     required this.lastMove,
     required this.showCoords,
     required this.lineWidth,
+    this.ownership,
   });
 
   final GameState state;
@@ -39,6 +40,10 @@ class BoardRenderModel {
   final Point? lastMove;
   final bool showCoords;
   final double lineWidth;
+
+  /// 계가 결과의 집 소유. 길이는 판 넓이와 같고, empty 는 공배다.
+  /// null 이면 표시하지 않는다.
+  final List<Stone>? ownership;
 
   @override
   bool operator ==(Object other) =>
@@ -99,10 +104,44 @@ class BoardPainter extends CustomPainter {
 
     if (model.showCoords) _paintCoords(canvas);
     _paintStars(canvas);
+    if (model.ownership != null) _paintTerritory(canvas);
     _paintStones(canvas);
     if (model.showCursor) _paintCursor(canvas);
 
     canvas.restore();
+  }
+
+  /// 집 표시. 돌은 원, 집은 **사각형**이다 — 색만으로 구분하지 않는다.
+  /// 공배는 아무것도 그리지 않아 "정해지지 않음" 이 눈에 띈다.
+  void _paintTerritory(Canvas canvas) {
+    final List<Stone> own = model.ownership!;
+    final double half = kCellUnits * 0.17;
+    for (int y = 0; y < _lines; y++) {
+      for (int x = 0; x < _lines; x++) {
+        final int i = y * _lines + x;
+        if (i >= own.length) continue;
+        final Stone o = own[i];
+        if (o == Stone.empty) continue;
+        // 돌이 놓인 자리에는 그리지 않는다 (돌을 가린다)
+        if (model.state.stoneAt(x, y) != Stone.empty) continue;
+
+        final Offset c = _at(x, y);
+        final Rect r = Rect.fromCenter(
+            center: c, width: half * 2, height: half * 2);
+        canvas.drawRect(
+            r,
+            Paint()
+              ..color = o == Stone.black ? palette.blackFill : palette.whiteFill);
+        canvas.drawRect(
+            r,
+            Paint()
+              ..style = PaintingStyle.stroke
+              ..strokeWidth = model.lineWidth
+              ..color = o == Stone.black
+                  ? palette.blackStroke
+                  : palette.whiteStroke);
+      }
+    }
   }
 
   void _paintCoords(Canvas canvas) {

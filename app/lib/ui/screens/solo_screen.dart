@@ -13,6 +13,7 @@ import '../../application/opponent.dart';
 import '../../data/db/settings_store.dart';
 import '../../data/platform/katago_process.dart';
 import '../../domain/platform_caps.dart';
+import '../../domain/engine/scoring.dart';
 import '../../domain/engine/types.dart';
 import '../../domain/input/board_speech.dart';
 import '../../domain/input/coord_input.dart';
@@ -96,6 +97,10 @@ class _SoloScreenState extends State<SoloScreen> {
   String _status = '';
 
   Opponent? _opponent;
+
+  /// 계가 표시 중일 때의 집 소유. 착수하면 지운다 —
+  /// 옛 계가 결과가 판에 남아 있으면 잘못 읽힌다.
+  ScoreBreakdown? _score;
   KataGoProcess? _katago;
   StreamSubscription<String>? _tuningSub;
 
@@ -128,6 +133,7 @@ class _SoloScreenState extends State<SoloScreen> {
     });
     _game.addListener(_onGameChanged);
     _value = _game.cursorSpeech;
+    _game.rules = widget.settings.goRules;
     _opponent = _makeOpponent();
   }
 
@@ -273,6 +279,8 @@ class _SoloScreenState extends State<SoloScreen> {
   /// 반환값은 좌표 입력칸이 쓴다 — 성공이면 비우고, 실패면 텍스트를
   /// 선택 상태로 남겨 고쳐 칠 수 있게 한다(체크리스트 A11·A12).
   bool _handleAndReply(PlayOutcome outcome) {
+    // 판이 바뀌면 계가 표시는 더 이상 맞지 않는다
+    if (_score != null) setState(() => _score = null);
     final bool ok = _handle(outcome);
     if (ok && _vsEngine) unawaited(_letOpponentPlay());
     return ok;
@@ -371,6 +379,7 @@ class _SoloScreenState extends State<SoloScreen> {
         LineWeight.normal => 2.5,
         LineWeight.thick => 4,
       },
+      ownership: _score?.ownership,
       onMoveCursor: _game.moveCursor,
       onSetCursor: _game.setCursor,
       onIntent: _onIntent,
@@ -420,7 +429,18 @@ class _SoloScreenState extends State<SoloScreen> {
             // 무를 것이 없으면 눌러도 아무 일이 없는 대신 비활성으로 알린다
             _action(S.undoMove(_lang), interactive && _game.canUndo,
                 () => _handle(_game.undo(plies: _vsEngine ? 2 : 1))),
-            _action(S.scoreNow(_lang), true, () => _handle(_game.scoreGame())),
+            _action(
+              _score == null ? S.scoreNow(_lang) : S.offLabel(_lang),
+              true,
+              () {
+                if (_score != null) {
+                  setState(() => _score = null);
+                  return;
+                }
+                setState(() => _score = _game.currentScore());
+                _handle(_game.scoreGame());
+              },
+            ),
             _action(S.resign(_lang), interactive,
                 () => _handle(_game.resignGame(_game.state.toPlay))),
           ],

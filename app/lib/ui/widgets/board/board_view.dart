@@ -33,6 +33,7 @@ class BoardView extends StatefulWidget {
     required this.onMoveCursor,
     required this.onSetCursor,
     required this.onIntent,
+    this.ownership,
     this.coordMode = CoordDisplayMode.auto,
     this.lineWidth = 2.5,
     super.key,
@@ -56,6 +57,9 @@ class BoardView extends StatefulWidget {
   final void Function(int dx, int dy) onMoveCursor;
   final void Function(Point p) onSetCursor;
   final void Function(BoardIntent intent) onIntent;
+
+  /// 계가 결과의 집 소유. null 이면 표시하지 않는다.
+  final List<Stone>? ownership;
   final CoordDisplayMode coordMode;
   final double lineWidth;
 
@@ -171,6 +175,7 @@ class BoardViewState extends State<BoardView> {
           lastMove: widget.lastMove,
           showCoords: _showCoords,
           lineWidth: widget.lineWidth,
+              ownership: widget.ownership,
         );
 
         return Semantics(

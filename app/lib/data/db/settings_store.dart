@@ -7,17 +7,21 @@
 import 'dart:convert';
 
 import '../../domain/ai/ranks.dart';
+import '../../domain/engine/scoring.dart';
 import '../../domain/engine/types.dart';
 import '../../i18n/strings.g.dart';
 import '../../ui/theme/board_theme.dart';
 import '../../ui/theme/svil_theme.dart';
 
+// GoRules 는 domain/engine/scoring.dart 가 정본이다.
+// 여기에 같은 이름으로 하나 더 두면 설정과 엔진이 서로 다른 타입을 쓰게 된다.
+export '../../domain/engine/scoring.dart' show GoRules;
+
+
 /// 저장 스키마 버전. 구조가 바뀌면 올리고 migrate 에 분기를 추가한다.
 const int settingsVersion = 1;
 
 const String settingsKey = 'svil-baduk-settings';
-
-enum GoRules { japanese, chinese }
 
 enum BoardScale { small, medium, large }
 

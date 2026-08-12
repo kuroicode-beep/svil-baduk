@@ -21,6 +21,7 @@ const BoardSpeech speech = BoardSpeech(
   noStonesWord: '돌 없음',
   rowWord: '줄',
   noLastMoveWord: '직전 수 없음',
+  passWord: '패스',
 );
 
 void main() {

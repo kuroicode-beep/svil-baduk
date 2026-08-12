@@ -24,6 +24,7 @@ class BoardSpeech {
     required this.noStonesWord,
     required this.rowWord,
     required this.noLastMoveWord,
+    required this.passWord,
   });
 
   final String blackWord;
@@ -38,6 +39,9 @@ class BoardSpeech {
   final String noStonesWord;
   final String rowWord;
   final String noLastMoveWord;
+
+  /// 패스는 좌표가 없다 (x=-1) — 좌표를 만들려 하면 터진다
+  final String passWord;
 
   String _who(Stone s) => switch (s) {
         Stone.black => blackWord,
@@ -126,7 +130,9 @@ class BoardSpeech {
   /// 착수 결과 — 좌표·따냄·다음 차례
   String moveResult(GameState after, Move move) {
     final List<String> parts = <String>[
-      '${_who(move.player)} ${pointLabel(move.x, move.y, after.lines)}',
+      move.isPass
+          ? '${_who(move.player)} $passWord'
+          : '${_who(move.player)} ${pointLabel(move.x, move.y, after.lines)}',
     ];
     if (move.captured.isNotEmpty) {
       parts.add('${_who(move.player.opponent)} ${move.captured.length}$captureWord');

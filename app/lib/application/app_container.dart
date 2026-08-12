@@ -43,15 +43,6 @@ class VisionController extends ChangeNotifier {
   }
 }
 
-/// 낭독 상세도 — 좌표만 읽을지, 주변 정보까지 읽을지
-enum AnnounceVerbosity {
-  terse('간단'),
-  full('자세히');
-
-  const AnnounceVerbosity(this.label);
-  final String label;
-}
-
 class AppContainer {
   AppContainer._(this.vision);
 

@@ -29,7 +29,8 @@
     "codesign:setup": "powershell -ExecutionPolicy Bypass -File scripts/setup-codesign.ps1",
     "deploy": "npm run build:gh && gh-pages -d dist -b gh-pages",
     "changelog:export": "node scripts/export_changelog.mjs",
-    "engine:diff": "tsx tools/engine_diff.mjs"
+    "engine:diff": "tsx tools/engine_diff.mjs",
+    "i18n:export": "node scripts/export_i18n.mjs"
   },
   "dependencies": {
     "@tauri-apps/api": "^2.11.1",

@@ -52,6 +52,16 @@ TextStyle monoStyle({
       fontWeight: weight,
     );
 
+/// 낭독 상세도 — 좌표만 읽을지, 주변 정보까지 읽을지.
+/// 저시력·스크린리더 사용자가 발화 길이를 직접 고를 수 있어야 한다.
+enum AnnounceVerbosity {
+  terse('간단'),
+  full('자세히');
+
+  const AnnounceVerbosity(this.label);
+  final String label;
+}
+
 /// 대비 프로파일 — OS 고대비를 못 읽으므로 앱이 직접 제공한다
 enum ContrastProfile {
   standard('표준'),

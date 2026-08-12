@@ -90,7 +90,8 @@
   flex: 1;
   min-height: 0;
   display: grid;
-  grid-template-columns: minmax(0, 1fr) clamp(260px, 26vw, 340px);
+  /* 판 크기 설정이 패널 폭을 좁혀 판에 자리를 내준다 */
+  grid-template-columns: minmax(0, 1fr) min(var(--panel-w, 300px), 34vw);
   grid-template-rows: minmax(0, 1fr);
   gap: var(--space-4);
   align-items: stretch;

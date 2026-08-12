@@ -21,7 +21,7 @@ export default defineConfig({
           name: 'engine',
           environment: 'node',
           include: [
-            'src/{engine,ai,sgf,game,learn,profile,solo,p2p,settings,styles,i18n,history}/**/*.test.ts',
+            'src/{engine,ai,sgf,game,learn,profile,solo,p2p,settings,styles,i18n,history,data}/**/*.test.ts',
           ],
         },
       },

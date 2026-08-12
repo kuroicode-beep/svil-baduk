@@ -34,6 +34,7 @@
   --board-line: #c9c9d4;
   --board-star-fill: #ffffff;
   --board-star-stroke: #000000;
+  --board-coord: #c0c7d0;
   --board-legal: #ffd479;
   --board-legal-focus: #fff59a;
   --board-lastmove: #ffd479;
@@ -42,6 +43,10 @@
   --board-terr-black-line: #b3ddff;
   --board-terr-white: rgba(255, 155, 155, 0.5);
   --board-terr-white-line: #ff9b9b;
+
+  /* 판 크기 설정이 App.tsx 에서 이 둘을 덮어쓴다 (boardScale) */
+  --board-max: 78vmin;
+  --panel-w: 300px;
 
   /* ── 타이포 ──────────────────────────────────────────────────
      `html { font-size: var(--font-base) }` 와 짝이다.
@@ -102,6 +107,7 @@ html[data-board-contrast='max'] {
   --board-bg: #000000;
   --board-grid-bg: #111111;
   --board-line: #f5f5f7;
+  --board-coord: #f5f5f7;
 }
 
 /* 모션 줄이기 — 설정과 OS 선호 양쪽 */

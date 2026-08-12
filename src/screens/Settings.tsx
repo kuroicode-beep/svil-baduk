@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import {
   connectBridge,
   disconnectBridge,
@@ -13,6 +13,7 @@ import { LANG_LABELS, type Lang, t } from '../i18n/dict'
 import {
   FONT_OPTIONS,
   prefersReducedMotion,
+  loadSettings,
   resetSettings,
   type BoardScaleId,
   type FontId,
@@ -21,6 +22,8 @@ import {
   type Settings as SettingsState,
 } from '../settings/store'
 import { ConfirmDialog } from '../components/ConfirmDialog'
+import { buildBackup, downloadBackup, restoreBackup } from '../data/backup'
+import { APP_VERSION } from '../version'
 import {
   BLACK_STONE_OPTIONS,
   WHITE_STONE_OPTIONS,
@@ -36,6 +39,9 @@ interface SettingsProps {
 
 export function SettingsScreen({ lang, settings, onChange }: SettingsProps) {
   const [confirmReset, setConfirmReset] = useState(false)
+  const [backupMsg, setBackupMsg] = useState('')
+  const [backupOk, setBackupOk] = useState(true)
+  const importRef = useRef<HTMLInputElement>(null)
   const [kgMsg, setKgMsg] = useState('')
   const [kgBusy, setKgBusy] = useState(false)
   const [connected, setConnected] = useState(() => isKataGoAvailable())
@@ -407,6 +413,64 @@ export function SettingsScreen({ lang, settings, onChange }: SettingsProps) {
           ))}
         </ol>
       </details>
+
+      <section className="field" aria-labelledby="data-section-title">
+        <h3 id="data-section-title">{t(lang, 'dataSection')}</h3>
+        <p className="hint">{t(lang, 'backupNote')}</p>
+        {backupMsg && (
+          <p className={backupOk ? 'done-msg' : 'error'} role="status">
+            {backupMsg}
+          </p>
+        )}
+        <div className="btn-row">
+          <button
+            type="button"
+            className="btn"
+            onClick={() => {
+              downloadBackup(buildBackup(APP_VERSION))
+              setBackupOk(true)
+              setBackupMsg('')
+            }}
+          >
+            {t(lang, 'exportData')}
+          </button>
+          <button type="button" className="btn" onClick={() => importRef.current?.click()}>
+            {t(lang, 'importData')}
+          </button>
+          <input
+            ref={importRef}
+            type="file"
+            accept="application/json,.json"
+            hidden
+            onChange={async (e) => {
+              const file = e.target.files?.[0]
+              e.target.value = ''
+              if (!file) return
+              const result = restoreBackup(await file.text())
+              if (result.ok) {
+                setBackupOk(true)
+                setBackupMsg(
+                  t(lang, 'importDone').replace('{n}', String(result.restored.length)),
+                )
+                // 되돌린 값으로 화면을 즉시 갱신
+                onChange(loadSettings())
+              } else {
+                setBackupOk(false)
+                setBackupMsg(
+                  t(
+                    lang,
+                    result.reason === 'not_json'
+                      ? 'importFailedNotJson'
+                      : result.reason === 'unsupported_version'
+                        ? 'importFailedVersion'
+                        : 'importFailedNotBackup',
+                  ),
+                )
+              }
+            }}
+          />
+        </div>
+      </section>
 
       <div className="btn-row">
         <button type="button" className="btn btn-danger" onClick={() => setConfirmReset(true)}>

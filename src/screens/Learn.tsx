@@ -17,7 +17,7 @@ import {
 import { loc, type LearnProblem, type LearnStage, type TrackId } from '../learn/types'
 import type { Lang } from '../i18n/dict'
 import { t } from '../i18n/dict'
-import { BOARD_CELL_PX, LINE_STROKE, resolveReduceMotion, type Settings } from '../settings/store'
+import { LINE_STROKE, resolveReduceMotion, type Settings } from '../settings/store'
 
 interface LearnProps {
   lang: Lang
@@ -235,6 +235,7 @@ export function Learn({ lang, settings }: LearnProps) {
 
             <div className="game-layout">
               <Board
+                lang={lang}
                 state={board}
                 interactive={status !== 'ok'}
                 blink={settings.blinkIntersections}
@@ -243,8 +244,10 @@ export function Learn({ lang, settings }: LearnProps) {
                 blackStone={settings.blackStone}
                 whiteStone={settings.whiteStone}
                 markers={markers}
-                cellSize={BOARD_CELL_PX[settings.boardScale]}
                 lineWidth={LINE_STROKE[settings.lineWeight]}
+                coordMode={settings.boardCoords}
+                /* 문제 풀이는 즉각 반응이 중요 — 확정 단계를 두지 않는다 */
+                placeMode="direct"
                 onPlay={onPuzzlePlay}
                 ariaLabel={loc(lang, problem.title)}
               />

@@ -10,8 +10,10 @@ import { ProfileScreen } from './screens/Profile'
 import { SettingsScreen } from './screens/Settings'
 import { Solo } from './screens/Solo'
 import {
+  BOARD_MAX_VMIN,
   FONT_OPTIONS,
   FONT_SIZE_PX,
+  PANEL_WIDTH_PX,
   loadSettings,
   resolveReduceMotion,
   saveSettings,
@@ -59,6 +61,9 @@ export default function App() {
     root.dataset.buttonContrast = settings.strongButtonContrast ? 'strong' : 'normal'
     // 바둑판 고대비 — Board.tsx 의 색 분기를 대신한다
     root.dataset.boardContrast = settings.maxContrastBoard ? 'max' : 'normal'
+    // 판 크기 설정이 실제로 판을 키운다 (패널 폭을 내주는 방식)
+    root.style.setProperty('--board-max', `${BOARD_MAX_VMIN[settings.boardScale]}vmin`)
+    root.style.setProperty('--panel-w', `${PANEL_WIDTH_PX[settings.boardScale]}px`)
   }, [settings, reduceMotion])
 
   useEffect(() => {

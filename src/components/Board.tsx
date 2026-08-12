@@ -1,16 +1,21 @@
-import { useEffect, useId, useMemo, useRef, useState } from 'react'
-import { idx, legalMoves, starPoints } from '../engine/board'
+// src/components/Board.tsx — 시각(BoardSvg) + 접근성·입력(BoardGrid) 합성
+import { useEffect, useId, useMemo, useState } from 'react'
+import { idx, legalMoves } from '../engine/board'
 import type { GameState, Point, Stone } from '../engine/types'
-import { BlinkOpacity, PulseRings } from './PulseRings'
-import {
-  blackStoneStyle,
-  whiteStoneStyle,
-  type BlackStoneId,
-  type WhiteStoneId,
-} from '../settings/stoneColors'
+import type { Lang } from '../i18n/dict'
+import { t } from '../i18n/dict'
+import type { BlackStoneId, WhiteStoneId } from '../settings/stoneColors'
+import { BoardGrid, type CellLabels } from './board/BoardGrid'
+import { BoardSvg } from './board/BoardSvg'
+import { boardGeometry, columnLabel, rowLabel, stepCursor } from './board/geometry'
+import { defaultPlaceMode, shouldShowCoords, useBoardFit } from './board/useBoardFit'
+
+/** 'direct' 는 누르면 바로 착수, 'confirm' 은 고른 뒤 확정 버튼 */
+export type PlaceMode = 'direct' | 'confirm'
 
 interface BoardProps {
   state: GameState
+  lang: Lang
   interactive: boolean
   blink: boolean
   reduceMotion: boolean
@@ -23,7 +28,10 @@ interface BoardProps {
   markers?: Array<Point & { label?: string }>
   /** 계가 소유권: 1흑집 2백집 0공배 */
   ownership?: Stone[]
-  cellSize?: number
+  /** 좌표 눈금 — 'auto' 는 칸이 작아지면 자동으로 숨긴다 */
+  coordMode?: 'auto' | 'on' | 'off'
+  /** 생략하면 판 크기·입력 기기에 따라 자동 */
+  placeMode?: PlaceMode
   lineWidth?: number
   onPlay: (x: number, y: number) => void
   ariaLabel: string
@@ -31,6 +39,7 @@ interface BoardProps {
 
 export function Board({
   state,
+  lang,
   interactive,
   blink,
   reduceMotion,
@@ -40,370 +49,161 @@ export function Board({
   whiteStone = 'white',
   markers = [],
   ownership,
-  cellSize = 48,
+  coordMode = 'auto',
+  placeMode,
   lineWidth = 2.5,
   onPlay,
   ariaLabel,
 }: BoardProps) {
-  const svgRef = useRef<SVGSVGElement>(null)
-  const titleId = useId()
-  const [focusIdx, setFocusIdx] = useState(0)
-  const legal = useMemo(
-    () => (interactive ? legalMoves(state) : []),
-    [interactive, state],
-  )
-  const stars = useMemo(() => starPoints(state.size), [state.size])
-  const starSet = useMemo(
-    () => new Set(stars.map((s) => `${s.x},${s.y}`)),
-    [stars],
-  )
+  const gridId = useId()
+  const { ref: fitRef, cellPx } = useBoardFit(state.size)
+  const showCoords = shouldShowCoords(coordMode, cellPx)
+  const mode: PlaceMode = placeMode ?? defaultPlaceMode(state.size)
+  const [cursor, setCursor] = useState<Point>(() => ({
+    x: Math.floor(state.size / 2),
+    y: Math.floor(state.size / 2),
+  }))
+  const [armed, setArmed] = useState(false)
+
+  const geometry = useMemo(() => boardGeometry(state.size, showCoords), [state.size, showCoords])
+  const legal = useMemo(() => (interactive ? legalMoves(state) : []), [interactive, state])
+
+  // 판이 바뀌면 커서를 범위 안으로, 확정 대기는 해제
+  useEffect(() => {
+    setCursor((c) => ({
+      x: Math.min(c.x, state.size - 1),
+      y: Math.min(c.y, state.size - 1),
+    }))
+    setArmed(false)
+  }, [state.size])
 
   useEffect(() => {
-    if (legal.length === 0) return
-    setFocusIdx((i) => Math.min(i, legal.length - 1))
-  }, [legal.length])
+    setArmed(false)
+  }, [state.history.length, interactive])
 
-  const pad = Math.round(cellSize * 0.75)
-  const cell = cellSize
-  const boardPx = pad * 2 + cell * (state.size - 1)
-  const stoneR = cell * 0.42
-  const stroke = Math.max(1, lineWidth)
-  /** 화점: 칸 비율 + 최소 크기 — 저시력에서도 격자선과 구분 */
-  const starR = Math.max(8, cell * 0.18)
-  /* 색은 전부 토큰. 고대비 전환은 html[data-board-contrast='max'] 한 줄로 처리된다 */
-  const line = 'var(--board-line)'
-  const starFill = 'var(--board-star-fill)'
-  const starStroke = 'var(--board-star-stroke)'
-  const bg = 'var(--board-bg)'
-  const gridBg = 'var(--board-grid-bg)'
+  const labels: CellLabels = {
+    empty: t(lang, 'pointEmpty'),
+    black: t(lang, 'black'),
+    white: t(lang, 'white'),
+    lastMove: t(lang, 'lastMove'),
+    selected: t(lang, 'selectedPoint'),
+  }
 
-  const blackStyle = blackStoneStyle(blackStone)
-  const whiteStyle = whiteStoneStyle(whiteStone)
-  const focusPoint = legal[focusIdx] ?? null
-  const hintStyle = state.toPlay === 1 ? blackStyle : whiteStyle
-  const pulseThick = Math.max(5, cell * 0.11)
-
-  function handleKey(e: React.KeyboardEvent) {
-    if (!interactive || legal.length === 0) return
-    if (e.key === 'Enter' || e.key === ' ') {
-      e.preventDefault()
-      if (focusPoint) onPlay(focusPoint.x, focusPoint.y)
+  /** 확정 모드에서는 같은 지점을 두 번 눌러야 착수된다 */
+  function activate(x: number, y: number) {
+    if (!interactive) return
+    if (mode === 'direct') {
+      onPlay(x, y)
       return
     }
-    if (!focusPoint) return
-    const moveFocus = (nx: number, ny: number) => {
-      let best = -1
-      let bestDist = Infinity
-      legal.forEach((p, i) => {
-        const d = Math.abs(p.x - nx) + Math.abs(p.y - ny)
-        if (d < bestDist) {
-          bestDist = d
-          best = i
-        }
-      })
-      if (best >= 0) setFocusIdx(best)
-    }
-    if (e.key === 'ArrowRight') {
-      e.preventDefault()
-      moveFocus(focusPoint.x + 1, focusPoint.y)
-    } else if (e.key === 'ArrowLeft') {
-      e.preventDefault()
-      moveFocus(focusPoint.x - 1, focusPoint.y)
-    } else if (e.key === 'ArrowDown') {
-      e.preventDefault()
-      moveFocus(focusPoint.x, focusPoint.y + 1)
-    } else if (e.key === 'ArrowUp') {
-      e.preventDefault()
-      moveFocus(focusPoint.x, focusPoint.y - 1)
-    } else if (e.key === 'Tab') {
-      e.preventDefault()
-      setFocusIdx((i) => (e.shiftKey ? (i - 1 + legal.length) % legal.length : (i + 1) % legal.length))
-    } else if (e.key === 'Home') {
-      e.preventDefault()
-      setFocusIdx(0)
-    } else if (e.key === 'End') {
-      e.preventDefault()
-      setFocusIdx(legal.length - 1)
+    const same = armed && cursor.x === x && cursor.y === y
+    if (same) {
+      setArmed(false)
+      onPlay(x, y)
+    } else {
+      setArmed(true)
     }
   }
 
+  function handleKeyDown(e: React.KeyboardEvent) {
+    if (!interactive) return
+    const move = (dx: number, dy: number) => {
+      e.preventDefault()
+      setCursor((c) => stepCursor(c, dx, dy, state.size))
+      setArmed(false)
+    }
+    switch (e.key) {
+      case 'ArrowRight': return move(1, 0)
+      case 'ArrowLeft': return move(-1, 0)
+      case 'ArrowDown': return move(0, 1)
+      case 'ArrowUp': return move(0, -1)
+      case 'PageUp': return move(0, -5)
+      case 'PageDown': return move(0, 5)
+      case 'Home':
+        e.preventDefault()
+        setCursor((c) => ({ x: 0, y: c.y }))
+        setArmed(false)
+        return
+      case 'End':
+        e.preventDefault()
+        setCursor((c) => ({ x: state.size - 1, y: c.y }))
+        setArmed(false)
+        return
+      case 'Escape':
+        if (armed) {
+          e.preventDefault()
+          setArmed(false)
+        }
+        return
+      case 'Enter':
+      case ' ':
+        e.preventDefault()
+        activate(cursor.x, cursor.y)
+        return
+      default:
+    }
+  }
+
+  const cursorOccupied = state.board[idx(state.size, cursor.x, cursor.y)] !== 0
+  const cursorCoord = `${columnLabel(cursor.x)}${rowLabel(cursor.y, state.size)}`
+
   return (
     <div className="board-wrap">
-      <svg
-        ref={svgRef}
-        className="board-svg"
-        viewBox={`0 0 ${boardPx} ${boardPx}`}
-        preserveAspectRatio="xMidYMid meet"
-        role="application"
-        aria-labelledby={titleId}
-        aria-label={ariaLabel}
-        tabIndex={interactive ? 0 : -1}
-        onKeyDown={handleKey}
-      >
-        <title id={titleId}>{ariaLabel}</title>
-        <rect width={boardPx} height={boardPx} fill={bg} />
-        <rect
-          x={pad - cell * 0.5}
-          y={pad - cell * 0.5}
-          width={cell * (state.size - 1) + cell}
-          height={cell * (state.size - 1) + cell}
-          fill={gridBg}
-          stroke={line}
-          strokeWidth={stroke + 1}
+      <div className="board-fit" ref={fitRef}>
+        <BoardSvg
+          state={state}
+          geometry={geometry}
+          legal={legal}
+          interactive={interactive}
+          blink={blink}
+          reduceMotion={reduceMotion}
+          lastMove={lastMove}
+          blinkLastMove={blinkLastMove}
+          blackStone={blackStone}
+          whiteStone={whiteStone}
+          markers={markers}
+          ownership={ownership}
+          lineWidth={lineWidth}
+          cursor={interactive ? cursor : null}
+          armed={armed}
+          blackLabel={t(lang, 'black')}
+          whiteLabel={t(lang, 'white')}
+          territoryBlackLabel={t(lang, 'territoryBlack')}
+          territoryWhiteLabel={t(lang, 'territoryWhite')}
         />
-        {Array.from({ length: state.size }, (_, i) => {
-          const p = pad + i * cell
-          return (
-            <g key={`line-${i}`}>
-              <line x1={pad} y1={p} x2={pad + cell * (state.size - 1)} y2={p} stroke={line} strokeWidth={stroke} />
-              <line x1={p} y1={pad} x2={p} y2={pad + cell * (state.size - 1)} stroke={line} strokeWidth={stroke} />
-            </g>
-          )
-        })}
-        {interactive &&
-          legal.map((p) => {
-            const cx = pad + p.x * cell
-            const cy = pad + p.y * cell
-            const focused = focusPoint?.x === p.x && focusPoint?.y === p.y
-            const onStar = starSet.has(`${p.x},${p.y}`)
-            /* 화점 위에서는 링만 — 화점 점이 가려지지 않게 */
-            if (onStar) {
-              return (
-                <circle
-                  key={`legal-${p.x}-${p.y}`}
-                  className={[
-                    'legal-dot',
-                    blink && !reduceMotion ? 'legal-dot--blink' : '',
-                    focused ? 'legal-dot--focus' : '',
-                  ].join(' ')}
-                  cx={cx}
-                  cy={cy}
-                  r={starR + (focused ? 6 : 4)}
-                  fill="none"
-                  stroke="var(--board-legal)"
-                  strokeWidth={focused ? 4 : 3}
-                  onClick={() => onPlay(p.x, p.y)}
-                  role="button"
-                  aria-label={`착수 ${p.x + 1},${p.y + 1}${focused ? ' 선택됨' : ''}`}
-                  tabIndex={-1}
-                />
-              )
-            }
-            return (
-              <circle
-                key={`legal-${p.x}-${p.y}`}
-                className={[
-                  'legal-dot',
-                  blink && !reduceMotion ? 'legal-dot--blink' : '',
-                  focused ? 'legal-dot--focus' : '',
-                ].join(' ')}
-                cx={cx}
-                cy={cy}
-                r={focused ? 10 : 7}
-                fill="var(--board-legal)"
-                stroke="var(--board-star-stroke)"
-                strokeWidth={2}
-                onClick={() => onPlay(p.x, p.y)}
-                role="button"
-                aria-label={`착수 ${p.x + 1},${p.y + 1}${focused ? ' 선택됨' : ''}`}
-                tabIndex={-1}
-              />
-            )
-          })}
-        {stars.map((s) => (
-          <circle
-            key={`star-${s.x}-${s.y}`}
-            className="board-hoshi"
-            cx={pad + s.x * cell}
-            cy={pad + s.y * cell}
-            r={starR}
-            fill={starFill}
-            stroke={starStroke}
-            strokeWidth={Math.max(2, stroke)}
-            aria-hidden
-          />
-        ))}
-        {ownership &&
-          ownership.map((owner, i) => {
-            if (owner === 0 || state.board[i] !== 0) return null
-            const x = i % state.size
-            const y = Math.floor(i / state.size)
-            const cx = pad + x * cell
-            const cy = pad + y * cell
-            const fill =
-              owner === 1 ? 'var(--board-terr-black)' : 'var(--board-terr-white)'
-            const label = owner === 1 ? '흑집' : '백집'
-            return (
-              <g key={`own-${i}`}>
-                <rect
-                  x={cx - cell * 0.35}
-                  y={cy - cell * 0.35}
-                  width={cell * 0.7}
-                  height={cell * 0.7}
-                  fill={fill}
-                  stroke={
-                    owner === 1
-                      ? 'var(--board-terr-black-line)'
-                      : 'var(--board-terr-white-line)'
-                  }
-                  strokeWidth={2}
-                />
-                <text
-                  x={cx}
-                  y={cy + 4}
-                  textAnchor="middle"
-                  fill="var(--board-star-stroke)"
-                  fontSize={Math.max(10, cell * 0.22)}
-                  fontFamily="var(--font-mono)"
-                >
-                  {label}
-                </text>
-              </g>
-            )
-          })}
-        {state.board.map((stone, i) => {
-          if (stone === 0) return null
-          const x = i % state.size
-          const y = Math.floor(i / state.size)
-          const cx = pad + x * cell
-          const cy = pad + y * cell
-          const isLast = lastMove && lastMove.x === x && lastMove.y === y
-          const style = stone === 1 ? blackStyle : whiteStyle
-          const label = stone === 1 ? '흑' : '백'
-          const blinkStone = Boolean(isLast && blinkLastMove && !reduceMotion)
-          const showLastFx = Boolean(isLast && blinkLastMove)
-          const body = (
-            <>
-              <circle cx={cx} cy={cy} r={stoneR} fill={style.fill} stroke={style.stroke} strokeWidth={3} />
-              <text
-                x={cx}
-                y={cy + 5}
-                textAnchor="middle"
-                fill={style.label}
-                fontSize={12}
-                fontFamily="Consolas, monospace"
-                aria-hidden
-              >
-                {label}
-              </text>
-            </>
-          )
-          return (
-            <g key={`stone-${i}`}>
-              {blinkStone ? (
-                <BlinkOpacity active periodMs={650}>
-                  {body}
-                </BlinkOpacity>
-              ) : (
-                body
-              )}
-              {isLast && !blinkLastMove && (
-                <circle
-                  cx={cx}
-                  cy={cy}
-                  r={stoneR * 0.28}
-                  fill="var(--board-lastmove)"
-                  stroke="var(--board-star-stroke)"
-                  strokeWidth={2}
-                />
-              )}
-              {showLastFx && (
-                <>
-                  <circle
-                    cx={cx}
-                    cy={cy}
-                    r={stoneR * 1.05}
-                    fill="none"
-                    stroke="var(--board-star-stroke)"
-                    strokeWidth={Math.max(3, cell * 0.06)}
-                  />
-                  <circle
-                    cx={cx}
-                    cy={cy}
-                    r={stoneR * 1.05}
-                    fill="none"
-                    stroke="var(--board-lastmove)"
-                    strokeWidth={Math.max(2.5, cell * 0.05)}
-                  />
-                  <PulseRings
-                    cx={cx}
-                    cy={cy}
-                    baseR={stoneR * 0.55}
-                    thick={pulseThick}
-                    color="var(--board-lastmove)"
-                    active={!reduceMotion}
-                    periodMs={1200}
-                  />
-                </>
-              )}
-            </g>
-          )
-        })}
-        {markers.map((p, mi) => {
-          const cx = pad + p.x * cell
-          const cy = pad + p.y * cell
-          const primary = mi === 0
-          const ghost = (
-            <circle
-              cx={cx}
-              cy={cy}
-              r={stoneR}
-              fill={hintStyle.fill}
-              stroke={primary ? 'var(--board-hint)' : hintStyle.stroke}
-              strokeWidth={primary ? 4 : 3}
-              opacity={0.55}
-            />
-          )
-          return (
-            <g key={`mark-${p.x}-${p.y}`} pointerEvents="none">
-              {reduceMotion ? (
-                ghost
-              ) : (
-                <BlinkOpacity active periodMs={380}>
-                  {ghost}
-                </BlinkOpacity>
-              )}
-              <PulseRings
-                cx={cx}
-                cy={cy}
-                baseR={stoneR * 0.55}
-                thick={pulseThick}
-                color="var(--board-hint)"
-                active={!reduceMotion}
-                periodMs={750}
-              />
-              <text
-                x={cx}
-                y={cy + 5}
-                textAnchor="middle"
-                fill={primary ? 'var(--board-hint)' : hintStyle.label}
-                fontSize={primary ? 14 : 12}
-                fontFamily="Consolas, monospace"
-                fontWeight={700}
-              >
-                {p.label ?? (markers.length === 1 ? '힌트' : '정답')}
-              </text>
-            </g>
-          )
-        })}
-        {interactive &&
-          Array.from({ length: state.size * state.size }, (_, i) => {
-            const x = i % state.size
-            const y = Math.floor(i / state.size)
-            if (state.board[idx(state.size, x, y)] !== 0) return null
-            return (
-              <circle
-                key={`hit-${i}`}
-                cx={pad + x * cell}
-                cy={pad + y * cell}
-                r={cell * 0.4}
-                fill="transparent"
-                className="hit-target"
-                onClick={() => onPlay(x, y)}
-              />
-            )
-          })}
-      </svg>
+        <BoardGrid
+          state={state}
+          geometry={geometry}
+          gridId={gridId}
+          ariaLabel={ariaLabel}
+          interactive={interactive}
+          cursor={cursor}
+          armed={armed}
+          lastMove={lastMove}
+          labels={labels}
+          onCellActivate={activate}
+          onCursorMove={setCursor}
+          onKeyDown={handleKeyDown}
+        />
+      </div>
+
+      {/* 확정 모드: 실제로 커밋하는 타깃은 크게 만든다.
+          19줄에서 교차점 자체를 50px 로 만드는 건 산술적으로 불가능하다. */}
+      {interactive && mode === 'confirm' && (
+        <div className="board-confirm">
+          <button
+            type="button"
+            className="btn btn-primary board-confirm-btn"
+            disabled={!armed || cursorOccupied}
+            onClick={() => {
+              setArmed(false)
+              onPlay(cursor.x, cursor.y)
+            }}
+          >
+            {t(lang, 'confirmPlace')} ({cursorCoord})
+          </button>
+        </div>
+      )}
     </div>
   )
 }

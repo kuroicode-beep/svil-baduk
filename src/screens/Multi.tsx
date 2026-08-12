@@ -13,7 +13,7 @@ import { t } from '../i18n/dict'
 import { applyP2PMessage, initialMultiState, type MultiState } from '../p2p/reducer'
 import { BadukP2P, friendlyP2PError, type P2PMessage } from '../p2p/session'
 import { enterFullscreen, exitFullscreen } from '../platform/fullscreen'
-import { BOARD_CELL_PX, LINE_STROKE, resolveReduceMotion, type Settings } from '../settings/store'
+import { LINE_STROKE, resolveReduceMotion, type Settings } from '../settings/store'
 
 interface MultiProps {
   lang: Lang
@@ -278,6 +278,7 @@ export function Multi({ lang, settings }: MultiProps) {
       )}
       <div className="game-layout">
         <Board
+          lang={lang}
           state={state}
           interactive={humanTurn}
           blink={settings.blinkIntersections}
@@ -287,8 +288,9 @@ export function Multi({ lang, settings }: MultiProps) {
           blackStone={settings.blackStone}
           whiteStone={settings.whiteStone}
           ownership={state.ended ? estimateScore(state, settings.goRules).ownership : undefined}
-          cellSize={BOARD_CELL_PX[settings.boardScale]}
           lineWidth={LINE_STROKE[settings.lineWeight]}
+          coordMode={settings.boardCoords}
+          placeMode={settings.placeMode}
           onPlay={onPlay}
           ariaLabel={t(lang, 'multi')}
         />

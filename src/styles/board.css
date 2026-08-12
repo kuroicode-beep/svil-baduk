@@ -1,22 +1,28 @@
-/* src/styles/board.css — 바둑판 컨테이너·교차점 표시 */
+/* src/styles/board.css — 바둑판 컨테이너·격자 오버레이·교차점 표시 */
 
 .board-wrap {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--space-2);
+  width: 100%;
+  min-height: 0;
+}
+
+/*
+ * 항상 정사각인 상자. SVG 와 DOM 격자가 여기에 겹쳐 놓이므로
+ * 둘의 좌표가 정확히 일치한다 (오터치 방지의 핵심).
+ */
+.board-fit {
   position: relative;
-  width: min(100%, 72vmin);
   aspect-ratio: 1;
-  /* 동심원 퍼짐이 잘리지 않도록 — CSS scale 대신 JS r 애니메이션 사용 */
+  width: min(100%, var(--board-max, 72vmin));
+  max-width: 100%;
+  max-height: 100%;
   overflow: visible;
   border: var(--bw) solid var(--border-strong);
   border-radius: var(--radius);
   background: var(--board-star-stroke);
-}
-
-.game-screen .board-wrap {
-  width: 100%;
-  height: 100%;
-  max-width: none;
-  aspect-ratio: auto;
-  min-height: 0;
 }
 
 .board-svg {
@@ -25,14 +31,56 @@
   height: 100%;
 }
 
-.board-svg:focus-visible {
+/* 접근성·입력 레이어 — 탭 가능한 노드는 이 격자 하나뿐(APG grid 패턴) */
+.board-grid {
+  position: absolute;
+  inset: 0;
+}
+
+.board-grid:focus-visible {
   outline: var(--bw-strong) solid var(--focus);
   outline-offset: var(--space-1);
 }
 
-/* 착수 가능 교차점 — 클릭은 .hit-target 이 받는다 */
-.legal-dot {
+.board-row {
+  display: contents;
+}
+
+/* 히트 영역은 셀 전체 — 원보다 넓고, 돌 위에서도 안내가 나간다 */
+.board-cell {
+  position: absolute;
+  transform: translate(-50%, -50%);
   cursor: pointer;
+  /* 탭 지연·더블탭 확대 제거. none 은 보조기술 제스처를 죽이므로 쓰지 않는다 */
+  touch-action: manipulation;
+}
+
+.board-grid[aria-readonly='true'] .board-cell {
+  cursor: default;
+}
+
+/* 커서는 색만이 아니라 테두리로도 드러낸다 */
+.board-cell--cursor {
+  outline: var(--bw) dashed var(--focus);
+  outline-offset: -2px;
+}
+
+.board-cell--armed {
+  outline-style: solid;
+  outline-width: var(--bw-strong);
+}
+
+.board-confirm {
+  width: min(100%, var(--board-max, 72vmin));
+}
+
+.board-confirm-btn {
+  width: 100%;
+  min-height: var(--list-item-min);
+}
+
+/* 착수 가능 교차점 — 클릭은 .board-cell 이 받는다 */
+.legal-dot {
   pointer-events: none;
 }
 
@@ -60,10 +108,6 @@ html[data-reduce-motion='1'] .legal-dot--blink {
   .legal-dot--blink {
     animation: none;
   }
-}
-
-.hit-target {
-  cursor: pointer;
 }
 
 .territory-b {

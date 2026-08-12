@@ -10,6 +10,22 @@ import { describe, expect, it } from 'vitest'
 const SRC = join(process.cwd(), 'src')
 const STYLES = join(SRC, 'styles')
 
+/**
+ * src 전체를 재귀로 훑는다.
+ * 예전엔 src/components 한 겹만 읽어서 src/components/board/*.tsx 의
+ * var(--board-*) 사용이 통째로 안 보였고, 살아 있는 토큰이 미사용으로 잡혔다.
+ */
+function walkSource(dir: string, out: string[] = []): string[] {
+  for (const entry of readdirSync(dir, { withFileTypes: true })) {
+    const full = join(dir, entry.name)
+    if (entry.isDirectory()) walkSource(full, out)
+    else if (/\.(tsx?|css)$/.test(entry.name)) out.push(full)
+  }
+  return out
+}
+
+const allSourceFiles = walkSource(SRC)
+
 function cssFiles(): { name: string; text: string }[] {
   const out = readdirSync(STYLES)
     .filter((f) => f.endsWith('.css'))
@@ -51,21 +67,22 @@ describe('디자인 토큰', () => {
   })
 
   it('선언된 토큰에 미사용이 없다', () => {
+    // CSS 든 TSX 든, src 아래 어디서 쓰이면 사용으로 친다
     const usedSomewhere = new Set<string>()
-    for (const f of files) {
-      for (const m of stripComments(f.text).matchAll(/var\(\s*(--[a-z0-9-]+)/gi)) {
-        usedSomewhere.add(m[1])
-      }
-    }
-    // tokens.css 안에서 다른 토큰을 참조하는 경우도 사용으로 친다
-    // 컴포넌트(TSX)에서 인라인으로 쓰는 토큰도 사용으로 친다
-    for (const f of readdirSync(join(SRC, 'components'))) {
-      if (!f.endsWith('.tsx')) continue
-      const text = readFileSync(join(SRC, 'components', f), 'utf8')
-      for (const m of text.matchAll(/var\(\s*(--[a-z0-9-]+)/gi)) usedSomewhere.add(m[1])
+    for (const path of allSourceFiles) {
+      const text = readFileSync(path, 'utf8')
+      const scanned = path.endsWith('.css') ? stripComments(text) : text
+      for (const m of scanned.matchAll(/var\(\s*(--[a-z0-9-]+)/gi)) usedSomewhere.add(m[1])
     }
     const unused = [...declared].filter((d) => !usedSomewhere.has(d))
     expect(unused, '선언만 하고 안 쓰는 토큰 (0.8.0 의 --gap 같은 경우)').toEqual([])
+  })
+
+  it('토큰 사용처 스캔이 하위 디렉터리까지 본다', () => {
+    // 회귀 방지: 예전 스캔은 src/components 한 겹만 읽어 board/ 를 놓쳤다
+    expect(allSourceFiles.some((p) => p.includes('board'))).toBe(true)
+    const boardSvg = allSourceFiles.find((p) => p.endsWith('BoardSvg.tsx'))
+    expect(boardSvg, 'BoardSvg.tsx 를 스캔 대상에서 찾지 못했습니다').toBeDefined()
   })
 
   it('간격·모서리에 맨 px 값이 없다', () => {

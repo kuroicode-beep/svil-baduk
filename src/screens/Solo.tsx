@@ -15,7 +15,7 @@ import { t } from '../i18n/dict'
 import { recordSoloResult } from '../profile/progress'
 import { hasCharacter, loadProfile, saveProfile } from '../profile/store'
 import { enterFullscreen, exitFullscreen } from '../platform/fullscreen'
-import { BOARD_CELL_PX, LINE_STROKE, resolveReduceMotion, type Settings } from '../settings/store'
+import { LINE_STROKE, resolveReduceMotion, type Settings } from '../settings/store'
 import { decodeSgf, replayTo } from '../sgf/sgf'
 import { clearSoloSnapshot, loadSoloSnapshot, saveSoloSnapshot, type SoloSnapshot } from '../solo/snapshot'
 
@@ -531,6 +531,7 @@ export function Solo({ lang, settings }: SoloProps) {
       )}
       <div className="game-layout">
         <Board
+          lang={lang}
           state={state}
           interactive={humanTurn && !aiBusy}
           blink={settings.blinkIntersections}
@@ -541,8 +542,9 @@ export function Solo({ lang, settings }: SoloProps) {
           whiteStone={settings.whiteStone}
           ownership={ownership}
           markers={hintPts}
-          cellSize={BOARD_CELL_PX[settings.boardScale]}
           lineWidth={LINE_STROKE[settings.lineWeight]}
+          coordMode={settings.boardCoords}
+          placeMode={settings.placeMode}
           onPlay={onPlay}
           ariaLabel={`${t(lang, 'solo')} ${size}×${size}`}
         />

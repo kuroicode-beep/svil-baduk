@@ -32,6 +32,10 @@ export interface Settings {
   boardScale: BoardScaleId
   lineWeight: LineWeightId
   goRules: GoRules
+  /** 좌표 눈금 — 'auto' 는 칸이 너무 작아지면 자동으로 숨긴다 */
+  boardCoords: 'auto' | 'on' | 'off'
+  /** 착수 방식 — 좁은 화면·큰 판에서는 확정 방식이 기본 */
+  placeMode: 'direct' | 'confirm'
   blackStone: BlackStoneId
   whiteStone: WhiteStoneId
   katagoBridgeUrl: string
@@ -60,10 +64,22 @@ export const FONT_SIZE_PX: Record<FontSizeId, number> = {
   large: 20,
 }
 
-export const BOARD_CELL_PX: Record<BoardScaleId, number> = {
-  small: 40,
-  medium: 48,
-  large: 60,
+/**
+ * 판이 차지하는 최대 폭. 예전의 BOARD_CELL_PX 는 viewBox 셀 크기만 바꿔서
+ * 화면상 판 크기가 전혀 달라지지 않았고, 오히려 고정 크기 마커가 상대적으로
+ * 작아지는 역효과가 났다. 이제는 패널 폭을 내주고 판이 실제로 커진다.
+ */
+export const BOARD_MAX_VMIN: Record<BoardScaleId, number> = {
+  small: 68,
+  medium: 78,
+  large: 90,
+}
+
+/** 판이 커지는 만큼 우측 패널이 좁아진다 */
+export const PANEL_WIDTH_PX: Record<BoardScaleId, number> = {
+  small: 340,
+  medium: 300,
+  large: 260,
 }
 
 export const LINE_STROKE: Record<LineWeightId, number> = {
@@ -105,6 +121,8 @@ export const defaultSettings = (): Settings => ({
   boardScale: 'medium',
   lineWeight: 'normal',
   goRules: 'japanese',
+  boardCoords: 'auto',
+  placeMode: 'direct',
   blackStone: 'black',
   whiteStone: 'white',
   katagoBridgeUrl: 'http://127.0.0.1:17419',
@@ -137,6 +155,8 @@ export function migrateSettings(raw: unknown): Settings {
   if (!FONT_OPTIONS.some((f) => f.id === merged.font)) merged.font = base.font
   if (!['small', 'medium', 'large'].includes(merged.boardScale)) merged.boardScale = base.boardScale
   if (!['thin', 'normal', 'thick'].includes(merged.lineWeight)) merged.lineWeight = base.lineWeight
+  if (!['auto', 'on', 'off'].includes(merged.boardCoords)) merged.boardCoords = base.boardCoords
+  if (!['direct', 'confirm'].includes(merged.placeMode)) merged.placeMode = base.placeMode
   if (merged.reduceMotion !== 'system' && typeof merged.reduceMotion !== 'boolean') {
     merged.reduceMotion = base.reduceMotion
   }

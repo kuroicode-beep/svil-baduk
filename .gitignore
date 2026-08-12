@@ -16,3 +16,11 @@ katago/bin/*
 katago/models/*
 !katago/models/.gitkeep
 katago/_tmp/
+
+# Flutter
+app/build/
+app/.dart_tool/
+app/windows/flutter/ephemeral/
+spikes/*/build/
+spikes/*/.dart_tool/
+spikes/*/windows/flutter/ephemeral/

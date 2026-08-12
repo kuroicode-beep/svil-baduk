@@ -4,17 +4,42 @@ on:
   push:
     branches: [main]
   pull_request:
-    branches: [main]
 
 jobs:
-  test-build:
+  # React 웹 — 웹 타깃으로 계속 유지된다 (Flutter 웹은 접근성 게이트 뒤로 보류)
+  web:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
         with:
-          node-version: '22'
+          node-version: 22
           cache: npm
       - run: npm ci
+      - run: npm run version:check
       - run: npm test
       - run: npm run build
+
+  # Flutter 데스크톱 — 새 PC 클라이언트
+  app:
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: subosito/flutter-action@v2
+        with:
+          flutter-version: 3.44.8
+          channel: stable
+          cache: true
+      - name: pub get
+        working-directory: app
+        run: flutter pub get
+      # 하우스 기준은 0 issues — info 도 허용하지 않는다
+      - name: analyze
+        working-directory: app
+        run: flutter analyze --fatal-infos --fatal-warnings
+      - name: test
+        working-directory: app
+        run: flutter test
+      - name: build windows
+        working-directory: app
+        run: flutter build windows --release

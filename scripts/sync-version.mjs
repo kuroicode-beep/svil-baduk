@@ -2,7 +2,7 @@
 // src/version.ts 의 APP_VERSION 을 단일 진실로 삼아 VERSION · package.json · README 를 맞춘다.
 // prebuild 훅에서 자동 실행되며, --check 로 CI 검증만 할 수도 있다.
 
-import { readFileSync, writeFileSync } from 'node:fs'
+import { existsSync, readFileSync, writeFileSync } from 'node:fs'
 import { fileURLToPath } from 'node:url'
 import { dirname, join } from 'node:path'
 
@@ -37,12 +37,39 @@ function sync(relPath, transform) {
   console.log(`  sync-version: ${relPath} → ${version}`)
 }
 
+/** 아직 없을 수 있는 파일 (Flutter 앱은 단계적으로 들어온다) */
+function syncOptional(relPath, transform) {
+  if (!existsSync(join(root, relPath))) return
+  sync(relPath, transform)
+}
+
 sync('VERSION', () => `${version}\n`)
 
 sync('package.json', (s) => s.replace(/("version"\s*:\s*")[^"]+(")/, `$1${version}$2`))
 
 sync('README.md', (s) =>
   s.replace(/(현재\s*)\d+\.\d+\.\d+/g, `$1${version}`),
+)
+
+/* Flutter 앱 — pubspec 의 빌드 번호(+N)는 보존한다 */
+syncOptional('app/pubspec.yaml', (s) =>
+  s.replace(/^(version:\s*)\d+\.\d+\.\d+(\+\d+)?/m, (_m, head, build) =>
+    `${head}${version}${build ?? ''}`,
+  ),
+)
+
+syncOptional('app/lib/version.dart', (s) =>
+  s.replace(/(appVersion\s*=\s*')[^']+(')/, `$1${version}$2`),
+)
+
+/* Tauri 셸 — 여기가 빠져 있어서 0.9.x 와 0.8.0 이 갈라져 있었다.
+   설치본이 조용히 옛 버전으로 찍히던 버그의 원인. */
+syncOptional('src-tauri/tauri.conf.json', (s) =>
+  s.replace(/("version"\s*:\s*")[^"]+(")/, `$1${version}$2`),
+)
+
+syncOptional('src-tauri/Cargo.toml', (s) =>
+  s.replace(/^(version\s*=\s*")[^"]+(")/m, `$1${version}$2`),
 )
 
 if (checkOnly && drift.length > 0) {

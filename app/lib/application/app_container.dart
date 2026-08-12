@@ -5,6 +5,8 @@
 
 import 'package:flutter/foundation.dart';
 
+import '../data/platform/current_platform.dart';
+import '../domain/platform_caps.dart';
 import '../ui/theme/board_theme.dart';
 import '../ui/theme/svil_theme.dart';
 
@@ -44,13 +46,19 @@ class VisionController extends ChangeNotifier {
 }
 
 class AppContainer {
-  AppContainer._(this.vision);
+  AppContainer._(this.vision, this.caps);
 
   final VisionController vision;
 
+  /// 이 기기에서 실제로 되는 것 — KataGo 노출 여부 등을 여기서 판단한다
+  final PlatformCaps caps;
+
   static Future<AppContainer> create() async {
-    // 저장소·엔진은 단계별로 여기에 붙는다 (3단계 이후)
-    return AppContainer._(VisionController());
+    final PlatformCaps caps = detectCaps();
+    final VisionController vision = VisionController();
+    // 터치 기기는 오터치가 잦아 확정 착수를 기본으로 둔다
+    if (caps.prefersConfirmPlacement) vision.setVerbosity(AnnounceVerbosity.terse);
+    return AppContainer._(vision, caps);
   }
 
   Future<void> dispose() async {

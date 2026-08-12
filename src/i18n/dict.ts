@@ -226,6 +226,13 @@ const dict = {
   home: { ko: '홈', en: 'Home', ja: 'ホーム', zh: '主页', vi: 'Trang chủ' },
   confirm: { ko: '확인', en: 'Confirm', ja: '確認', zh: '确认', vi: 'Xác nhận' },
   on: { ko: '켬', en: 'On', ja: 'オン', zh: '开', vi: 'Bật' },
+  katagoMobileUnavailable: {
+    ko: '이 기기에서는 KataGo를 쓸 수 없습니다. 내장 AI로 대국합니다.',
+    en: 'KataGo is not available on this device. Playing with the built-in AI.',
+    ja: 'この端末ではKataGoを使えません。内蔵AIで対局します。',
+    zh: '此设备无法使用 KataGo，将使用内置 AI 对局。',
+    vi: 'Thiết bị này không dùng được KataGo. Sẽ chơi với AI tích hợp.',
+  },
   starPoint: { ko: '화점', en: 'star point', ja: '星', zh: '星位', vi: 'điểm sao' },
   liberties: { ko: '활로', en: 'liberties', ja: '呼吸点', zh: '气', vi: 'khí' },
   turnSuffix: { ko: '차례', en: 'to play', ja: '番', zh: '行棋', vi: 'lượt' },

@@ -87,6 +87,7 @@ abstract final class S {
   static const LocString home = LocString("홈", "Home", "ホーム", "主页", "Trang chủ");
   static const LocString confirm = LocString("확인", "Confirm", "確認", "确认", "Xác nhận");
   static const LocString on = LocString("켬", "On", "オン", "开", "Bật");
+  static const LocString katagoMobileUnavailable = LocString("이 기기에서는 KataGo를 쓸 수 없습니다. 내장 AI로 대국합니다.", "KataGo is not available on this device. Playing with the built-in AI.", "この端末ではKataGoを使えません。内蔵AIで対局します。", "此设备无法使用 KataGo，将使用内置 AI 对局。", "Thiết bị này không dùng được KataGo. Sẽ chơi với AI tích hợp.");
   static const LocString starPoint = LocString("화점", "star point", "星", "星位", "điểm sao");
   static const LocString liberties = LocString("활로", "liberties", "呼吸点", "气", "khí");
   static const LocString turnSuffix = LocString("차례", "to play", "番", "行棋", "lượt");
@@ -234,7 +235,7 @@ abstract final class S {
 }
 
 /// 완전성 테스트용 — 생성된 문자열 개수
-const int generatedStringCount = 186;
+const int generatedStringCount = 187;
 
 /// 완전성 테스트용 — 키 이름과 값 목록
 const Map<String, LocString> allStrings = <String, LocString>{
@@ -280,6 +281,7 @@ const Map<String, LocString> allStrings = <String, LocString>{
   "home": S.home,
   "confirm": S.confirm,
   "on": S.on,
+  "katagoMobileUnavailable": S.katagoMobileUnavailable,
   "starPoint": S.starPoint,
   "liberties": S.liberties,
   "turnSuffix": S.turnSuffix,

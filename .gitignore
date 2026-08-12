@@ -24,3 +24,6 @@ app/windows/flutter/ephemeral/
 spikes/*/build/
 spikes/*/.dart_tool/
 spikes/*/windows/flutter/ephemeral/
+
+# 차분 테스트 fixture — TS 엔진에서 생성 (npm run engine:diff), 56MB
+app/test/fixtures/engine_diff.json

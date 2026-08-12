@@ -30,6 +30,14 @@ jobs:
           flutter-version: 3.44.8
           channel: stable
           cache: true
+      # 차분 테스트 fixture 는 TS 엔진에서 생성한다 (저장소에 넣기엔 56MB 로 크다)
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci
+      - name: generate engine diff fixture
+        run: npx tsx tools/engine_diff.mjs
       - name: pub get
         working-directory: app
         run: flutter pub get

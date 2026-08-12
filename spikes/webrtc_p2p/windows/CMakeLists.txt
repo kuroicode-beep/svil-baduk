@@ -1,17 +1,17 @@
 # Project-level configuration.
 cmake_minimum_required(VERSION 3.14)
-project(svil_baduk LANGUAGES CXX)
+project(webrtc_p2p LANGUAGES CXX)
 
-# 한국어 로케일(코드페이지 949)에서 MSVC 가 UTF-8 소스를 읽지 못해 C4819 가 나고,
-# 경고를 오류로 처리하는 플러그인(flutter_webrtc 등)에서 빌드가 실패한다.
-# 1단계 P2P 스파이크에서 실제로 겪은 문제라 미리 넣어 둔다.
+# 한국어 로케일(코드페이지 949)에서 MSVC 가 UTF-8 소스를 읽지 못해
+# C4819 경고가 나고, 플러그인이 경고를 오류로 처리해 빌드가 실패한다.
+# (flutter_webrtc 가 대표적) /utf-8 을 전역으로 준다.
 if(MSVC)
   add_compile_options("/utf-8")
 endif()
 
 # The name of the executable created for the application. Change this to change
 # the on-disk name of your application.
-set(BINARY_NAME "svil_baduk")
+set(BINARY_NAME "webrtc_p2p")
 
 # Explicitly opt in to modern CMake behaviors to avoid warnings with recent
 # versions of CMake.

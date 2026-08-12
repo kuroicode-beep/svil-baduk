@@ -458,6 +458,10 @@ const dict = {
   learnPrevProblem: { ko: '이전 문제', en: 'Previous problem', ja: '前の問題', zh: '上一题', vi: 'Bài trước' },
   learnProgress: { ko: '진행', en: 'Progress', ja: '進捗', zh: '进度', vi: 'Tiến độ' },
   learnTryHint: { ko: '두 번 틀렸습니다. 힌트를 들어보세요', en: 'Two misses. Try the hint', ja: '2回間違えました。ヒントを聞いてみてください', zh: '错了两次，试试提示', vi: 'Sai hai lần. Hãy nghe gợi ý' },
+  learnLocked: { ko: '앞 단계를 먼저 끝내세요', en: 'Finish the previous stage first', ja: '前のステージを先に終えてください', zh: '请先完成上一阶段', vi: 'Hãy hoàn thành chặng trước' },
+  learnTrackBasics: { ko: '기초', en: 'Basics', ja: '基礎', zh: '基础', vi: 'Cơ bản' },
+  learnTrackFuseki: { ko: '포석', en: 'Openings', ja: '布石', zh: '布局', vi: 'Khai cuộc' },
+  learnTrackTsumego: { ko: '사활', en: 'Life and death', ja: '詰碁', zh: '死活', vi: 'Sống chết' },
   // KataGo 오류 — 사유마다 다른 문장이어야 한다 (체크리스트 K2)
   engineKataGo: { ko: 'KataGo', en: 'KataGo', ja: 'KataGo', zh: 'KataGo', vi: 'KataGo' },
   katagoExeMissing: { ko: 'KataGo 실행 파일을 찾지 못했습니다', en: 'KataGo executable not found', ja: 'KataGo の実行ファイルが見つかりません', zh: '未找到 KataGo 可执行文件', vi: 'Không tìm thấy tệp thực thi KataGo' },

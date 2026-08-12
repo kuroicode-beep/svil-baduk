@@ -7,6 +7,7 @@
 import 'dart:convert';
 
 import '../../domain/ai/ranks.dart';
+import '../../domain/engine/types.dart';
 import '../../i18n/strings.g.dart';
 import '../../ui/theme/board_theme.dart';
 import '../../ui/theme/svil_theme.dart';
@@ -55,6 +56,7 @@ class AppSettings {
     this.katagoAutoStart = true,
     this.opponent = OpponentKind.builtin,
     this.rankId = kDefaultRank,
+    this.boardSize = BoardSize.s19,
   });
 
   final Lang lang;
@@ -79,6 +81,8 @@ class AppSettings {
 
   /// ai/ranks.dart 의 id. 저장값이 손상돼도 getRank 가 기본값으로 떨어진다.
   final String rankId;
+
+  final BoardSize boardSize;
 
   VisionSettings toVision({required bool systemReduceMotion}) => VisionSettings(
         contrast: contrast,
@@ -112,6 +116,7 @@ class AppSettings {
     bool? katagoAutoStart,
     OpponentKind? opponent,
     String? rankId,
+    BoardSize? boardSize,
   }) =>
       AppSettings(
         lang: lang ?? this.lang,
@@ -134,6 +139,7 @@ class AppSettings {
         katagoAutoStart: katagoAutoStart ?? this.katagoAutoStart,
         opponent: opponent ?? this.opponent,
         rankId: rankId ?? this.rankId,
+        boardSize: boardSize ?? this.boardSize,
       );
 
   Map<String, dynamic> toJson() => <String, dynamic>{
@@ -162,6 +168,7 @@ class AppSettings {
         'katagoAutoStart': katagoAutoStart,
         'opponent': opponent.name,
         'rankId': rankId,
+        'boardSize': boardSize.lines,
       };
 }
 
@@ -222,6 +229,12 @@ AppSettings migrateSettings(Object? raw) {
     opponent: _enumOr(OpponentKind.values, m['opponent'], base.opponent),
     // 없는 난이도가 저장돼 있어도 getRank 가 기본값을 준다
     rankId: m['rankId'] is String ? m['rankId'] as String : base.rankId,
+    boardSize: switch (m['boardSize']) {
+      9 => BoardSize.s9,
+      13 => BoardSize.s13,
+      19 => BoardSize.s19,
+      _ => base.boardSize,
+    },
   );
 }
 

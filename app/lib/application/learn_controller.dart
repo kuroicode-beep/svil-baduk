@@ -7,6 +7,7 @@ import 'package:flutter/foundation.dart';
 
 import '../domain/engine/board.dart';
 import '../domain/engine/types.dart';
+import '../domain/input/board_speech.dart';
 import '../domain/learn/curriculum.dart';
 
 /// 문제 하나의 시도 결과 — 화면이 무엇을 낭독할지 정하는 근거
@@ -34,10 +35,63 @@ class LearnController extends ChangeNotifier {
   LearnController({
     required this.curriculum,
     required Set<String> solved,
+    required this.speech,
+    this.detail = SpeechDetail.terse,
   }) : _solved = Set<String>.from(solved);
 
   final Curriculum curriculum;
+  final BoardSpeech speech;
+  SpeechDetail detail;
   final Set<String> _solved;
+
+  /// 대국 화면과 같은 커서 모델 — 판 조작 방식이 화면마다 다르면 안 된다
+  Point _cursor = const Point(0, 0);
+  Point get cursor => _cursor;
+
+  int get lines => _board?.size.lines ?? 9;
+
+  String get cursorLabel => pointLabel(_cursor.x, _cursor.y, lines);
+
+  String get cursorSpeech {
+    final GameState? b = _board;
+    if (b == null) return '';
+    return speech.point(b, _cursor.x, _cursor.y, detail: detail);
+  }
+
+  void moveCursor(int dx, int dy) {
+    setCursor(Point(
+      (_cursor.x + dx).clamp(0, lines - 1),
+      (_cursor.y + dy).clamp(0, lines - 1),
+    ));
+  }
+
+  void setCursor(Point p) {
+    final Point next =
+        Point(p.x.clamp(0, lines - 1), p.y.clamp(0, lines - 1));
+    if (next.x == _cursor.x && next.y == _cursor.y) return;
+    _cursor = next;
+    notifyListeners();
+  }
+
+  /// 힌트를 이미 들었는가 — 화면이 정답 공개를 단계적으로 여는 근거
+  bool _hintShown = false;
+  bool get hintShown => _hintShown;
+
+  void showHint() {
+    _hintShown = true;
+    notifyListeners();
+  }
+
+  /// 정답 자리로 커서를 옮긴다 (정답 보기)
+  void revealAnswer() {
+    final LearnProblem? p = problem;
+    if (p == null || p.solutions.isEmpty) return;
+    _hintShown = true;
+    _cursor = p.solutions.first;
+    notifyListeners();
+  }
+
+  AttemptOutcome attemptAtCursor() => attempt(_cursor.x, _cursor.y);
 
   LearnStage? _stage;
   int _index = 0;
@@ -88,6 +142,13 @@ class LearnController extends ChangeNotifier {
     notifyListeners();
   }
 
+  /// 스테이지 목록으로 돌아간다
+  void closeStage() {
+    _stage = null;
+    _board = null;
+    notifyListeners();
+  }
+
   void goTo(int index) {
     final LearnStage? s = _stage;
     if (s == null) return;
@@ -111,6 +172,7 @@ class LearnController extends ChangeNotifier {
   void _resetBoard() {
     final LearnProblem? p = problem;
     _misses = 0;
+    _hintShown = false;
     _board = p == null
         ? null
         : createProblemState(
@@ -119,6 +181,9 @@ class LearnController extends ChangeNotifier {
             white: p.white,
             toPlay: p.toPlay,
           );
+    // 커서는 판 한가운데에서 시작한다 — 판이 바뀌면 범위를 벗어날 수 있다
+    final int n = p?.size.lines ?? 9;
+    _cursor = Point(n ~/ 2, n ~/ 2);
   }
 
   AttemptOutcome attempt(int x, int y) {

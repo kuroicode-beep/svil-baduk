@@ -9,6 +9,8 @@ import 'package:svil_baduk/application/learn_controller.dart';
 import 'package:svil_baduk/domain/engine/types.dart';
 import 'package:svil_baduk/domain/learn/curriculum.dart';
 
+import '../support/speech_fixture.dart';
+
 void main() {
   late Curriculum curriculum;
 
@@ -18,7 +20,8 @@ void main() {
   });
 
   LearnController make({Set<String> solved = const <String>{}}) =>
-      LearnController(curriculum: curriculum, solved: solved);
+      LearnController(
+          curriculum: curriculum, solved: solved, speech: testSpeech);
 
   group('L1 · 교육 과정이 실린다', () {
     test('9스테이지 28문제', () {

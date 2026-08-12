@@ -121,15 +121,20 @@ GameState createProblemState({
 }
 
 class _Group {
-  _Group(this.stones, this.liberties);
+  _Group(this.stones, this.libertyPoints);
   final List<int> stones;
-  final int liberties;
+
+  /// 활로의 위치. 개수만 쓰던 것을 위치까지 남기게 바꿨다 —
+  /// 어차피 계산 중에 만들던 집합이라 비용은 그대로다.
+  final Set<int> libertyPoints;
+
+  int get liberties => libertyPoints.length;
 }
 
 /// 이어진 돌 무리와 활로 수 — 평면 인덱스로 다룬다
 _Group _groupAt(Uint8List board, int lines, int start) {
   final int color = board[start];
-  if (color == 0) return _Group(const <int>[], 0);
+  if (color == 0) return _Group(const <int>[], const <int>{});
 
   final List<int> stones = <int>[];
   final Set<int> seenStone = <int>{};
@@ -148,7 +153,7 @@ _Group _groupAt(Uint8List board, int lines, int start) {
     if (y > 0) _visit(board, lines, i - lines, color, seenStone, libs, stack);
     if (y < lines - 1) _visit(board, lines, i + lines, color, seenStone, libs, stack);
   }
-  return _Group(stones, libs.length);
+  return _Group(stones, libs);
 }
 
 void _visit(Uint8List board, int lines, int n, int color, Set<int> seenStone,
@@ -301,6 +306,32 @@ const String _columnLetters = 'ABCDEFGHJKLMNOPQRST';
 /// board 배열은 y=0 이 위쪽이라 세로를 뒤집는다. SGF 는 뒤집지 않는다.
 String pointLabel(int x, int y, int lines) =>
     '${_columnLetters[x]}${lines - y}';
+
+/// 지금 두는 쪽이 두면 돌을 따내게 되는 점들.
+///
+/// 후보는 "상대 그룹의 마지막 활로" 뿐이라 O(판 크기) 로 찾는다.
+/// 다만 그 점이 패 금지점이거나 슈퍼코에 걸리면 둘 수 없으므로
+/// 후보만 실제로 확인한다 — 후보 수는 축에 걸린 그룹 수뿐이다.
+/// (전 합법수를 두어 보는 방식과 결과가 같다: capture_points_test.dart)
+Set<Point> capturePoints(GameState state) {
+  final int lines = state.size.lines;
+  final int enemy = state.toPlay.opponent.wire;
+  final Set<int> seen = <int>{};
+  final Set<Point> out = <Point>{};
+
+  for (int i = 0; i < state.board.length; i++) {
+    if (state.board[i] != enemy || seen.contains(i)) continue;
+    final _Group g = _groupAt(state.board, lines, i);
+    seen.addAll(g.stones);
+    if (g.liberties != 1) continue;
+
+    final int lib = g.libertyPoints.first;
+    final Point p = Point(lib % lines, lib ~/ lines);
+    // 활로를 메우는 수는 자살이 될 수 없지만 패·슈퍼코에는 걸린다
+    if (tryPlay(state, p.x, p.y) is PlayOk) out.add(p);
+  }
+  return out;
+}
 
 List<Point> starPoints(BoardSize size) => switch (size) {
       BoardSize.s9 => const <Point>[

@@ -150,9 +150,7 @@ class GameController extends ChangeNotifier {
     if (_state.ended) {
       return GameEnded(speech.summary(_state, lastMove: lastMove));
     }
-    return PlayedMove(
-      '${speech.moveResult(_state, ok.move)}',
-    );
+    return PlayedMove(speech.moveResult(_state, ok.move));
   }
 
   PlayOutcome resignGame(Player who) {

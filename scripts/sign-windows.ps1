@@ -1,4 +1,4 @@
-# Authenticode sign for Tauri Windows artifacts.
+﻿# Authenticode sign for Tauri Windows artifacts.
 # Skips when no certificate is available (unless SVIL_CODESIGN_REQUIRED=1).
 #
 # Certificate resolution order:

@@ -1,4 +1,4 @@
-# KataGo 바이너리 + 대국용 모델 배치
+﻿# KataGo 바이너리 + 대국용 모델 배치
 # NVIDIA RTX (5060 Ti 등): CUDA Toolkit 있으면 CUDA 빌드, 없으면 OpenCL (GPU Device 사용)
 # 사용: powershell -ExecutionPolicy Bypass -File scripts/setup-katago.ps1
 $ErrorActionPreference = 'Stop'

@@ -37,7 +37,7 @@ jobs:
           cache: npm
       - run: npm ci
       - name: generate engine diff fixture
-        run: npx tsx tools/engine_diff.mjs
+        run: node tools/engine_diff.mjs
       - name: pub get
         working-directory: app
         run: flutter pub get

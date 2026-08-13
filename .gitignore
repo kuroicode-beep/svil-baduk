@@ -30,3 +30,6 @@ app/test/fixtures/engine_diff.json
 dist-installer/
 app/android/.gradle/
 app/android/local.properties
+
+# 작업 중 임시 산출물 (KataGo 디버그 로그, 디자인 목업 등)
+tmp/

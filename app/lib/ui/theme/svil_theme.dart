@@ -186,10 +186,16 @@ ThemeData buildBadukTheme(VisionSettings v) {
         borderSide: BorderSide(color: v.focusColor, width: 3),
       ),
     ),
+    // FilledButton 도 표준 버튼과 같은 모양이다 — 밝은 채움 판때기는
+    // 버튼으로 읽히지 않는다는 사용자 피드백(0.17.0 캐릭터 화면)이 근거.
     filledButtonTheme: FilledButtonThemeData(
       style: FilledButton.styleFrom(
         minimumSize: const Size(kTouchMin, kTouchMin),
+        backgroundColor: v.surfaceColor,
+        foregroundColor: v.textColor,
+        side: BorderSide(color: v.borderColor, width: 1.5),
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
+        padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
         textStyle: TextStyle(fontSize: base, fontFamily: kFontFamily),
       ),
     ),
@@ -208,5 +214,11 @@ ThemeData buildBadukTheme(VisionSettings v) {
       ),
     ),
     dividerTheme: DividerThemeData(color: v.borderColor),
+    // 진행바: 트랙이 액센트색이면 0% 가 100% 처럼 보인다 (0.17.0 실사고).
+    // 채워진 부분만 밝고 트랙은 표면색이어야 진행이 전달된다.
+    progressIndicatorTheme: ProgressIndicatorThemeData(
+      color: SvilColors.accentStrong,
+      linearTrackColor: v.surfaceColor,
+    ),
   );
 }

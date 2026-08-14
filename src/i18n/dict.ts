@@ -453,6 +453,7 @@ const dict = {
   menuHelp: { ko: '도움말', en: 'Help', ja: 'ヘルプ', zh: '帮助', vi: 'Trợ giúp' },
   comingSoon: { ko: '준비 중', en: 'Coming soon', ja: '準備中', zh: '即将推出', vi: 'Sắp ra mắt' },
   setupTitle: { ko: '대국 설정', en: 'Game setup', ja: '対局設定', zh: '对局设置', vi: 'Thiết lập ván cờ' },
+  gradeTitle: { ko: '급수', en: 'Grade', ja: '段級位', zh: '段级', vi: 'Cấp bậc' },
   gradeBeginner: { ko: '입문', en: 'Beginner', ja: '入門', zh: '入门', vi: 'Nhập môn' },
   gradeKyuSuffix: { ko: '급', en: ' kyu', ja: '級', zh: '级', vi: ' kyu' },
   gradeDanSuffix: { ko: '단', en: ' dan', ja: '段', zh: '段', vi: ' dan' },

@@ -167,6 +167,7 @@ abstract final class S {
   static const LocString menuHelp = LocString("도움말", "Help", "ヘルプ", "帮助", "Trợ giúp");
   static const LocString comingSoon = LocString("준비 중", "Coming soon", "準備中", "即将推出", "Sắp ra mắt");
   static const LocString setupTitle = LocString("대국 설정", "Game setup", "対局設定", "对局设置", "Thiết lập ván cờ");
+  static const LocString gradeTitle = LocString("급수", "Grade", "段級位", "段级", "Cấp bậc");
   static const LocString gradeBeginner = LocString("입문", "Beginner", "入門", "入门", "Nhập môn");
   static const LocString gradeKyuSuffix = LocString("급", " kyu", "級", "级", " kyu");
   static const LocString gradeDanSuffix = LocString("단", " dan", "段", "段", " dan");
@@ -331,7 +332,7 @@ abstract final class S {
 }
 
 /// 완전성 테스트용 — 생성된 문자열 개수
-const int generatedStringCount = 283;
+const int generatedStringCount = 284;
 
 /// 완전성 테스트용 — 키 이름과 값 목록
 const Map<String, LocString> allStrings = <String, LocString>{
@@ -457,6 +458,7 @@ const Map<String, LocString> allStrings = <String, LocString>{
   "menuHelp": S.menuHelp,
   "comingSoon": S.comingSoon,
   "setupTitle": S.setupTitle,
+  "gradeTitle": S.gradeTitle,
   "gradeBeginner": S.gradeBeginner,
   "gradeKyuSuffix": S.gradeKyuSuffix,
   "gradeDanSuffix": S.gradeDanSuffix,

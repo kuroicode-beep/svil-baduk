@@ -83,16 +83,17 @@ class _CharacterScreenState extends State<CharacterScreen> {
                 onSubmitted: (_) => _save(),
               ),
               const SizedBox(height: 8),
-              FilledButton(
+              FilledButton.icon(
                 style: FilledButton.styleFrom(
                     minimumSize: const Size.fromHeight(kTouchLarge)),
                 onPressed: _save,
-                child: Text(S.profileSave(_lang)),
+                icon: const Icon(Icons.save_outlined),
+                label: Text(S.profileSave(_lang)),
               ),
               const SizedBox(height: 24),
 
               // ── 급수 · 레벨 ──────────────────────────────────
-              _row(t, S.difficulty(_lang), gradeLabel(grade, _lang)),
+              _row(t, S.gradeTitle(_lang), gradeLabel(grade, _lang)),
               _row(t, S.profileLevel(_lang), '${p.level}'),
 
               // ── 경험치 (진행바 + 수치 병기 — 색·막대만으로 전달 금지) ──

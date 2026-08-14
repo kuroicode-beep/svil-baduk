@@ -79,13 +79,18 @@ class HomeScreen extends StatelessWidget {
               ),
             ),
           ),
-          // P2P — 전송 계층 미구현. 기획상 자리는 여기다 (사용자 결정: 준비 중 노출)
+          // P2P — 전송 계층 미구현. 기획상 자리는 여기다 (사용자 결정: 준비 중 노출).
+          // 비활성 버튼은 Tab 이 건너뛰어 스크린리더가 존재 자체를 모른다(실측) —
+          // 포커스는 받되 누르면 준비 중임을 알린다.
           _tile(
             context,
             icon: Icons.groups_outlined,
             label: S.menuMulti(_lang),
             detail: S.comingSoon(_lang),
-            onTap: null,
+            onTap: () => ScaffoldMessenger.of(context).showSnackBar(
+              SnackBar(content: Text(
+                  '${S.menuMulti(_lang)} — ${S.comingSoon(_lang)}')),
+            ),
           ),
           _tile(
             context,

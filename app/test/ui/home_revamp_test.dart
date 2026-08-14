@@ -53,10 +53,18 @@ void main() {
       await pumpHome(tester, await boot(tester));
       expect(find.text(S.comingSoon(Lang.ko)), findsOneWidget);
 
+      // 비활성 버튼은 Tab 이 건너뛰어 스크린리더가 발견 못 한다(NVDA 실측) —
+      // 준비 중 타일도 포커스 가능해야 하고, 누르면 준비 중임을 알린다.
       final Iterable<OutlinedButton> disabled = tester
           .widgetList<OutlinedButton>(find.byType(OutlinedButton))
           .where((OutlinedButton b) => b.onPressed == null);
-      expect(disabled.length, 1, reason: '준비 중 타일 하나만 비활성이어야 한다');
+      expect(disabled, isEmpty, reason: '포커스 불가 타일이 있습니다');
+
+      await tester.tap(find.text(S.menuMulti(Lang.ko)));
+      await tester.pump();
+      await tester.pump(const Duration(milliseconds: 300));
+      expect(find.textContaining(S.comingSoon(Lang.ko)), findsWidgets,
+          reason: '눌렀을 때 준비 중임을 알려야 한다');
 
       // 스크린리더가 "준비 중" 을 듣는가 — 시맨틱 라벨로 확인
       expect(

@@ -34,6 +34,14 @@ final class SpokeOnly extends PlayOutcome {
   final String speech;
 }
 
+/// 입력 자체가 잘못됐다 (I열·범위 밖 등). 낭독은 하되 **실패**다 —
+/// 좌표칸이 텍스트를 지우지 않고 전체 선택으로 남겨야 한다(A12).
+/// SpokeOnly 로 뭉뚱그리면 화면이 성공으로 보고 입력을 비운다(실측로 발견).
+final class InputError extends PlayOutcome {
+  const InputError(this.speech);
+  final String speech;
+}
+
 final class GameEnded extends PlayOutcome {
   const GameEnded(this.speech);
   final String speech;
@@ -193,7 +201,7 @@ class GameController extends ChangeNotifier {
         return _runCommand(command, lastSpoken);
 
       case CoordError():
-        return SpokeOnly(coordErrorPhrase(parsed, lines));
+        return InputError(coordErrorPhrase(parsed, lines));
     }
   }
 

@@ -26,6 +26,7 @@ String _spoken(PlayOutcome o) => switch (o) {
       RejectedMove(:final String speech) => speech,
       SpokeOnly(:final String speech) => speech,
       GameEnded(:final String speech) => speech,
+      InputError(:final String speech) => speech,
     };
 
 void main() {

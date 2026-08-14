@@ -119,12 +119,14 @@ void main() {
       expect(c.state.history.length, before);
     });
 
-    test('잘못된 입력은 낭독만 하고 판을 건드리지 않는다', () {
+    test('잘못된 입력은 InputError — 낭독하되 실패로 구분된다', () {
+      // SpokeOnly 로 돌려주면 화면이 성공으로 보고 입력을 비운다(A12 위반,
+      // 실측로 발견). 오류는 타입으로 구분해야 좌표칸이 텍스트를 남긴다.
       final GameController c = make();
       for (final String bad in <String>['I5', 'Z99', '무슨소리', '']) {
         final PlayOutcome r = c.submitInput(bad);
-        expect(r, isA<SpokeOnly>(), reason: bad);
-        expect((r as SpokeOnly).speech, isNotEmpty, reason: bad);
+        expect(r, isA<InputError>(), reason: bad);
+        expect((r as InputError).speech, isNotEmpty, reason: bad);
       }
       expect(c.state.history, isEmpty);
     });

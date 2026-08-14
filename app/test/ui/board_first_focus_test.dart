@@ -29,7 +29,7 @@ void main() {
           interactive: true,
           coordMode: CoordDisplayMode.off,
           lineWidth: 2,
-          onMoveCursor: (_, __) {},
+          onMoveCursor: (_, _) {},
           onSetCursor: (_) {},
           onIntent: (_) {},
           onFirstFocus: onFirst,

@@ -12,6 +12,16 @@ class HistoryEntry {
 
 const List<HistoryEntry> changelog = <HistoryEntry>[
   HistoryEntry(
+    version: "0.16.1",
+    date: "2026-08-14",
+    lines: <String>[
+      "판 첫 포커스에서 조작 안내를 1회 낭독 (NVDA 실측: hint 는 낭독되지 않음)",
+      "홈·배우기 타일이 키보드 포커스에서 침묵하던 것 수정",
+      "내 착수 낭독이 AI 즉답에 삼켜지던 것 수정 — 응수 반영에 최소 간격 700ms",
+      "좌표 입력 오류 후 텍스트가 지워지던 것 수정 — 전체 선택으로 유지",
+    ],
+  ),
+  HistoryEntry(
     version: "0.16.0",
     date: "2026-08-09",
     lines: <String>[

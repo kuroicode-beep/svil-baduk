@@ -75,16 +75,18 @@ class HomeScreen extends StatelessWidget {
   }) =>
       Padding(
         padding: const EdgeInsets.only(bottom: 12),
-        child: Semantics(
-          button: true,
-          label: '$label, $detail',
-          child: ExcludeSemantics(
-            child: FilledButton(
-              style: FilledButton.styleFrom(
-                minimumSize: const Size.fromHeight(kListItemMin),
-                alignment: Alignment.centerLeft,
-              ),
-              onPressed: onTap,
+        // 라벨은 버튼 안에 병합한다. 바깥 Semantics + 안쪽 ExcludeSemantics
+        // 구조는 키보드 포커스(안쪽 버튼)와 낭독(바깥 노드)이 갈라져서
+        // Tab 으로 닿았을 때 아무것도 읽히지 않는다 — NVDA 실측로 발견.
+        child: FilledButton(
+          style: FilledButton.styleFrom(
+            minimumSize: const Size.fromHeight(kListItemMin),
+            alignment: Alignment.centerLeft,
+          ),
+          onPressed: onTap,
+          child: Semantics(
+            label: '$label, $detail',
+            child: ExcludeSemantics(
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 mainAxisSize: MainAxisSize.min,

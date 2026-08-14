@@ -186,6 +186,11 @@ class _SoloScreenState extends State<SoloScreen> {
         _announcer.critical(speech);
         setState(() => _status = speech);
         return true;
+      case InputError(:final String speech):
+        // 낭독은 하되 실패로 돌려준다 — 좌표칸이 텍스트를 선택 상태로 남긴다
+        _announcer.critical(speech);
+        setState(() => _status = speech);
+        return false;
     }
   }
 
@@ -262,7 +267,14 @@ class _SoloScreenState extends State<SoloScreen> {
 
     setState(() => _thinking = true);
     try {
+      final Stopwatch sw = Stopwatch()..start();
       final OpponentReply reply = await engine.nextMove(_game.state);
+      // 즉답이면 직전 알림(내 착수)이 삼켜진다 — NVDA 실측: 알림 두 개가
+      // 수 ms 간격이면 하나만 도달했다. 내 착수가 들릴 시간을 확보한다.
+      final int remain = 700 - sw.elapsedMilliseconds;
+      if (remain > 0) {
+        await Future<void>.delayed(Duration(milliseconds: remain));
+      }
       if (!mounted) return;
       switch (reply) {
         case OpponentMove(:final Point point):

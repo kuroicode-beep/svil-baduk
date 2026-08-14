@@ -151,17 +151,16 @@ class _LearnScreenState extends State<LearnScreen> {
 
     return Padding(
       padding: const EdgeInsets.only(bottom: 8),
-      child: Semantics(
-        button: true,
-        enabled: unlocked,
-        label: '${s.title(_lang.code)}, $state',
-        child: ExcludeSemantics(
-          child: OutlinedButton(
-            style: OutlinedButton.styleFrom(
-              minimumSize: const Size.fromHeight(kListItemMin),
-              alignment: Alignment.centerLeft,
-            ),
-            onPressed: unlocked ? () => _learn.openStage(s) : null,
+      // 홈 타일과 같은 이유로 라벨을 버튼 안에 병합한다 (포커스 침묵 방지)
+      child: OutlinedButton(
+        style: OutlinedButton.styleFrom(
+          minimumSize: const Size.fromHeight(kListItemMin),
+          alignment: Alignment.centerLeft,
+        ),
+        onPressed: unlocked ? () => _learn.openStage(s) : null,
+        child: Semantics(
+          label: '${s.title(_lang.code)}, $state',
+          child: ExcludeSemantics(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               mainAxisSize: MainAxisSize.min,

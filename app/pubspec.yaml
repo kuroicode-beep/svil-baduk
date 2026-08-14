@@ -16,7 +16,7 @@ publish_to: 'none' # Remove this line if you wish to publish to pub.dev
 # https://developer.apple.com/library/archive/documentation/General/Reference/InfoPlistKeyReference/Articles/CoreFoundationKeys.html
 # In Windows, build-name is used as the major, minor, and patch parts
 # of the product and file versions while build-number is used as the build suffix.
-version: 0.17.1+1
+version: 0.18.0+1
 
 environment:
   sdk: ^3.10.4
@@ -41,8 +41,17 @@ dependencies:
   # SGF 내보내기·가져오기 (데스크톱 파일 대화상자)
   file_selector: ^1.0.3
 
+  # P2P 대국. 브로커 클라이언트는 직접 쓴다 (알파 상태의 대체 패키지 금지 — 가드레일).
+  # 크기: libwebrtc.dll +20MB 는 스파이크에서 실측·승인됨 (체크리스트 B2 60MB).
+  flutter_webrtc: ^1.6.0
+
+  # 방 ID 를 휴대폰 카메라로 옮긴다 (체크리스트 P7)
+  qr_flutter: ^4.1.0
+
 dev_dependencies:
   flutter_test:
+    sdk: flutter
+  integration_test:
     sdk: flutter
 
   # The "flutter_lints" package below contains a set of recommended lints to

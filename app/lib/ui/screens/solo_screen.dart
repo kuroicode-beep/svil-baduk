@@ -28,6 +28,7 @@ import '../widgets/board/board_announcer.dart';
 import '../widgets/board/board_view.dart';
 import '../widgets/board/coord_field.dart';
 import '../widgets/board/cursor_readout.dart';
+import '../widgets/confirm_resign.dart';
 
 /// 언어별 낭독 어휘를 만든다
 BoardSpeech speechFor(Lang lang) => BoardSpeech(
@@ -385,6 +386,13 @@ class _SoloScreenState extends State<SoloScreen> {
     return ok;
   }
 
+  /// 기권은 항상 확인창을 거친다 (체크리스트 A15)
+  Future<void> _askResign() async {
+    if (!await confirmResign(context, _lang)) return;
+    if (!mounted) return;
+    _handle(_game.resignGame(_game.state.toPlay));
+  }
+
   void _onIntent(BoardIntent intent) {
     switch (intent) {
       case BoardIntent.arm:
@@ -501,8 +509,17 @@ class _SoloScreenState extends State<SoloScreen> {
           helper: S.coordInputHelper(_lang),
           vision: v,
           enabled: interactive,
-          onSubmit: (String raw) => _handleAndReply(
-              _game.submitInput(raw, lastSpoken: _announcer.lastSpoken)),
+          onSubmit: (String raw) {
+            // 기권은 좌표칸 명령이라도 확인창을 거친다 (A15)
+            final CoordInput parsed = parseCoordInput(raw, _game.state.size);
+            if (parsed is CoordCommand &&
+                parsed.command == BoardCommand.resign) {
+              unawaited(_askResign());
+              return true;
+            }
+            return _handleAndReply(
+                _game.submitInput(raw, lastSpoken: _announcer.lastSpoken));
+          },
         ),
         const SizedBox(height: 12),
         if (interactive && widget.settings.placeMode == PlaceMode.confirm)
@@ -547,8 +564,7 @@ class _SoloScreenState extends State<SoloScreen> {
               _action(S.sgfExport(_lang), true, _exportSgf),
               _action(S.sgfImport(_lang), true, _importSgf),
             ],
-            _action(S.resign(_lang), interactive,
-                () => _handle(_game.resignGame(_game.state.toPlay))),
+            _action(S.resign(_lang), interactive, () => unawaited(_askResign())),
           ],
         ),
       ],

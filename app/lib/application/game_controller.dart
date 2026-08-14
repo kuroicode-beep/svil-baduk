@@ -289,6 +289,15 @@ class GameController extends ChangeNotifier {
     return r;
   }
 
+  /// 원격(P2P 재동기화)에서 온 판을 통째로 채택한다.
+  /// 판 크기가 달라질 수 있으므로 커서를 안으로 되돌린다.
+  void adoptState(GameState s) {
+    _state = s;
+    _armed = false;
+    _clampCursor();
+    notifyListeners();
+  }
+
   /// 판 크기가 바뀌었을 수 있으므로 커서를 판 안으로 되돌린다
   void _clampCursor() {
     _cursor = Point(

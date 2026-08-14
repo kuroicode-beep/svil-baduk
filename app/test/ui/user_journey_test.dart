@@ -5,6 +5,7 @@
 // 여기서는 사용자가 실제로 하는 순서 그대로 앱 전체를 누빈다.
 
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:svil_baduk/application/app_container.dart';
@@ -13,10 +14,14 @@ import 'package:svil_baduk/ui/screens/character_screen.dart';
 import 'package:svil_baduk/ui/screens/home_screen.dart';
 import 'package:svil_baduk/ui/screens/learn_screen.dart';
 import 'package:svil_baduk/ui/screens/settings_screen.dart';
+import 'package:svil_baduk/ui/screens/multi_screen.dart';
 import 'package:svil_baduk/ui/screens/solo_screen.dart';
 import 'package:svil_baduk/ui/screens/solo_setup_screen.dart';
 import 'package:svil_baduk/ui/theme/svil_theme.dart';
+import 'package:svil_baduk/ui/widgets/board/board_view.dart';
 import 'package:svil_baduk/ui/widgets/board/cursor_readout.dart';
+
+import '../support/loopback_p2p.dart';
 
 void main() {
   TestWidgetsFlutterBinding.ensureInitialized();
@@ -27,7 +32,11 @@ void main() {
       [Map<String, Object> initial = const <String, Object>{}]) async {
     final AppContainer? c = await tester.runAsync(() async {
       SharedPreferences.setMockInitialValues(initial);
-      return AppContainer.create(prefs: await SharedPreferences.getInstance());
+      return AppContainer.create(
+        prefs: await SharedPreferences.getInstance(),
+        // 실 WebSocket 이 위젯 테스트의 FakeAsync 를 멈추게 하므로 가짜를 쓴다
+        makeEndpoint: () => FakeEndpoint(FakeBrokerRegistry()),
+      );
     });
     container = c!;
     await tester.pumpWidget(MaterialApp(
@@ -111,8 +120,12 @@ void main() {
     await settle(tester, 900);
     expect(status(tester), startsWith('백 '), reason: 'AI 가 응수하지 않았습니다');
 
-    // 기권 → 전적·경험치 반영
+    // 기권 → 확인창(A15) → 전적·경험치 반영
     await tapText(tester, S.resign(Lang.ko));
+    expect(find.text(S.resignConfirmTitle(Lang.ko)), findsOneWidget,
+        reason: '기권은 한 번의 탭으로 끝나면 안 된다');
+    await tester.tap(find.widgetWithText(TextButton, S.resign(Lang.ko)));
+    await settle(tester);
     expect(container.profile.profile.gamesPlayed, 1);
     expect(container.profile.profile.losses, 1);
     expect(container.profile.profile.xp, greaterThan(0));
@@ -173,13 +186,78 @@ void main() {
     expect(find.byType(HomeScreen), findsOneWidget);
   });
 
-  testWidgets('여정 5 — 준비 중 메뉴는 눌러도 아무 데도 가지 않는다',
+  testWidgets('여정 5 — 상대랑 두기: 로비에 닿고 방 ID 가 생기고 돌아온다',
       (WidgetTester tester) async {
     await boot(tester);
     await tester.tap(find.text(S.menuMulti(Lang.ko)), warnIfMissed: false);
     await settle(tester);
-    expect(find.byType(HomeScreen), findsOneWidget,
-        reason: '준비 중 메뉴가 어딘가로 이동했습니다');
+    expect(find.byType(MultiScreen), findsOneWidget);
+    expect(find.textContaining('svb-'), findsWidgets,
+        reason: '방 ID 가 만들어져 보여야 한다');
+    await goBack(tester);
+    expect(find.byType(HomeScreen), findsOneWidget);
+  });
+
+  testWidgets('여정 6 — 계가: 혼자 두기에서 두 수 → 계가 → 패스 둘로 종국',
+      (WidgetTester tester) async {
+    await boot(tester);
+    await tapText(tester, S.solo(Lang.ko));
+    await tapText(tester, '9${S.rowSuffix(Lang.ko)}');
+    await tapText(tester, S.opponentNone(Lang.ko));
+    await tester.scrollUntilVisible(find.text(S.startGame(Lang.ko)), 300,
+        scrollable: find.byType(Scrollable).first);
+    await tester.pump();
+    await tester.tap(find.text(S.startGame(Lang.ko)));
+    await settle(tester, 800);
+
+    Future<void> type(String s) async {
+      await tester.enterText(find.byType(TextField), s);
+      await tester.testTextInput.receiveAction(TextInputAction.go);
+      await settle(tester, 200);
+    }
+
+    await type('D4');
+    await type('F6');
+
+    // 계가 — 사석 판정이 없으므로 "추정" 이 반드시 붙는다
+    await tapText(tester, S.scoreNow(Lang.ko));
+    expect(status(tester), contains(S.scoreEstimate(Lang.ko)),
+        reason: '계가 결과가 화면상 쌍둥이에 남아야 한다');
+
+    // 패스 두 번이면 종국 — 좌표칸 명령으로도 된다
+    await type(S.pass(Lang.ko));
+    await type(S.pass(Lang.ko));
+    expect(container.profile.profile.gamesPlayed, 0,
+        reason: '상대 없음(혼자 두기)은 전적에 넣지 않는다');
+    final CursorReadout readout =
+        tester.widget<CursorReadout>(find.byType(CursorReadout));
+    expect(readout.status, isNotEmpty, reason: '종국 문장이 남아야 한다');
+  });
+
+  testWidgets('여정 7 — 배우기 첫 문제를 풀면 홈 타일 진행이 오른다',
+      (WidgetTester tester) async {
+    await boot(tester);
+    expect(find.text('0 / ${container.curriculum.problemCount}'),
+        findsOneWidget);
+
+    await tapText(tester, S.learn(Lang.ko));
+    final String firstStage = container.curriculum.stages.first.title('ko');
+    await tapText(tester, firstStage);
+
+    // 정답 보기가 커서를 정답으로 옮긴다 → 판에 포커스 → 엔터
+    await tapText(tester, S.learnShowAnswer(Lang.ko));
+    tester.state<BoardViewState>(find.byType(BoardView)).requestFocus();
+    await tester.pump();
+    await tester.sendKeyEvent(LogicalKeyboardKey.enter);
+    await settle(tester, 600);
+    expect(container.progress.solved, isNotEmpty,
+        reason: '정답이 진행으로 저장돼야 한다');
+
+    await goBack(tester); // 문제 → 목록
+    await goBack(tester); // 목록 → 홈
+    expect(find.byType(HomeScreen), findsOneWidget);
+    expect(find.text('1 / ${container.curriculum.problemCount}'),
+        findsOneWidget, reason: '홈 타일이 새 진행을 보여야 한다');
   });
 
   testWidgets('버튼 표준 — 앱 어디에도 밝은 채움 버튼이 없다',

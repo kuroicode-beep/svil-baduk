@@ -12,8 +12,10 @@ import 'package:shared_preferences/shared_preferences.dart';
 import '../data/db/learn_progress_store.dart';
 import '../domain/profile/profile.dart';
 import '../data/db/settings_store.dart';
+import '../data/p2p/webrtc_endpoint.dart';
 import '../data/platform/current_platform.dart';
 import '../domain/learn/curriculum.dart';
+import '../domain/p2p/transport.dart';
 import '../domain/platform_caps.dart';
 import '../ui/theme/board_theme.dart';
 import '../ui/theme/svil_theme.dart';
@@ -136,6 +138,7 @@ class AppContainer {
     required this.progress,
     required this.profile,
     required this.curriculum,
+    required this.makeEndpoint,
   });
 
   final VisionController vision;
@@ -148,9 +151,16 @@ class AppContainer {
   final ProfileController profile;
   final Curriculum curriculum;
 
+  /// P2P 전송 팩토리. 테스트가 가짜를 끼운다 —
+  /// 위젯 테스트에서 실 WebSocket 이 열리면 FakeAsync 가 멈춘다.
+  final P2PEndpoint Function() makeEndpoint;
+
   /// [prefs] 를 넘기면 그걸 쓴다. 테스트가 저장소를 직접 주고
   /// SharedPreferences 싱글턴을 건드리지 않게 하기 위한 것이다.
-  static Future<AppContainer> create({SharedPreferences? prefs}) async {
+  static Future<AppContainer> create({
+    SharedPreferences? prefs,
+    P2PEndpoint Function()? makeEndpoint,
+  }) async {
     final PlatformCaps caps = detectCaps();
     final SharedPreferences store =
         prefs ?? await SharedPreferences.getInstance();
@@ -169,6 +179,7 @@ class AppContainer {
       profile: ProfileController(store, ProfileController.load(store)),
       curriculum: Curriculum.parse(
           await rootBundle.loadString('assets/learn/curriculum.json')),
+      makeEndpoint: makeEndpoint ?? WebRtcEndpoint.new,
     );
   }
 

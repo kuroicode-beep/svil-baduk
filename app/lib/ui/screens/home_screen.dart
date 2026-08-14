@@ -17,6 +17,7 @@ import '../theme/svil_theme.dart';
 import '../../version.dart';
 import 'character_screen.dart';
 import 'learn_screen.dart';
+import 'multi_screen.dart';
 import 'settings_screen.dart';
 import 'solo_setup_screen.dart';
 
@@ -29,6 +30,19 @@ class HomeScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    // 다른 화면에서 돌아왔을 때 타일의 진행·전적·설정 요약이 낡아 있으면
+    // 안 된다 (여정 테스트가 잡은 실결함) — 컨트롤러 변화에 구독한다.
+    return ListenableBuilder(
+      listenable: Listenable.merge(<Listenable>[
+        container.settings,
+        container.progress,
+        container.profile,
+      ]),
+      builder: (BuildContext context, _) => _build(context),
+    );
+  }
+
+  Widget _build(BuildContext context) {
     final AppSettings st = container.settings.settings;
 
     return Scaffold(
@@ -79,18 +93,16 @@ class HomeScreen extends StatelessWidget {
               ),
             ),
           ),
-          // P2P — 전송 계층 미구현. 기획상 자리는 여기다 (사용자 결정: 준비 중 노출).
-          // 비활성 버튼은 Tab 이 건너뛰어 스크린리더가 존재 자체를 모른다(실측) —
-          // 포커스는 받되 누르면 준비 중임을 알린다.
           _tile(
             context,
             icon: Icons.groups_outlined,
             label: S.menuMulti(_lang),
-            detail: S.comingSoon(_lang),
-            onTap: () => ScaffoldMessenger.of(context).showSnackBar(
-              SnackBar(content: Text(
-                  '${S.menuMulti(_lang)} — ${S.comingSoon(_lang)}')),
-            ),
+            detail: '${S.hostRoom(_lang)} · ${S.joinRoom(_lang)}',
+            onTap: () => _push(
+                context,
+                MultiScreen(
+                    container: container,
+                    makeEndpoint: container.makeEndpoint)),
           ),
           _tile(
             context,

@@ -14,7 +14,10 @@ import 'package:svil_baduk/domain/profile/profile.dart';
 import 'package:svil_baduk/i18n/strings.g.dart';
 import 'package:svil_baduk/ui/screens/character_screen.dart';
 import 'package:svil_baduk/ui/screens/home_screen.dart';
+import 'package:svil_baduk/ui/screens/multi_screen.dart';
 import 'package:svil_baduk/ui/screens/solo_screen.dart';
+
+import '../support/loopback_p2p.dart';
 
 void main() {
   TestWidgetsFlutterBinding.ensureInitialized();
@@ -23,7 +26,11 @@ void main() {
       [Map<String, Object> initial = const <String, Object>{}]) async {
     final AppContainer? c = await tester.runAsync(() async {
       SharedPreferences.setMockInitialValues(initial);
-      return AppContainer.create(prefs: await SharedPreferences.getInstance());
+      return AppContainer.create(
+        prefs: await SharedPreferences.getInstance(),
+        // 실 WebSocket 이 위젯 테스트의 FakeAsync 를 멈추게 하므로 가짜를 쓴다
+        makeEndpoint: () => FakeEndpoint(FakeBrokerRegistry()),
+      );
     });
     return c!;
   }
@@ -48,13 +55,13 @@ void main() {
       }
     });
 
-    testWidgets('P2P 는 준비 중으로 비활성 — 낭독 라벨에도 담긴다',
+    testWidgets('상대랑 두기 타일이 P2P 로비를 연다 (0.18.0 — 준비 중 해제)',
         (WidgetTester tester) async {
       await pumpHome(tester, await boot(tester));
-      expect(find.text(S.comingSoon(Lang.ko)), findsOneWidget);
+      expect(find.text(S.comingSoon(Lang.ko)), findsNothing,
+          reason: '전송 계층이 생겼으니 준비 중 표기는 사라져야 한다');
 
-      // 비활성 버튼은 Tab 이 건너뛰어 스크린리더가 발견 못 한다(NVDA 실측) —
-      // 준비 중 타일도 포커스 가능해야 하고, 누르면 준비 중임을 알린다.
+      // 모든 타일이 포커스 가능해야 한다 (비활성은 Tab 이 건너뛴다 — NVDA 실측)
       final Iterable<OutlinedButton> disabled = tester
           .widgetList<OutlinedButton>(find.byType(OutlinedButton))
           .where((OutlinedButton b) => b.onPressed == null);
@@ -63,15 +70,9 @@ void main() {
       await tester.tap(find.text(S.menuMulti(Lang.ko)));
       await tester.pump();
       await tester.pump(const Duration(milliseconds: 300));
-      expect(find.textContaining(S.comingSoon(Lang.ko)), findsWidgets,
-          reason: '눌렀을 때 준비 중임을 알려야 한다');
-
-      // 스크린리더가 "준비 중" 을 듣는가 — 시맨틱 라벨로 확인
-      expect(
-        find.bySemanticsLabel(
-            '${S.menuMulti(Lang.ko)}, ${S.comingSoon(Lang.ko)}'),
-        findsOneWidget,
-      );
+      expect(find.byType(MultiScreen), findsOneWidget,
+          reason: '타일이 P2P 로비로 이어져야 한다');
+      expect(find.text(S.yourId(Lang.ko)), findsOneWidget);
     });
 
     testWidgets('타일은 밝은 채움 버튼이 아니다 — 대비 회귀 방지',
@@ -134,6 +135,10 @@ void main() {
       await tester.tap(find.text(S.resign(Lang.ko)));
       await tester.pump();
       await tester.pump(const Duration(milliseconds: 300));
+      // 기권은 확인창 경유 (A15)
+      await tester.tap(find.widgetWithText(TextButton, S.resign(Lang.ko)));
+      await tester.pump();
+      await tester.pump(const Duration(milliseconds: 300));
 
       final Profile p = c.profile.profile;
       expect(p.gamesPlayed, 1);
@@ -158,6 +163,9 @@ void main() {
           scrollable: find.byType(Scrollable).first);
       await tester.pump();
       await tester.tap(find.text(S.resign(Lang.ko)));
+      await tester.pump();
+      await tester.pump(const Duration(milliseconds: 300));
+      await tester.tap(find.widgetWithText(TextButton, S.resign(Lang.ko)));
       await tester.pump();
       await tester.pump(const Duration(milliseconds: 300));
       expect(c.profile.profile.gamesPlayed, 0,

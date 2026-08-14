@@ -251,6 +251,13 @@ abstract final class S {
   static const LocString returnLobby = LocString("로비로 돌아가기", "Back to lobby", "ロビーへ", "返回大厅", "Về sảnh");
   static const LocString reinitPeer = LocString("연결 다시 준비", "Reset connection", "接続をやり直す", "重置连接", "Thiết lập lại kết nối");
   static const LocString p2pHint = LocString("서버리스 WebRTC P2P (PeerJS 시그널링). 같은 Wi‑Fi가 아니면 연결이 실패할 수 있습니다.", "Serverless WebRTC P2P (PeerJS signaling). Connection may fail across strict NAT.", "サーバーレスWebRTC P2P。厳格なNATでは失敗することがあります。", "无服务器 WebRTC P2P。严格 NAT 下可能失败。", "P2P WebRTC không server. NAT nghiêm có thể thất bại.");
+  static const LocString opponentTurn = LocString("상대 차례", "Opponent's turn", "相手の番", "对方回合", "Lượt đối thủ");
+  static const LocString notYourTurn = LocString("지금은 상대 차례입니다", "It's your opponent's turn", "今は相手の番です", "现在轮到对方", "Đang là lượt đối thủ");
+  static const LocString multiNoUndo = LocString("함께 두기에서는 무르기·힌트를 쓸 수 없습니다", "Undo and hints are not available in online games", "オンライン対局では待ったとヒントは使えません", "联机对弈不能悔棋或提示", "Không thể hoàn tác hay gợi ý khi chơi online");
+  static const LocString protocolMismatch = LocString("앱 버전이 서로 다릅니다. 양쪽 모두 최신 버전으로 업데이트하세요.", "App versions differ. Update both sides to the latest version.", "アプリのバージョンが異なります。両方とも最新に更新してください。", "双方应用版本不同，请都更新到最新版本。", "Phiên bản ứng dụng khác nhau. Hãy cập nhật cả hai bên.");
+  static const LocString idCopied = LocString("복사했습니다", "Copied", "コピーしました", "已复制", "Đã sao chép");
+  static const LocString roomQrLabel = LocString("방 ID QR — 상대가 휴대폰으로 찍어 옮길 수 있습니다", "Room ID QR — your friend can scan it with a phone", "部屋ID QR — 相手がスマホで読み取れます", "房间ID二维码 — 对方可用手机扫描", "Mã QR ID phòng — bạn có thể quét bằng điện thoại");
+  static const LocString crossPlayNote = LocString("웹 판과는 서로 연결되지 않습니다", "Not compatible with the web version", "ウェブ版とは接続できません", "与网页版不互通", "Không tương thích với bản web");
   static const LocString hostLabel = LocString("호스트", "Host", "ホスト", "房主", "Chủ phòng");
   static const LocString score = LocString("계가(초보)", "Score (beginner)", "終局計算(初級)", "点目(入门)", "Đếm điểm (cơ bản)");
   static const LocString territory = LocString("집", "Territory", "地", "目", "Đất");
@@ -332,7 +339,7 @@ abstract final class S {
 }
 
 /// 완전성 테스트용 — 생성된 문자열 개수
-const int generatedStringCount = 284;
+const int generatedStringCount = 291;
 
 /// 완전성 테스트용 — 키 이름과 값 목록
 const Map<String, LocString> allStrings = <String, LocString>{
@@ -542,6 +549,13 @@ const Map<String, LocString> allStrings = <String, LocString>{
   "returnLobby": S.returnLobby,
   "reinitPeer": S.reinitPeer,
   "p2pHint": S.p2pHint,
+  "opponentTurn": S.opponentTurn,
+  "notYourTurn": S.notYourTurn,
+  "multiNoUndo": S.multiNoUndo,
+  "protocolMismatch": S.protocolMismatch,
+  "idCopied": S.idCopied,
+  "roomQrLabel": S.roomQrLabel,
+  "crossPlayNote": S.crossPlayNote,
   "hostLabel": S.hostLabel,
   "score": S.score,
   "territory": S.territory,

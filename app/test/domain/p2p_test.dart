@@ -111,12 +111,22 @@ void main() {
       expect(r.effects.single, isA<SoundEffect>());
     });
 
-    test('순서가 어긋나면 전체 상태를 다시 요청한다', () {
-      // 프로토콜 1 은 이걸 조용히 삼켰다
+    test('순서가 어긋나면 호스트는 권위 판을 보낸다', () {
+      // 프로토콜 1 은 이걸 조용히 삼켰다.
+      // 호스트↔게스트가 서로 StateRequest 만 보내면 교착이라,
+      // 호스트는 자기 판(StateMsg)을 직접 보낸다.
       final P2PResult r = applyP2PMessage(
           hostInPlay(), const MoveMsg(seq: 7, player: Stone.black, x: 3, y: 3));
       expect(r.state.error, MultiError.badSequence);
       expect(r.state.game.history, isEmpty);
+      expect((r.effects.single as SendEffect).message, isA<StateMsg>());
+    });
+
+    test('순서가 어긋나면 게스트는 호스트 판을 요청한다', () {
+      final MultiState guest = hostInPlay().copyWith(amHost: false);
+      final P2PResult r = applyP2PMessage(
+          guest, const MoveMsg(seq: 7, player: Stone.black, x: 3, y: 3));
+      expect(r.state.error, MultiError.badSequence);
       expect((r.effects.single as SendEffect).message, isA<StateRequest>());
     });
 
@@ -126,7 +136,7 @@ void main() {
           hostInPlay(), const MoveMsg(seq: 0, player: Stone.white, x: 3, y: 3));
       expect(r.state.error, MultiError.outOfTurn);
       expect(r.state.game.history, isEmpty);
-      expect((r.effects.single as SendEffect).message, isA<StateRequest>());
+      expect((r.effects.single as SendEffect).message, isA<StateMsg>());
     });
 
     test('반칙 수도 재동기화로 이어진다', () {
@@ -138,7 +148,9 @@ void main() {
       final P2PResult r = applyP2PMessage(
           s, const MoveMsg(seq: 1, player: Stone.white, x: 3, y: 3));
       expect(r.state.error, MultiError.badSequence);
-      expect((r.effects.single as SendEffect).message, isA<StateRequest>());
+      final StateMsg sent =
+          (r.effects.single as SendEffect).message as StateMsg;
+      expect(sent.moves.length, 1, reason: '호스트의 현재 판을 담아야 한다');
     });
 
     test('패스는 소리를 내지 않는다', () {

@@ -245,6 +245,24 @@ final class SoundEffect extends P2PEffect {
 /// 부수효과를 실행하지 않고 목록으로 돌려준다 — 리듀서를 순수하게 유지한다
 typedef P2PResult = ({MultiState state, List<P2PEffect> effects});
 
+/// 어긋남 복구 — 호스트가 판의 권위다.
+/// 호스트는 자기 판을 그대로 보내고, 게스트는 호스트 판을 요청한다.
+/// (양쪽 다 StateRequest 를 보내면 호스트→게스트 요청을 게스트가
+/// 응답하지 못해 교착된다 — StateRequest 처리는 호스트 전용이다.)
+List<P2PEffect> _resyncEffects(MultiState s) => <P2PEffect>[
+      if (s.amHost)
+        SendEffect(StateMsg(
+          size: s.size,
+          hostColor: s.hostColor,
+          moves: <List<int>>[
+            for (final Move m in s.game.history)
+              <int>[m.x, m.y, m.isPass ? 1 : 0],
+          ],
+        ))
+      else
+        const SendEffect(StateRequest()),
+    ];
+
 P2PResult applyP2PMessage(MultiState s, P2PMessage msg) {
   switch (msg) {
     case StateRequest():
@@ -324,23 +342,23 @@ P2PResult applyP2PMessage(MultiState s, P2PMessage msg) {
 
     case MoveMsg(:final int seq, :final Player player, :final int x, :final int y, :final bool isPass):
       if (seq != s.seq) {
-        // 어긋났으면 조용히 삼키지 않고 전체 상태를 다시 요청한다
+        // 어긋났으면 조용히 삼키지 않고 재동기화한다
         return (
           state: s.copyWith(error: MultiError.badSequence),
-          effects: <P2PEffect>[const SendEffect(StateRequest())],
+          effects: _resyncEffects(s),
         );
       }
       if (player != s.game.toPlay) {
         return (
           state: s.copyWith(error: MultiError.outOfTurn),
-          effects: <P2PEffect>[const SendEffect(StateRequest())],
+          effects: _resyncEffects(s),
         );
       }
       final PlayResult r = isPass ? passMove(s.game) : tryPlay(s.game, x, y);
       if (r is! PlayOk) {
         return (
           state: s.copyWith(error: MultiError.badSequence),
-          effects: <P2PEffect>[const SendEffect(StateRequest())],
+          effects: _resyncEffects(s),
         );
       }
       return (

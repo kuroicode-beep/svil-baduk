@@ -12,6 +12,18 @@ class HistoryEntry {
 
 const List<HistoryEntry> changelog = <HistoryEntry>[
   HistoryEntry(
+    version: "0.18.0",
+    date: "2026-08-14",
+    lines: <String>[
+      "상대랑 두기(P2P) — 준비 중 해제. WebRTC 전송 계층 + 직접 쓴 PeerJS 브로커 클라이언트",
+      "로비: 방 ID 한 글자씩 낭독 · QR · 복사. 웹 판과는 서로 연결되지 않음을 명시",
+      "재연결 시 판 복원 — 어긋나면 호스트 판이 권위 (프로토콜 2)",
+      "기권은 항상 확인창 경유 (솔로 포함) — 좌표칸의 기권 명령도 동일",
+      "배우기 진행·전적이 홈 타일에 실시간 반영되지 않던 것 수정",
+      "실측: 공개 브로커 시그널링 왕복 1.7초 · 실 WebRTC 데이터채널 연결 1.8초",
+    ],
+  ),
+  HistoryEntry(
     version: "0.17.1",
     date: "2026-08-14",
     lines: <String>[

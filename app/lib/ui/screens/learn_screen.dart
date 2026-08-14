@@ -263,6 +263,7 @@ class _LearnScreenState extends State<LearnScreen> {
           LineWeight.normal => 2.5,
           LineWeight.thick => 4,
         },
+        onFirstFocus: () => _say(S.boardHint(_lang)),
         onMoveCursor: _learn.moveCursor,
         onSetCursor: _learn.setCursor,
         onIntent: (BoardIntent i) {

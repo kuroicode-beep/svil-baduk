@@ -440,6 +440,8 @@ class _SoloScreenState extends State<SoloScreen> {
         LineWeight.thick => 4,
       },
       ownership: _score?.ownership,
+      // hint 는 NVDA 에서 낭독되지 않는다(실측) — 첫 포커스에 한 번 말해 준다
+      onFirstFocus: () => _announcer.critical(S.boardHint(_lang)),
       onMoveCursor: _game.moveCursor,
       onSetCursor: _game.setCursor,
       onIntent: _onIntent,

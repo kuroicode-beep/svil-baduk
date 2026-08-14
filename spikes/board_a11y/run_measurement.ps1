@@ -38,7 +38,9 @@ if (-not (Test-Path $nvda)) {
 } else {
     if (-not (Get-Process nvda -ErrorAction SilentlyContinue)) {
         Write-Host 'NVDA 시작... (소리가 나야 정상입니다)'
-        Start-Process $nvda -ArgumentList '--log-level=IO'
+        # 로그 레벨은 userConfig\nvda.ini 의 loggingLevel = IO 가 정한다.
+        # --log-level 은 정수만 받으므로(10/12/15/20/100) 이름을 넘기면 인자 오류창이 뜬다.
+        Start-Process $nvda
         Start-Sleep -Seconds 10
     } else {
         Write-Host 'NVDA 이미 실행 중'

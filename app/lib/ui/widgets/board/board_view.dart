@@ -33,6 +33,7 @@ class BoardView extends StatefulWidget {
     required this.onMoveCursor,
     required this.onSetCursor,
     required this.onIntent,
+    this.onFirstFocus,
     this.ownership,
     this.coordMode = CoordDisplayMode.auto,
     this.lineWidth = 2.5,
@@ -58,6 +59,12 @@ class BoardView extends StatefulWidget {
   final void Function(Point p) onSetCursor;
   final void Function(BoardIntent intent) onIntent;
 
+  /// 판이 처음 포커스를 받을 때 한 번. 화면이 조작 안내를 낭독하는 데 쓴다 —
+  /// NVDA 실측(2026-08-13)에서 Semantics.hint 가 낭독되지 않음이 확인됐다.
+  /// label·value 는 읽히지만 hint 는 MSAA 경로에서 유실되므로, 처음 쓰는
+  /// 사람에게 조작법을 알릴 유일한 통로는 명시적 announce 다.
+  final VoidCallback? onFirstFocus;
+
   /// 계가 결과의 집 소유. null 이면 표시하지 않는다.
   final List<Stone>? ownership;
   final CoordDisplayMode coordMode;
@@ -72,12 +79,29 @@ enum CoordDisplayMode { auto, on, off }
 class BoardViewState extends State<BoardView> {
   final FocusNode _focus = FocusNode(debugLabel: 'board');
   double _cellPx = 0;
+  bool _hintAnnounced = false;
 
   /// 화면(솔로 등)이 좌표 입력에서 판으로 포커스를 되돌릴 때 쓴다
   void requestFocus() => _focus.requestFocus();
 
   @override
+  void initState() {
+    super.initState();
+    _focus.addListener(_onFocusChanged);
+  }
+
+  void _onFocusChanged() {
+    // 포커스 링 표시 갱신 + 첫 포커스에서 조작 안내 1회
+    if (mounted) setState(() {});
+    if (_focus.hasFocus && !_hintAnnounced) {
+      _hintAnnounced = true;
+      widget.onFirstFocus?.call();
+    }
+  }
+
+  @override
   void dispose() {
+    _focus.removeListener(_onFocusChanged);
     _focus.dispose();
     super.dispose();
   }

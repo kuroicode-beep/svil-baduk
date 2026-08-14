@@ -14,6 +14,7 @@ import 'package:svil_baduk/i18n/strings.g.dart';
 import 'package:svil_baduk/ui/screens/home_screen.dart';
 import 'package:svil_baduk/ui/screens/learn_screen.dart';
 import 'package:svil_baduk/ui/screens/solo_screen.dart';
+import 'package:svil_baduk/ui/screens/solo_setup_screen.dart';
 import 'package:svil_baduk/version.dart';
 
 void main() {
@@ -53,9 +54,19 @@ void main() {
     await tester.pump(const Duration(milliseconds: 400));
   }
 
-  testWidgets('대국 화면으로 갈 수 있다', (WidgetTester tester) async {
+  testWidgets('대국은 설정 화면을 거쳐 시작한다 (Stitch 기획 흐름)',
+      (WidgetTester tester) async {
     await pumpHome(tester, await boot(tester));
     await tester.tap(find.text(S.solo(Lang.ko)));
+    await settleRoute(tester);
+    expect(find.byType(SoloSetupScreen), findsOneWidget,
+        reason: '바로 판이 아니라 대국 설정이 먼저다');
+
+    // 시작 버튼은 난이도 라디오 10개 아래라 화면 밖이다 — 스크롤해서 탭
+    await tester.scrollUntilVisible(find.text(S.startGame(Lang.ko)), 300,
+        scrollable: find.byType(Scrollable).first);
+    await tester.pump();
+    await tester.tap(find.text(S.startGame(Lang.ko)));
     await settleRoute(tester);
     expect(find.byType(SoloScreen), findsOneWidget);
   });

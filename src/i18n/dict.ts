@@ -447,6 +447,18 @@ const dict = {
   pass: { ko: '패스', en: 'Pass', ja: 'パス', zh: '停着', vi: 'Bỏ lượt' },
   resign: { ko: '기권', en: 'Resign', ja: '投了', zh: '认输', vi: 'Bỏ cuộc' },
   scoreNow: { ko: '계가', en: 'Score', ja: '計算', zh: '点目', vi: 'Đếm điểm' },
+  // 홈 개편 (Stitch 기획 복원)
+  menuMulti: { ko: '상대랑 두기', en: 'Play a person', ja: '対人で打つ', zh: '与人对弈', vi: 'Chơi với người' },
+  menuCharacter: { ko: '캐릭터', en: 'Character', ja: 'キャラクター', zh: '角色', vi: 'Nhân vật' },
+  menuHelp: { ko: '도움말', en: 'Help', ja: 'ヘルプ', zh: '帮助', vi: 'Trợ giúp' },
+  comingSoon: { ko: '준비 중', en: 'Coming soon', ja: '準備中', zh: '即将推出', vi: 'Sắp ra mắt' },
+  setupTitle: { ko: '대국 설정', en: 'Game setup', ja: '対局設定', zh: '对局设置', vi: 'Thiết lập ván cờ' },
+  gradeBeginner: { ko: '입문', en: 'Beginner', ja: '入門', zh: '入门', vi: 'Nhập môn' },
+  gradeKyuSuffix: { ko: '급', en: ' kyu', ja: '級', zh: '级', vi: ' kyu' },
+  gradeDanSuffix: { ko: '단', en: ' dan', ja: '段', zh: '段', vi: ' dan' },
+  winSuffix: { ko: '승', en: 'W', ja: '勝', zh: '胜', vi: 'T' },
+  lossSuffix: { ko: '패', en: 'L', ja: '敗', zh: '负', vi: 'B' },
+  drawSuffix: { ko: '무', en: 'D', ja: '分', zh: '和', vi: 'H' },
   // 배우기 — 왜 틀렸는지 구별해서 말한다
   learnNoProblem: { ko: '문제가 없습니다', en: 'No problem loaded', ja: '問題がありません', zh: '没有题目', vi: 'Chưa có bài tập' },
   learnWrongPoint: { ko: '그 자리가 아닙니다', en: 'Not that point', ja: 'その場所ではありません', zh: '不是这个点', vi: 'Không phải điểm đó' },

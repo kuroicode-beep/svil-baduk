@@ -1,0 +1,337 @@
+<!DOCTYPE html>
+
+<html class="dark" lang="ko"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>SVIL Baduk - Solo Play</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=KyoboHandwriting2019:wght@100..900&display=swap" rel="stylesheet"/>
+<style>
+        @font-face {
+            font-family: 'KyoboHandwriting2019';
+            src: url('https://cdn.jsdelivr.net/gh/projectnoonnu/naverfont_03@1.0/KyoboHandwriting2019.woff') format('woff');
+            font-weight: normal;
+            font-style: normal;
+        }
+
+        body {
+            margin: 0;
+            padding: 0;
+            overflow: hidden; /* No scroll as requested */
+            background-color: #0D0D12;
+            color: #E4E1EB;
+        }
+
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 48;
+        }
+
+        /* High Contrast Focus */
+        :focus {
+            outline: 3px solid #FFFF00 !important;
+            outline-offset: 2px;
+        }
+
+        /* Custom scrollbar for small areas if needed */
+        ::-webkit-scrollbar {
+            width: 8px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #16161D;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #6B6B82;
+            border-radius: 4px;
+        }
+
+        .board-grid-line {
+            stroke: #6B6B82;
+            stroke-width: 2;
+        }
+
+        .stone-black {
+            fill: #000000;
+            stroke: #3A3A48;
+            stroke-width: 1.5;
+        }
+
+        .stone-white {
+            fill: #FFFFFF;
+            stroke: #0D0D12;
+            stroke-width: 1;
+        }
+
+        .last-move-marker {
+            fill: #FFFF00;
+            stroke: #000000;
+            stroke-width: 2;
+        }
+    </style>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    "colors": {
+                        "primary-container": "#7ec8ff",
+                        "surface-bright": "#393840",
+                        "on-primary-fixed-variant": "#004b70",
+                        "on-primary-fixed": "#001e30",
+                        "on-primary-container": "#00537c",
+                        "on-tertiary-fixed-variant": "#494900",
+                        "on-secondary-fixed-variant": "#454749",
+                        "primary": "#bee1ff",
+                        "surface-container-highest": "#34343c",
+                        "on-secondary": "#2f3132",
+                        "on-surface": "#e4e1eb",
+                        "tertiary-container": "#c7c700",
+                        "on-background": "#e4e1eb",
+                        "surface-variant": "#34343c",
+                        "on-tertiary-container": "#515100",
+                        "secondary-fixed": "#e2e2e4",
+                        "outline": "#8a929a",
+                        "inverse-surface": "#e4e1eb",
+                        "on-tertiary-fixed": "#1d1d00",
+                        "surface-container-lowest": "#0d0e14",
+                        "surface-container": "#1f1f26",
+                        "surface-container-low": "#1b1b22",
+                        "tertiary": "#e4e400",
+                        "inverse-primary": "#006493",
+                        "on-primary": "#00344f",
+                        "secondary-fixed-dim": "#c6c6c8",
+                        "tertiary-fixed": "#eaea00",
+                        "secondary-container": "#454749",
+                        "outline-variant": "#40484f",
+                        "tertiary-fixed-dim": "#cdcd00",
+                        "on-secondary-container": "#b4b5b7",
+                        "surface-dim": "#13131a",
+                        "surface": "#13131a",
+                        "error-container": "#93000a",
+                        "secondary": "#c6c6c8",
+                        "on-secondary-fixed": "#1a1c1d",
+                        "surface-tint": "#8dcdff",
+                        "error": "#ffb4ab",
+                        "on-error": "#690005",
+                        "on-error-container": "#ffdad6",
+                        "primary-fixed": "#cae6ff",
+                        "background": "#13131a",
+                        "on-tertiary": "#323200",
+                        "surface-container-high": "#292931",
+                        "primary-fixed-dim": "#8dcdff",
+                        "inverse-on-surface": "#303037",
+                        "on-surface-variant": "#c0c7d0"
+                    },
+                    "borderRadius": {
+                        "DEFAULT": "0.25rem",
+                        "lg": "0.5rem",
+                        "xl": "0.75rem",
+                        "full": "9999px"
+                    },
+                    "spacing": {
+                        "gutter": "24px",
+                        "touch-target-min": "50px",
+                        "margin-mobile": "16px",
+                        "max-width": "1280px",
+                        "unit": "8px",
+                        "margin-desktop": "40px"
+                    },
+                    "fontFamily": {
+                        "body-lg": ["KyoboHandwriting2019"],
+                        "data-mono": ["Consolas", "monospaced"],
+                        "display-lg": ["KyoboHandwriting2019"],
+                        "label-sm": ["Consolas", "monospaced"],
+                        "body-md": ["KyoboHandwriting2019"],
+                        "headline-md": ["KyoboHandwriting2019"]
+                    },
+                    "fontSize": {
+                        "body-lg": ["24px", {"lineHeight": "1.8", "fontWeight": "400"}],
+                        "data-mono": ["20px", {"lineHeight": "1.2", "fontWeight": "400"}],
+                        "display-lg": ["48px", {"lineHeight": "1.5", "fontWeight": "400"}],
+                        "label-sm": ["16px", {"lineHeight": "1.2", "fontWeight": "400"}],
+                        "body-md": ["18px", {"lineHeight": "1.8", "fontWeight": "400"}],
+                        "headline-md": ["32px", {"lineHeight": "1.6", "fontWeight": "400"}]
+                    }
+                },
+            },
+        }
+    </script>
+</head>
+<body class="bg-background text-on-background font-body-md h-screen w-screen flex flex-col overflow-hidden">
+<!-- Top AppBar (from JSON) -->
+<header class="bg-background dark:bg-background text-on-background dark:text-on-background border-b-3 border-outline-variant flex justify-between items-center w-full px-margin-desktop h-[70px] z-50">
+<div class="flex items-center gap-4">
+<span class="font-headline-md text-headline-md font-bold text-primary dark:text-primary">SVIL Baduk</span>
+<nav class="hidden md:flex gap-6 items-center h-full ml-10">
+<a class="text-primary dark:text-primary border-b-3 border-tertiary h-full flex items-center px-2 font-body-md" href="#">Play</a>
+<a class="text-on-surface-variant dark:text-on-surface-variant hover:bg-surface-container-highest px-2 h-full flex items-center font-body-md" href="#">Analysis</a>
+<a class="text-on-surface-variant dark:text-on-surface-variant hover:bg-surface-container-highest px-2 h-full flex items-center font-body-md" href="#">History</a>
+</nav>
+</div>
+<div class="flex items-center gap-6">
+<button class="material-symbols-outlined text-on-background hover:bg-surface-container-highest p-2 rounded-full" data-icon="help">help</button>
+<button class="material-symbols-outlined text-on-background hover:bg-surface-container-highest p-2 rounded-full" data-icon="settings">settings</button>
+</div>
+</header>
+<main class="flex-grow flex overflow-hidden">
+<!-- Left: Game Board Section -->
+<section class="flex-grow bg-[#0D0D12] flex items-center justify-center p-unit relative overflow-hidden">
+<!-- Coordinates Labels (Top/Bottom) -->
+<div class="absolute top-4 left-0 w-full flex justify-center gap-4 text-outline font-data-mono text-label-sm">
+<span>A B C D E F G H J K L M N O P Q R S T</span>
+</div>
+<!-- The Board (SVG for precision & high contrast) -->
+<div class="w-full max-w-[800px] aspect-square border-3 border-outline-variant bg-[#0D0D12] p-4 relative shadow-2xl">
+<svg class="w-full h-full" id="baduk-board" viewbox="0 0 400 400">
+<!-- Grid Lines -->
+<g id="grid">
+<!-- Vertical -->
+<line class="board-grid-line" x1="20" x2="20" y1="20" y2="380"></line>
+<line class="board-grid-line" x1="40" x2="40" y1="20" y2="380"></line>
+<line class="board-grid-line" x1="60" x2="60" y1="20" y2="380"></line>
+<line class="board-grid-line" x1="80" x2="80" y1="20" y2="380"></line>
+<line class="board-grid-line" x1="100" x2="100" y1="20" y2="380"></line>
+<line class="board-grid-line" x1="120" x2="120" y1="20" y2="380"></line>
+<line class="board-grid-line" x1="140" x2="140" y1="20" y2="380"></line>
+<line class="board-grid-line" x1="160" x2="160" y1="20" y2="380"></line>
+<line class="board-grid-line" x1="180" x2="180" y1="20" y2="380"></line>
+<line class="board-grid-line" x1="200" x2="200" y1="20" y2="380"></line>
+<line class="board-grid-line" x1="220" x2="220" y1="20" y2="380"></line>
+<line class="board-grid-line" x1="240" x2="240" y1="20" y2="380"></line>
+<line class="board-grid-line" x1="260" x2="260" y1="20" y2="380"></line>
+<line class="board-grid-line" x1="280" x2="280" y1="20" y2="380"></line>
+<line class="board-grid-line" x1="300" x2="300" y1="20" y2="380"></line>
+<line class="board-grid-line" x1="320" x2="320" y1="20" y2="380"></line>
+<line class="board-grid-line" x1="340" x2="340" y1="20" y2="380"></line>
+<line class="board-grid-line" x1="360" x2="360" y1="20" y2="380"></line>
+<line class="board-grid-line" x1="380" x2="380" y1="20" y2="380"></line>
+<!-- Horizontal -->
+<line class="board-grid-line" x1="20" x2="380" y1="20" y2="20"></line>
+<line class="board-grid-line" x1="20" x2="380" y1="40" y2="40"></line>
+<line class="board-grid-line" x1="20" x2="380" y1="60" y2="60"></line>
+<line class="board-grid-line" x1="20" x2="380" y1="80" y2="80"></line>
+<line class="board-grid-line" x1="20" x2="380" y1="100" y2="100"></line>
+<line class="board-grid-line" x1="20" x2="380" y1="120" y2="120"></line>
+<line class="board-grid-line" x1="20" x2="380" y1="140" y2="140"></line>
+<line class="board-grid-line" x1="20" x2="380" y1="160" y2="160"></line>
+<line class="board-grid-line" x1="20" x2="380" y1="180" y2="180"></line>
+<line class="board-grid-line" x1="20" x2="380" y1="200" y2="200"></line>
+<line class="board-grid-line" x1="20" x2="380" y1="220" y2="220"></line>
+<line class="board-grid-line" x1="20" x2="380" y1="240" y2="240"></line>
+<line class="board-grid-line" x1="20" x2="380" y1="260" y2="260"></line>
+<line class="board-grid-line" x1="20" x2="380" y1="280" y2="280"></line>
+<line class="board-grid-line" x1="20" x2="380" y1="300" y2="300"></line>
+<line class="board-grid-line" x1="20" x2="380" y1="320" y2="320"></line>
+<line class="board-grid-line" x1="20" x2="380" y1="340" y2="340"></line>
+<line class="board-grid-line" x1="20" x2="380" y1="360" y2="360"></line>
+<line class="board-grid-line" x1="20" x2="380" y1="380" y2="380"></line>
+</g>
+<!-- Hoshi Points -->
+<circle cx="80" cy="80" fill="#6B6B82" r="3"></circle>
+<circle cx="200" cy="80" fill="#6B6B82" r="3"></circle>
+<circle cx="320" cy="80" fill="#6B6B82" r="3"></circle>
+<circle cx="80" cy="200" fill="#6B6B82" r="3"></circle>
+<circle cx="200" cy="200" fill="#6B6B82" r="3"></circle>
+<circle cx="320" cy="200" fill="#6B6B82" r="3"></circle>
+<circle cx="80" cy="320" fill="#6B6B82" r="3"></circle>
+<circle cx="200" cy="320" fill="#6B6B82" r="3"></circle>
+<circle cx="320" cy="320" fill="#6B6B82" r="3"></circle>
+<!-- Stones (Mock State) -->
+<circle class="stone-black" cx="160" cy="180" r="9"></circle>
+<circle class="stone-white" cx="200" cy="180" r="9"></circle>
+<circle class="stone-black" cx="200" cy="220" r="9"></circle>
+<circle class="stone-white" cx="240" cy="220" r="9"></circle>
+<circle class="stone-black" cx="240" cy="180" r="9"></circle>
+<!-- Last Move Marker -->
+<circle class="last-move-marker" cx="240" cy="180" r="4"></circle>
+</svg>
+</div>
+<!-- Coordinates Labels (Left/Right) -->
+<div class="absolute left-4 top-0 h-full flex flex-col justify-center gap-4 text-outline font-data-mono text-label-sm">
+<span>19 18 17 16 15 14 13 12 11 10 9 8 7 6 5 4 3 2 1</span>
+</div>
+</section>
+<!-- Right: Control Sidebar -->
+<aside class="w-[360px] bg-surface-container border-l-3 border-outline-variant flex flex-col p-gutter">
+<!-- Status Panel -->
+<div class="mb-8 p-6 bg-surface-container-high border-3 border-tertiary">
+<p class="font-headline-md text-tertiary font-bold mb-2">백 · 당신 차례</p>
+<div class="flex items-center gap-2">
+<div class="w-3 h-3 bg-tertiary rounded-full animate-pulse"></div>
+<p class="font-body-md text-on-surface-variant">생각하는 중...</p>
+</div>
+</div>
+<!-- Stats Rows -->
+<div class="space-y-4 mb-10">
+<div class="flex justify-between items-center border-b border-outline-variant pb-2">
+<span class="font-body-lg text-on-surface">흑 딴 돌</span>
+<span class="font-data-mono text-body-lg text-primary">02</span>
+</div>
+<div class="flex justify-between items-center border-b border-outline-variant pb-2">
+<span class="font-body-lg text-on-surface">백 딴 돌</span>
+<span class="font-data-mono text-body-lg text-primary">05</span>
+</div>
+<div class="flex justify-between items-center border-b border-outline-variant pb-2">
+<span class="font-body-lg text-on-surface">직전 수</span>
+<span class="font-data-mono text-body-lg text-secondary">R-10</span>
+</div>
+<div class="flex justify-between items-center border-b border-outline-variant pb-2">
+<span class="font-body-lg text-on-surface">제한 시간</span>
+<span class="font-data-mono text-body-lg text-tertiary">14:52</span>
+</div>
+</div>
+<!-- 2-column Button Grid -->
+<div class="grid grid-cols-2 gap-3 flex-grow content-start">
+<button class="h-touch-target-min bg-surface-container-lowest text-on-surface border-3 border-outline-variant hover:border-primary flex items-center justify-center font-bold transition-colors">패스</button>
+<button class="h-touch-target-min bg-surface-container-lowest text-error border-3 border-error hover:bg-error hover:text-on-error flex items-center justify-center font-bold transition-colors">기권</button>
+<button class="h-touch-target-min bg-surface-container-lowest text-on-surface border-3 border-outline-variant hover:border-primary flex items-center justify-center font-bold transition-colors">뒤로</button>
+<button class="h-touch-target-min bg-white text-background hover:bg-tertiary flex items-center justify-center font-bold transition-colors">AI 힌트</button>
+<button class="h-touch-target-min bg-surface-container-lowest text-on-surface border-3 border-outline-variant hover:border-primary flex items-center justify-center font-bold transition-colors">기보 저장</button>
+<button class="h-touch-target-min bg-surface-container-lowest text-on-surface border-3 border-outline-variant hover:border-primary flex items-center justify-center font-bold transition-colors">기보 불러오기</button>
+<button class="h-touch-target-min bg-surface-container-lowest text-on-surface border-3 border-outline-variant hover:border-primary flex items-center justify-center font-bold transition-colors">
+<span class="material-symbols-outlined mr-2">arrow_back</span>한 수 뒤로
+                </button>
+<button class="h-touch-target-min bg-surface-container-lowest text-on-surface border-3 border-outline-variant hover:border-primary flex items-center justify-center font-bold transition-colors">
+<span class="material-symbols-outlined mr-2">arrow_forward</span>한 수 앞으로
+                </button>
+</div>
+<!-- Footer Small Actions -->
+<div class="mt-auto pt-6 flex justify-between items-center text-on-surface-variant font-label-sm">
+<div class="flex items-center gap-2">
+<span class="material-symbols-outlined text-[18px]">verified_user</span>
+<span>AI 난이도: 프로 (1단)</span>
+</div>
+<button class="hover:text-primary underline">규칙 확인</button>
+</div>
+</aside>
+</main>
+<!-- Interactive micro-interactions script -->
+<script>
+        document.querySelectorAll('button').forEach(btn => {
+            btn.addEventListener('click', () => {
+                // Haptic-like visual feedback
+                btn.classList.add('scale-95');
+                setTimeout(() => btn.classList.remove('scale-95'), 100);
+            });
+        });
+
+        // Board interaction mock
+        const board = document.getElementById('baduk-board');
+        board.addEventListener('click', (e) => {
+            const rect = board.getBoundingClientRect();
+            const x = e.clientX - rect.left;
+            const y = e.clientY - rect.top;
+            
+            // Logic to snap to nearest intersection would go here
+            console.log(`Board click at: ${x}, ${y}`);
+        });
+
+        // Toggle focus on keyboard navigation
+        window.addEventListener('keydown', (e) => {
+            if(e.key === 'Tab') {
+                document.body.classList.add('keyboard-nav');
+            }
+        });
+    </script>
+</body></html>

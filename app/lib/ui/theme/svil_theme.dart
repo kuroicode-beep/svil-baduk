@@ -111,6 +111,13 @@ class VisionSettings {
         ContrastProfile.maximum => const Color(0xFF000000),
       };
 
+  /// 버튼·카드의 표면색. 최대 대비에서는 배경과 같은 검정 — 테두리가 구조를 전달한다.
+  Color get surfaceColor => switch (contrast) {
+        ContrastProfile.standard => SvilColors.surface2,
+        ContrastProfile.high => SvilColors.surface2,
+        ContrastProfile.maximum => const Color(0xFF000000),
+      };
+
   /// 구조를 전달하는 테두리는 표준 프로파일에서도 3:1 을 지킨다.
   /// (하우스의 border #3A3A48 은 1.5:1 대의 장식용 구분선이라
   ///  저시력 앱의 기능적 테두리로는 쓸 수 없다)
@@ -182,13 +189,21 @@ ThemeData buildBadukTheme(VisionSettings v) {
     filledButtonTheme: FilledButtonThemeData(
       style: FilledButton.styleFrom(
         minimumSize: const Size(kTouchMin, kTouchMin),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
         textStyle: TextStyle(fontSize: base, fontFamily: kFontFamily),
       ),
     ),
+    // SVIL 표준 버튼 (2026-08-14 지정, 정본: svil-frontend-design 스킬):
+    // 어두운 표면 + 밝은 테두리 1.5px + 모서리 14px + 본문색 글자.
+    // 밝은 채움 버튼 위 회색 텍스트로 대비가 무너진 회귀(0.16.1)의 재발 방지책이기도 하다.
     outlinedButtonTheme: OutlinedButtonThemeData(
       style: OutlinedButton.styleFrom(
         minimumSize: const Size(kTouchMin, kTouchMin),
-        side: BorderSide(color: v.borderColor, width: 2),
+        backgroundColor: v.surfaceColor,
+        foregroundColor: v.textColor,
+        side: BorderSide(color: v.borderColor, width: 1.5),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
+        padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
         textStyle: TextStyle(fontSize: base, fontFamily: kFontFamily),
       ),
     ),

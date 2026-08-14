@@ -1,18 +1,24 @@
-// lib/ui/screens/home_screen.dart — 시작 화면
+// lib/ui/screens/home_screen.dart — 시작 화면 (Stitch 기획 복원, 2026-08-14)
 //
-// 항목 수를 적게 유지한다. 스크린리더로 도는 목록은 짧을수록 좋고,
-// 저시력 사용자에게는 큰 글자로 몇 개만 보이는 편이 낫다.
+// 구조는 docs/design/stitch/home_svil_baduk 을 따른다:
+// 프로필 카드(별명·급수·레벨·전적·경험치) + 메뉴 5개 + 도움말.
+//
+// 타일은 어두운 바탕 + 밝은 글자다. 밝은 채움 버튼 위에 회색 보조 텍스트를
+// 얹었다가 대비가 무너진 적이 있다(0.16.1 스크린샷) — 저시력 앱에서 타일은
+// 표면색 위에 본문색이 원칙이다.
 
 import 'package:flutter/material.dart';
 
 import '../../application/app_container.dart';
 import '../../data/db/settings_store.dart';
+import '../../domain/profile/profile.dart';
 import '../../i18n/strings.g.dart';
 import '../theme/svil_theme.dart';
 import '../../version.dart';
+import 'character_screen.dart';
 import 'learn_screen.dart';
 import 'settings_screen.dart';
-import 'solo_screen.dart';
+import 'solo_setup_screen.dart';
 
 class HomeScreen extends StatelessWidget {
   const HomeScreen({required this.container, super.key});
@@ -31,95 +37,215 @@ class HomeScreen extends StatelessWidget {
         title: Text('SVIL Baduk  v$appVersion'),
         actions: <Widget>[
           IconButton(
+            icon: const Icon(Icons.help_outline),
+            tooltip: S.menuHelp(_lang),
+            onPressed: () => _showHelp(context),
+          ),
+          IconButton(
             icon: const Icon(Icons.settings),
             tooltip: S.settings(_lang),
-            onPressed: () => Navigator.of(context).push(
-              MaterialPageRoute<void>(
-                builder: (_) => SettingsScreen(container: container),
-              ),
-            ),
+            onPressed: () => _push(context, SettingsScreen(container: container)),
           ),
         ],
       ),
       body: ListView(
         padding: const EdgeInsets.all(24),
         children: <Widget>[
-          Text(S.tagline(_lang),
-              style: Theme.of(context).textTheme.bodyLarge),
-          const SizedBox(height: 24),
+          Text(S.tagline(_lang), style: Theme.of(context).textTheme.bodyLarge),
+          const SizedBox(height: 16),
+          _profileCard(context),
+          const SizedBox(height: 16),
           _tile(
             context,
+            icon: Icons.smart_toy_outlined,
             label: S.solo(_lang),
-            detail: '${st.rankId} · ${_sizeLabel(st)}',
-            onTap: () => _openSolo(context, st),
+            detail: '${st.rankId} · ${st.boardSize.lines}${S.rowSuffix(_lang)}',
+            onTap: () => _push(context, SoloSetupScreen(container: container)),
           ),
           _tile(
             context,
+            icon: Icons.school_outlined,
             label: S.learn(_lang),
             detail: '${container.progress.solved.length} / '
                 '${container.curriculum.problemCount}',
-            onTap: () => _openLearn(context, st),
+            onTap: () => _push(
+              context,
+              LearnScreen(
+                curriculum: container.curriculum,
+                settings: st,
+                vision: container.vision.vision,
+                solved: container.progress.solved,
+                onProgress: container.progress.save,
+              ),
+            ),
+          ),
+          // P2P — 전송 계층 미구현. 기획상 자리는 여기다 (사용자 결정: 준비 중 노출)
+          _tile(
+            context,
+            icon: Icons.groups_outlined,
+            label: S.menuMulti(_lang),
+            detail: S.comingSoon(_lang),
+            onTap: null,
+          ),
+          _tile(
+            context,
+            icon: Icons.face_outlined,
+            label: S.menuCharacter(_lang),
+            detail: _recordLine(),
+            onTap: () => _push(context, CharacterScreen(container: container)),
+          ),
+          _tile(
+            context,
+            icon: Icons.tune,
+            label: S.settings(_lang),
+            detail: langLabels[_lang]!,
+            onTap: () => _push(context, SettingsScreen(container: container)),
           ),
         ],
       ),
     );
   }
 
-  String _sizeLabel(AppSettings st) => '${st.boardSize.lines}${S.rowSuffix(_lang)}';
+  void _push(BuildContext context, Widget screen) {
+    Navigator.of(context)
+        .push(MaterialPageRoute<void>(builder: (_) => screen));
+  }
 
-  Widget _tile(
-    BuildContext context, {
-    required String label,
-    required String detail,
-    required VoidCallback onTap,
-  }) =>
-      Padding(
-        padding: const EdgeInsets.only(bottom: 12),
-        // 라벨은 버튼 안에 병합한다. 바깥 Semantics + 안쪽 ExcludeSemantics
-        // 구조는 키보드 포커스(안쪽 버튼)와 낭독(바깥 노드)이 갈라져서
-        // Tab 으로 닿았을 때 아무것도 읽히지 않는다 — NVDA 실측로 발견.
-        child: FilledButton(
-          style: FilledButton.styleFrom(
-            minimumSize: const Size.fromHeight(kListItemMin),
-            alignment: Alignment.centerLeft,
-          ),
-          onPressed: onTap,
-          child: Semantics(
-            label: '$label, $detail',
-            child: ExcludeSemantics(
+  String _recordLine() {
+    final Profile p = container.profile.profile;
+    return '${p.wins}${S.winSuffix(_lang)} ${p.losses}${S.lossSuffix(_lang)} '
+        '${p.draws}${S.drawSuffix(_lang)}';
+  }
+
+  /// 별명·급수·레벨·전적·경험치 요약 — Stitch 홈의 프로필 카드
+  Widget _profileCard(BuildContext context) {
+    return ListenableBuilder(
+      listenable: container.profile,
+      builder: (BuildContext context, _) {
+        final Profile p = container.profile.profile;
+        final Grade grade = gradeForBestAi(p.bestAiLevel);
+        final int need = xpToNextLevel(p.level);
+        final TextTheme t = Theme.of(context).textTheme;
+        final ColorScheme c = Theme.of(context).colorScheme;
+
+        final String name =
+            p.name.isEmpty ? S.profileNamePlaceholder(_lang) : p.name;
+        final String summary = '$name, ${gradeLabel(grade, _lang)}, '
+            '${S.profileLevel(_lang)} ${p.level}, ${_recordLine()}, '
+            '${S.profileXp(_lang)} ${p.xp}/$need';
+
+        return Semantics(
+          label: summary,
+          child: ExcludeSemantics(
+            child: Container(
+              padding: const EdgeInsets.all(18),
+              decoration: BoxDecoration(
+                color: c.surfaceContainerHighest,
+                border: Border.all(color: c.outline, width: 1.5),
+                borderRadius: BorderRadius.circular(14),
+              ),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
-                mainAxisSize: MainAxisSize.min,
                 children: <Widget>[
-                  Text(label),
-                  Text(detail, style: Theme.of(context).textTheme.bodySmall),
+                  Row(
+                    children: <Widget>[
+                      Expanded(child: Text(name, style: t.titleLarge)),
+                      Text(
+                        '${gradeLabel(grade, _lang)} · '
+                        '${S.profileLevel(_lang)} ${p.level}',
+                        style: monoStyle(size: 18),
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 8),
+                  Text('${S.profileRecord(_lang)} ${_recordLine()}'
+                      '   ${S.profileHighScore(_lang)} ${p.highScore}'),
+                  const SizedBox(height: 10),
+                  Text('${S.profileXp(_lang)}  ${p.xp} / $need',
+                      style: t.bodySmall),
+                  const SizedBox(height: 4),
+                  ClipRRect(
+                    borderRadius: BorderRadius.circular(5),
+                    child: LinearProgressIndicator(
+                      value: need == 0 ? 0 : p.xp / need,
+                      minHeight: 10,
+                    ),
+                  ),
                 ],
               ),
             ),
           ),
-        ),
-      );
-
-  void _openSolo(BuildContext context, AppSettings st) {
-    Navigator.of(context).push(MaterialPageRoute<void>(
-      builder: (_) => SoloScreen(
-        settings: st,
-        vision: container.vision.vision,
-        size: st.boardSize,
-        caps: container.caps,
-      ),
-    ));
+        );
+      },
+    );
   }
 
-  void _openLearn(BuildContext context, AppSettings st) {
-    Navigator.of(context).push(MaterialPageRoute<void>(
-      builder: (_) => LearnScreen(
-        curriculum: container.curriculum,
-        settings: st,
-        vision: container.vision.vision,
-        solved: container.progress.solved,
-        onProgress: container.progress.save,
+  /// SVIL 표준 타일 — 어두운 표면 + 밝은 테두리 + 아이콘 + 두 줄 텍스트.
+  /// 모양은 테마(outlinedButtonTheme)가 정하고 여기는 내용만 놓는다.
+  Widget _tile(
+    BuildContext context, {
+    required IconData icon,
+    required String label,
+    required String detail,
+    required VoidCallback? onTap,
+  }) {
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 12),
+      // 라벨은 포커스 받는 버튼 안에 병합한다 — 바깥 라벨 + 안쪽 포커스로
+      // 갈라지면 Tab 이 침묵한다 (0.16.1 에서 실측로 발견해 고친 패턴)
+      child: OutlinedButton(
+        style: OutlinedButton.styleFrom(
+          minimumSize: const Size.fromHeight(kListItemMin),
+          alignment: Alignment.centerLeft,
+        ),
+        onPressed: onTap,
+        child: Semantics(
+          label: '$label, $detail',
+          child: ExcludeSemantics(
+            child: Row(
+              mainAxisSize: MainAxisSize.min,
+              children: <Widget>[
+                Icon(icon, size: 26),
+                const SizedBox(width: 14),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    mainAxisSize: MainAxisSize.min,
+                    children: <Widget>[
+                      Text(label),
+                      Text(detail,
+                          style: Theme.of(context).textTheme.bodySmall),
+                    ],
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ),
       ),
-    ));
+    );
+  }
+
+  /// 도움말 — 조작법 요약. 앱 안에서 언제든 볼 수 있어야 한다 (기획 D8)
+  void _showHelp(BuildContext context) {
+    showDialog<void>(
+      context: context,
+      builder: (BuildContext ctx) => AlertDialog(
+        title: Text(S.menuHelp(_lang)),
+        content: SingleChildScrollView(
+          child: Text(
+            '${S.boardHint(_lang)}\n\n${S.coordInputHelper(_lang)}',
+          ),
+        ),
+        actions: <Widget>[
+          TextButton(
+            style: TextButton.styleFrom(
+                minimumSize: const Size(kTouchLarge, kTouchLarge)),
+            onPressed: () => Navigator.of(ctx).pop(),
+            child: Text(S.confirm(_lang)),
+          ),
+        ],
+      ),
+    );
   }
 }

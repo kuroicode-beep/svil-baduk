@@ -1,0 +1,414 @@
+<!DOCTYPE html>
+
+<html class="dark" lang="ko"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>SVIL Baduk - 설정</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Consolas:wght@100..900&family=KyoboHandwriting2019:wght@100..900&display=swap" rel="stylesheet"/>
+<style>
+        @font-face {
+            font-family: 'KyoboHandwriting2019';
+            src: url('https://cdn.jsdelivr.net/gh/projectnoonnu/noonfonts_20-04@1.0/KyoboHandwriting2019.woff') format('woff');
+            font-weight: normal;
+            font-style: normal;
+        }
+
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 48;
+            vertical-align: middle;
+        }
+
+        /* High-Contrast Digital Brutalism Utilities */
+        .brutalist-border {
+            border: 3px solid #6B6B82;
+        }
+        
+        .focus-yellow:focus-within, .focus-yellow:focus {
+            outline: 3px solid #FFFF00 !important;
+            outline-offset: 2px;
+        }
+
+        /* Custom Toggle Switch for Low Vision */
+        .big-toggle {
+            width: 80px;
+            height: 44px;
+            background-color: #1F1F2A;
+            border: 3px solid #6B6B82;
+            position: relative;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+        .big-toggle::after {
+            content: '';
+            position: absolute;
+            top: 4px;
+            left: 4px;
+            width: 30px;
+            height: 30px;
+            background-color: #F5F5F7;
+            transition: all 0.2s ease;
+        }
+        input:checked + .big-toggle {
+            background-color: #FFFF00;
+        }
+        input:checked + .big-toggle::after {
+            left: 38px;
+            background-color: #0D0D12;
+        }
+
+        .custom-scrollbar::-webkit-scrollbar {
+            width: 12px;
+        }
+        .custom-scrollbar::-webkit-scrollbar-track {
+            background: #0D0D12;
+        }
+        .custom-scrollbar::-webkit-scrollbar-thumb {
+            background: #6B6B82;
+            border: 3px solid #0D0D12;
+        }
+    </style>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    "colors": {
+                        "primary-container": "#7ec8ff",
+                        "surface-bright": "#393840",
+                        "on-primary-fixed-variant": "#004b70",
+                        "on-primary-fixed": "#001e30",
+                        "on-primary-container": "#00537c",
+                        "on-tertiary-fixed-variant": "#494900",
+                        "on-secondary-fixed-variant": "#454749",
+                        "primary": "#bee1ff",
+                        "surface-container-highest": "#34343c",
+                        "on-secondary": "#2f3132",
+                        "on-surface": "#e4e1eb",
+                        "tertiary-container": "#c7c700",
+                        "on-background": "#e4e1eb",
+                        "surface-variant": "#34343c",
+                        "on-tertiary-container": "#515100",
+                        "secondary-fixed": "#e2e2e4",
+                        "outline": "#8a929a",
+                        "inverse-surface": "#e4e1eb",
+                        "on-tertiary-fixed": "#1d1d00",
+                        "surface-container-lowest": "#0d0e14",
+                        "surface-container": "#1f1f26",
+                        "surface-container-low": "#1b1b22",
+                        "tertiary": "#e4e400",
+                        "inverse-primary": "#006493",
+                        "on-primary": "#00344f",
+                        "secondary-fixed-dim": "#c6c6c8",
+                        "tertiary-fixed": "#eaea00",
+                        "secondary-container": "#454749",
+                        "outline-variant": "#40484f",
+                        "tertiary-fixed-dim": "#cdcd00",
+                        "on-secondary-container": "#b4b5b7",
+                        "surface-dim": "#13131a",
+                        "surface": "#13131a",
+                        "error-container": "#93000a",
+                        "secondary": "#c6c6c8",
+                        "on-secondary-fixed": "#1a1c1d",
+                        "surface-tint": "#8dcdff",
+                        "error": "#ffb4ab",
+                        "on-error": "#690005",
+                        "on-error-container": "#ffdad6",
+                        "primary-fixed": "#cae6ff",
+                        "background": "#13131a",
+                        "on-tertiary": "#323200",
+                        "surface-container-high": "#292931",
+                        "primary-fixed-dim": "#8dcdff",
+                        "inverse-on-surface": "#303037",
+                        "on-surface-variant": "#c0c7d0"
+                    },
+                    "spacing": {
+                        "gutter": "24px",
+                        "touch-target-min": "50px",
+                        "margin-mobile": "16px",
+                        "max-width": "1280px",
+                        "unit": "8px",
+                        "margin-desktop": "40px"
+                    },
+                    "fontFamily": {
+                        "body-lg": ["KyoboHandwriting2019"],
+                        "data-mono": ["Consolas"],
+                        "display-lg": ["KyoboHandwriting2019"],
+                        "label-sm": ["Consolas"],
+                        "body-md": ["KyoboHandwriting2019"],
+                        "headline-md": ["KyoboHandwriting2019"]
+                    },
+                    "fontSize": {
+                        "body-lg": ["24px", {"lineHeight": "1.8", "fontWeight": "400"}],
+                        "data-mono": ["20px", {"lineHeight": "1.2", "fontWeight": "400"}],
+                        "display-lg": ["48px", {"lineHeight": "1.5", "fontWeight": "400"}],
+                        "label-sm": ["16px", {"lineHeight": "1.2", "fontWeight": "400"}],
+                        "body-md": ["18px", {"lineHeight": "1.8", "fontWeight": "400"}],
+                        "headline-md": ["32px", {"lineHeight": "1.6", "fontWeight": "400"}]
+                    }
+                }
+            }
+        }
+    </script>
+</head>
+<body class="bg-background text-on-background font-body-md text-body-md min-h-screen custom-scrollbar">
+<!-- TopAppBar -->
+<header class="bg-background text-on-background border-b-3 border-outline-variant flex justify-between items-center w-full px-margin-desktop h-[70px] sticky top-0 z-50">
+<div class="flex items-center gap-4">
+<button aria-label="Back" class="w-[50px] h-[50px] flex items-center justify-center hover:bg-surface-container-highest transition-colors focus-yellow" onclick="window.history.back()">
+<span class="material-symbols-outlined text-4xl">arrow_back</span>
+</button>
+<h1 class="font-headline-md text-headline-md font-bold text-primary">설정</h1>
+</div>
+<div class="flex gap-4">
+<button class="w-[50px] h-[50px] flex items-center justify-center hover:bg-surface-container-highest focus-yellow">
+<span class="material-symbols-outlined text-3xl">help</span>
+</button>
+</div>
+</header>
+<div class="flex">
+<!-- SideNavBar (Desktop Only) -->
+<aside class="hidden md:flex flex-col gap-unit p-gutter bg-surface-container text-primary border-r-3 border-outline-variant h-[calc(100vh-70px)] w-[280px] sticky top-[70px]">
+<div class="mb-gutter">
+<div class="font-headline-md text-headline-md text-on-surface mb-1">Pro Player</div>
+<div class="text-on-surface-variant">Rank: 1 Dan</div>
+</div>
+<nav class="flex flex-col gap-2">
+<a class="flex items-center gap-4 px-4 h-[60px] text-on-surface-variant border-3 border-transparent hover:border-outline hover:bg-surface-container-high transition-all focus-yellow" href="#">
+<span class="material-symbols-outlined">grid_view</span>
+<span class="font-body-lg text-body-lg">Play</span>
+</a>
+<a class="flex items-center gap-4 px-4 h-[60px] text-on-surface-variant border-3 border-transparent hover:border-outline hover:bg-surface-container-high transition-all focus-yellow" href="#">
+<span class="material-symbols-outlined">analytics</span>
+<span class="font-body-lg text-body-lg">Analysis</span>
+</a>
+<a class="flex items-center gap-4 px-4 h-[60px] text-on-surface-variant border-3 border-transparent hover:border-outline hover:bg-surface-container-high transition-all focus-yellow" href="#">
+<span class="material-symbols-outlined">history</span>
+<span class="font-body-lg text-body-lg">History</span>
+</a>
+<a class="flex items-center gap-4 px-4 h-[60px] bg-tertiary text-on-tertiary-fixed font-bold border-3 border-tertiary focus-yellow" href="#">
+<span class="material-symbols-outlined">settings</span>
+<span class="font-body-lg text-body-lg">Settings</span>
+</a>
+</nav>
+<div class="mt-auto">
+<button class="flex items-center gap-4 px-4 h-[60px] w-full text-on-surface-variant border-3 border-transparent hover:border-outline hover:bg-surface-container-high transition-all focus-yellow">
+<span class="material-symbols-outlined">logout</span>
+<span class="font-body-lg text-body-lg">Logout</span>
+</button>
+</div>
+</aside>
+<!-- Main Content Canvas -->
+<main class="flex-1 p-gutter md:p-margin-desktop max-w-max-width mx-auto">
+<section class="flex flex-col gap-10 pb-20">
+<!-- Visual Accessibility Preview -->
+<div class="bg-surface-container-low p-6 brutalist-border">
+<div class="flex items-center justify-between mb-6">
+<h2 class="font-headline-md text-headline-md text-primary">시각 접근성 강화</h2>
+<label class="flex items-center gap-4 cursor-pointer">
+<input checked="" class="hidden" onchange="toggleContrast(this)" type="checkbox"/>
+<div class="big-toggle focus-yellow" tabindex="0"></div>
+<span class="font-body-lg text-body-lg font-bold">버튼 대비 확실하게 (글자·테두리 강화)</span>
+</label>
+</div>
+<div class="grid grid-cols-1 md:grid-cols-3 gap-6 p-6 bg-surface-container-highest brutalist-border" id="preview-area">
+<div class="flex flex-col gap-2">
+<span class="font-label-sm text-label-sm text-on-surface-variant">Primary</span>
+<button class="h-[60px] bg-[#F5F5F7] text-[#0D0D12] font-bold text-2xl focus-yellow">대국 시작</button>
+</div>
+<div class="flex flex-col gap-2">
+<span class="font-label-sm text-label-sm text-on-surface-variant">Secondary</span>
+<button class="h-[60px] bg-[#0D0D12] text-[#F5F5F7] border-[3px] border-[#C9C9D4] font-bold text-2xl focus-yellow">기보 복기</button>
+</div>
+<div class="flex flex-col gap-2">
+<span class="font-label-sm text-label-sm text-on-surface-variant">Danger</span>
+<button class="h-[60px] bg-[#0D0D12] text-[#FF9B9B] border-[3px] border-[#FF9B9B] font-bold text-2xl focus-yellow">대국 기권</button>
+</div>
+</div>
+</div>
+<!-- Toggles Grid -->
+<div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+<div class="bg-surface-container p-6 brutalist-border flex items-center justify-between">
+<div>
+<div class="font-body-lg text-body-lg font-bold">최대 대비 보드</div>
+<div class="text-on-surface-variant">검은 돌 테두리 및 고대비 선 적용</div>
+</div>
+<label class="cursor-pointer">
+<input checked="" class="hidden" type="checkbox"/>
+<div class="big-toggle focus-yellow" tabindex="0"></div>
+</label>
+</div>
+<div class="bg-surface-container p-6 brutalist-border flex items-center justify-between">
+<div>
+<div class="font-body-lg text-body-lg font-bold">움직임 줄이기</div>
+<div class="text-on-surface-variant">애니메이션 및 전환 효과 비활성화</div>
+</div>
+<label class="cursor-pointer">
+<input class="hidden" type="checkbox"/>
+<div class="big-toggle focus-yellow" tabindex="0"></div>
+</label>
+</div>
+<div class="bg-surface-container p-6 brutalist-border flex items-center justify-between">
+<div>
+<div class="font-body-lg text-body-lg font-bold">착수점 깜빡임</div>
+<div class="text-on-surface-variant">마지막 수 위치를 강조 표시</div>
+</div>
+<label class="cursor-pointer">
+<input checked="" class="hidden" type="checkbox"/>
+<div class="big-toggle focus-yellow" tabindex="0"></div>
+</label>
+</div>
+<div class="bg-surface-container p-6 brutalist-border flex items-center justify-between">
+<div>
+<div class="font-body-lg text-body-lg font-bold">착수 소리</div>
+<div class="text-on-surface-variant">바둑돌을 놓을 때 효과음 재생</div>
+</div>
+<label class="cursor-pointer">
+<input checked="" class="hidden" type="checkbox"/>
+<div class="big-toggle focus-yellow" tabindex="0"></div>
+</label>
+</div>
+</div>
+<!-- Selections -->
+<div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+<!-- Text & Board Config -->
+<div class="space-y-6">
+<h3 class="font-headline-md text-headline-md text-on-surface border-l-8 border-tertiary pl-4">기본 설정</h3>
+<div class="space-y-4">
+<label class="block font-body-lg text-body-lg">언어 (Language)</label>
+<select class="w-full h-[60px] bg-[#1F1F2A] brutalist-border px-4 font-body-lg text-on-surface focus-yellow appearance-none">
+<option>한국어 (Korean)</option>
+<option>English</option>
+<option>日本語</option>
+</select>
+</div>
+<div class="space-y-4">
+<label class="block font-body-lg text-body-lg">글꼴 (Font)</label>
+<select class="w-full h-[60px] bg-[#1F1F2A] brutalist-border px-4 font-body-lg text-on-surface focus-yellow">
+<option selected="">KyoboHandwriting2019</option>
+<option>Consolas (Mono)</option>
+<option>Sans-Serif</option>
+</select>
+</div>
+<div class="space-y-4">
+<label class="block font-body-lg text-body-lg">글자 크기 (Font Size)</label>
+<div class="flex gap-4">
+<button class="flex-1 h-[60px] bg-surface-container brutalist-border font-body-md text-body-md hover:bg-surface-container-high focus-yellow">16px</button>
+<button class="flex-1 h-[60px] bg-tertiary text-on-tertiary-fixed border-3 border-tertiary font-body-lg text-body-lg focus-yellow">18px</button>
+<button class="flex-1 h-[60px] bg-surface-container brutalist-border font-body-lg text-body-lg font-bold hover:bg-surface-container-high focus-yellow">20px</button>
+</div>
+</div>
+</div>
+<!-- Game Rules & Engine -->
+<div class="space-y-6">
+<h3 class="font-headline-md text-headline-md text-on-surface border-l-8 border-tertiary pl-4">게임 & 엔진</h3>
+<div class="space-y-4">
+<label class="block font-body-lg text-body-lg">바둑판 크기 (Board Scale)</label>
+<input class="w-full h-[20px] bg-surface-container rounded-lg appearance-none cursor-pointer accent-tertiary focus-yellow" max="120" min="80" type="range" value="100"/>
+<div class="flex justify-between text-on-surface-variant font-label-sm">
+<span>80%</span>
+<span>100% (기본)</span>
+<span>120%</span>
+</div>
+</div>
+<div class="space-y-4">
+<label class="block font-body-lg text-body-lg">규칙 (Go Rules)</label>
+<select class="w-full h-[60px] bg-[#1F1F2A] brutalist-border px-4 font-body-lg text-on-surface focus-yellow">
+<option>한국 (Korean Rules)</option>
+<option>중국 (Chinese Rules)</option>
+<option>일본 (Japanese Rules)</option>
+<option>AGA (American)</option>
+</select>
+</div>
+<div class="space-y-4">
+<label class="block font-body-lg text-body-lg">KataGo Bridge URL</label>
+<div class="flex gap-2">
+<input class="flex-1 h-[60px] bg-[#1F1F2A] brutalist-border px-4 font-body-lg text-on-surface focus-yellow" placeholder="ws://localhost:8080" type="text"/>
+<button class="px-6 h-[60px] bg-[#F5F5F7] text-[#0D0D12] font-bold hover:bg-on-surface transition-colors focus-yellow">연결</button>
+</div>
+<p class="text-on-surface-variant text-sm">인공지능 분석 기능을 사용하려면 로컬 브릿지 URL이 필요합니다.</p>
+</div>
+</div>
+</div>
+<!-- History & Changelog -->
+<div class="mt-10 bg-surface-container p-gutter brutalist-border">
+<h3 class="font-headline-md text-headline-md mb-6">최근 업데이트 내역</h3>
+<div class="space-y-4 max-h-[300px] overflow-y-auto custom-scrollbar pr-4">
+<div class="p-4 bg-surface-container-low brutalist-border">
+<div class="flex justify-between items-center mb-2">
+<span class="font-bold text-primary">v2.4.0 - 시각 보조 강화</span>
+<span class="text-on-surface-variant text-sm">2023.10.27</span>
+</div>
+<p class="text-on-surface-variant">저시력 사용자를 위한 고대비 버튼 모드 및 바둑판 확대 기능이 추가되었습니다.</p>
+</div>
+<div class="p-4 bg-surface-container-low brutalist-border">
+<div class="flex justify-between items-center mb-2">
+<span class="font-bold text-primary">v2.3.5 - 성능 개선</span>
+<span class="text-on-surface-variant text-sm">2023.10.15</span>
+</div>
+<p class="text-on-surface-variant">KataGo 엔진 연동 안정성이 향상되었으며 대국 기록 로딩 속도가 개선되었습니다.</p>
+</div>
+<div class="p-4 bg-surface-container-low brutalist-border">
+<div class="flex justify-between items-center mb-2">
+<span class="font-bold text-primary">v2.3.0 - 분석 툴 업데이트</span>
+<span class="text-on-surface-variant text-sm">2023.09.30</span>
+</div>
+<p class="text-on-surface-variant">승률 그래프 시각화 및 주요 착수점 힌트 기능이 베타 서비스로 제공됩니다.</p>
+</div>
+</div>
+</div>
+</section>
+</main>
+</div>
+<!-- BottomNavBar (Mobile Only) -->
+<nav class="md:hidden fixed bottom-0 left-0 w-full flex justify-around items-center h-[80px] bg-surface-container-lowest border-t-3 border-outline-variant z-50">
+<a class="flex flex-col items-center justify-center text-on-surface h-full w-full active:scale-95 transition-transform" href="#">
+<span class="material-symbols-outlined text-3xl">grid_4x4</span>
+<span class="font-label-sm text-label-sm">Board</span>
+</a>
+<a class="flex flex-col items-center justify-center text-on-surface h-full w-full active:scale-95 transition-transform" href="#">
+<span class="material-symbols-outlined text-3xl">bar_chart</span>
+<span class="font-label-sm text-label-sm">Stats</span>
+</a>
+<a class="flex flex-col items-center justify-center text-on-surface h-full w-full active:scale-95 transition-transform" href="#">
+<span class="material-symbols-outlined text-3xl">build</span>
+<span class="font-label-sm text-label-sm">Tools</span>
+</a>
+<a class="flex flex-col items-center justify-center bg-tertiary text-on-tertiary-fixed h-full w-full active:scale-95 transition-transform" href="#">
+<span class="material-symbols-outlined text-3xl">settings</span>
+<span class="font-label-sm text-label-sm">Menu</span>
+</a>
+</nav>
+<script>
+        function toggleContrast(checkbox) {
+            const previewButtons = document.querySelectorAll('#preview-area button');
+            if (checkbox.checked) {
+                previewButtons.forEach(btn => {
+                    btn.classList.add('ring-4', 'ring-white', 'ring-offset-2', 'ring-offset-black');
+                    btn.style.letterSpacing = '1px';
+                    btn.style.borderWidth = '4px';
+                });
+            } else {
+                previewButtons.forEach(btn => {
+                    btn.classList.remove('ring-4', 'ring-white', 'ring-offset-2', 'ring-offset-black');
+                    btn.style.letterSpacing = 'normal';
+                    btn.style.borderWidth = btn.classList.contains('bg-[#F5F5F7]') ? '0px' : '3px';
+                });
+            }
+        }
+
+        // Initialize Keyboard Accessibility for Custom Toggles
+        document.querySelectorAll('.big-toggle').forEach(toggle => {
+            toggle.addEventListener('keydown', (e) => {
+                if (e.key === 'Enter' || e.key === ' ') {
+                    e.preventDefault();
+                    const checkbox = toggle.previousElementSibling;
+                    checkbox.checked = !checkbox.checked;
+                    checkbox.dispatchEvent(new Event('change'));
+                }
+            });
+        });
+    </script>
+</body></html>

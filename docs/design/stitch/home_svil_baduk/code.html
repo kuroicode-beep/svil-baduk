@@ -1,0 +1,264 @@
+<!DOCTYPE html>
+
+<html class="dark" lang="ko"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>SVIL Baduk - Home</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Consolas:wght@100..900&family=KyoboHandwriting2019:wght@100..900&display=swap" rel="stylesheet"/>
+<style>
+        @font-face {
+            font-family: 'KyoboHandwriting2019';
+            src: url('https://cdn.jsdelivr.net/gh/projectnoonnu/noonfonts_20-04@1.0/KyoboHandwriting2019.woff') format('woff');
+            font-weight: normal;
+            font-style: normal;
+        }
+
+        body {
+            background-color: #0D0D12;
+            color: #e4e1eb;
+            margin: 0;
+            padding: 0;
+            overflow-x: hidden;
+            font-family: 'KyoboHandwriting2019', cursive;
+        }
+
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 48;
+        }
+
+        /* Custom focus ring for low vision accessibility */
+        .focus-ring:focus {
+            outline: none;
+            box-shadow: 0 0 0 4px #FFFF00;
+            border-color: #FFFF00 !important;
+        }
+
+        .radial-atmosphere {
+            background: radial-gradient(circle at 50% 50%, #1F1F2A 0%, #0D0D12 100%);
+        }
+
+        .stone-shadow {
+            filter: drop-shadow(0 4px 8px rgba(0,0,0,0.8));
+        }
+    </style>
+<script id="tailwind-config">
+        tailwind.config = {
+          darkMode: "class",
+          theme: {
+            extend: {
+              "colors": {
+                      "primary-container": "#7ec8ff",
+                      "surface-bright": "#393840",
+                      "on-primary-fixed-variant": "#004b70",
+                      "on-primary-fixed": "#001e30",
+                      "on-primary-container": "#00537c",
+                      "on-tertiary-fixed-variant": "#494900",
+                      "on-secondary-fixed-variant": "#454749",
+                      "primary": "#bee1ff",
+                      "surface-container-highest": "#34343c",
+                      "on-secondary": "#2f3132",
+                      "on-surface": "#e4e1eb",
+                      "tertiary-container": "#c7c700",
+                      "on-background": "#e4e1eb",
+                      "surface-variant": "#34343c",
+                      "on-tertiary-container": "#515100",
+                      "secondary-fixed": "#e2e2e4",
+                      "outline": "#8a929a",
+                      "inverse-surface": "#e4e1eb",
+                      "on-tertiary-fixed": "#1d1d00",
+                      "surface-container-lowest": "#0d0e14",
+                      "surface-container": "#1f1f26",
+                      "surface-container-low": "#1b1b22",
+                      "tertiary": "#e4e400",
+                      "inverse-primary": "#006493",
+                      "on-primary": "#00344f",
+                      "secondary-fixed-dim": "#c6c6c8",
+                      "tertiary-fixed": "#eaea00",
+                      "secondary-container": "#454749",
+                      "outline-variant": "#40484f",
+                      "tertiary-fixed-dim": "#cdcd00",
+                      "on-secondary-container": "#b4b5b7",
+                      "surface-dim": "#13131a",
+                      "surface": "#13131a",
+                      "error-container": "#93000a",
+                      "secondary": "#c6c6c8",
+                      "on-secondary-fixed": "#1a1c1d",
+                      "surface-tint": "#8dcdff",
+                      "error": "#ffb4ab",
+                      "on-error": "#690005",
+                      "on-error-container": "#ffdad6",
+                      "primary-fixed": "#cae6ff",
+                      "background": "#13131a",
+                      "on-tertiary": "#323200",
+                      "surface-container-high": "#292931",
+                      "primary-fixed-dim": "#8dcdff",
+                      "inverse-on-surface": "#303037",
+                      "on-surface-variant": "#c0c7d0"
+              },
+              "borderRadius": {
+                      "DEFAULT": "0.25rem",
+                      "lg": "0.5rem",
+                      "xl": "0.75rem",
+                      "full": "9999px"
+              },
+              "spacing": {
+                      "gutter": "24px",
+                      "touch-target-min": "50px",
+                      "margin-mobile": "16px",
+                      "max-width": "1280px",
+                      "unit": "8px",
+                      "margin-desktop": "40px"
+              },
+              "fontFamily": {
+                      "body-lg": ["KyoboHandwriting2019"],
+                      "data-mono": ["Consolas"],
+                      "display-lg": ["KyoboHandwriting2019"],
+                      "label-sm": ["Consolas"],
+                      "body-md": ["KyoboHandwriting2019"],
+                      "headline-md": ["KyoboHandwriting2019"]
+              },
+              "fontSize": {
+                      "body-lg": ["24px", {"lineHeight": "1.8", "fontWeight": "400"}],
+                      "data-mono": ["20px", {"lineHeight": "1.2", "fontWeight": "400"}],
+                      "display-lg": ["48px", {"lineHeight": "1.5", "fontWeight": "400"}],
+                      "label-sm": ["16px", {"lineHeight": "1.2", "fontWeight": "400"}],
+                      "body-md": ["18px", {"lineHeight": "1.8", "fontWeight": "400"}],
+                      "headline-md": ["32px", {"lineHeight": "1.6", "fontWeight": "400"}]
+              }
+            },
+          },
+        }
+    </script>
+</head>
+<body class="radial-atmosphere min-h-screen flex flex-col items-center">
+<!-- Top App Bar -->
+<header class="bg-background dark:bg-background text-on-background dark:text-on-background border-b-3 border-outline-variant flex justify-between items-center w-full px-margin-desktop h-[70px] docked full-width top-0 z-50">
+<div class="flex items-center gap-4">
+<span class="font-headline-md text-headline-md font-bold text-primary dark:text-primary">SVIL Baduk</span>
+<span class="font-label-sm text-label-sm bg-surface-container-highest px-3 py-1 rounded text-on-surface-variant">v0.6.9</span>
+</div>
+<div class="flex gap-4">
+<button class="w-[50px] h-[50px] flex items-center justify-center hover:bg-surface-container-highest transition-colors rounded-lg focus-ring">
+<span class="material-symbols-outlined" data-icon="help">help</span>
+</button>
+<button class="w-[50px] h-[50px] flex items-center justify-center hover:bg-surface-container-highest transition-colors rounded-lg focus-ring">
+<span class="material-symbols-outlined" data-icon="settings">settings</span>
+</button>
+</div>
+</header>
+<!-- Main Content Area -->
+<main class="w-full max-w-max-width flex flex-col md:flex-row gap-gutter px-margin-mobile md:px-margin-desktop py-12 mt-[70px]">
+<!-- Left Side: Identity & Profile -->
+<div class="flex-1 flex flex-col gap-12">
+<!-- Hero Branding -->
+<section class="space-y-4">
+<h1 class="font-display-lg text-display-lg text-primary tracking-tight">SVIL Baduk</h1>
+<p class="font-headline-md text-headline-md text-on-surface">고대비 바둑 — <br/><span class="text-secondary">저시력자를 위한 바둑</span></p>
+</section>
+<!-- Profile Summary Card -->
+<div class="bg-surface-container border-3 border-outline-variant p-gutter rounded-xl max-w-md stone-shadow">
+<div class="flex items-center gap-6 mb-6">
+<div class="w-24 h-24 bg-primary text-on-primary rounded-full flex items-center justify-center border-4 border-white">
+<span class="material-symbols-outlined scale-[2]" data-icon="account_circle" style="font-variation-settings: 'FILL' 1;">account_circle</span>
+</div>
+<div>
+<h2 class="font-headline-md text-headline-md text-on-surface">돌이</h2>
+<p class="font-body-md text-body-md text-secondary">Rank: 1 Dan · Level 3</p>
+</div>
+</div>
+<div class="space-y-4">
+<div class="flex justify-between font-data-mono text-data-mono text-on-surface-variant">
+<span>Win/Loss: 5W / 2L</span>
+<span>High: 42</span>
+</div>
+<!-- XP Bar -->
+<div class="w-full h-8 bg-surface-container-highest rounded-full overflow-hidden border-2 border-outline-variant relative">
+<div class="h-full bg-primary w-[65%]"></div>
+<span class="absolute inset-0 flex items-center justify-center font-label-sm text-label-sm text-on-background mix-blend-difference">XP 1240 / 2000</span>
+</div>
+</div>
+</div>
+</div>
+<!-- Right Side: Navigation Buttons (Primary Stack) -->
+<nav class="flex-1 flex flex-col gap-unit">
+<!-- AI Play (Primary CTA) -->
+<button class="group w-full min-h-[100px] bg-primary text-on-primary rounded-none flex items-center px-8 gap-6 border-3 border-transparent hover:border-tertiary focus-ring transition-all active:scale-[0.98] text-left">
+<span class="material-symbols-outlined scale-[1.5]" data-icon="smart_toy" style="font-variation-settings: 'FILL' 1;">smart_toy</span>
+<div>
+<span class="block font-headline-md text-headline-md leading-none">AI와 겨루기</span>
+<span class="block font-body-md text-body-md opacity-80">난이도 1~10 · 혼자 두기</span>
+</div>
+</button>
+<!-- Learn -->
+<button class="w-full min-h-[80px] bg-[#16161D] text-white border-3 border-[#C9C9D4] flex items-center px-8 gap-6 hover:bg-surface-container-high focus-ring transition-all active:scale-[0.98] text-left">
+<span class="material-symbols-outlined scale-[1.5]" data-icon="school">school</span>
+<span class="font-headline-md text-headline-md">배우기</span>
+</button>
+<!-- Multiplayer -->
+<button class="w-full min-h-[80px] bg-[#16161D] text-white border-3 border-[#C9C9D4] flex items-center px-8 gap-6 hover:bg-surface-container-high focus-ring transition-all active:scale-[0.98] text-left">
+<span class="material-symbols-outlined scale-[1.5]" data-icon="groups">groups</span>
+<span class="font-headline-md text-headline-md">상대랑 두기</span>
+</button>
+<div class="h-8"></div><!-- Spacer -->
+<!-- Character (Secondary) -->
+<button class="w-full min-h-[70px] bg-surface-container text-on-surface border-3 border-outline-variant flex items-center px-8 gap-6 hover:bg-surface-container-high focus-ring transition-all active:scale-[0.98] text-left">
+<span class="material-symbols-outlined" data-icon="face">face</span>
+<span class="font-body-lg text-body-lg">캐릭터</span>
+</button>
+<!-- Settings (Secondary) -->
+<button class="w-full min-h-[70px] bg-surface-container text-on-surface border-3 border-outline-variant flex items-center px-8 gap-6 hover:bg-surface-container-high focus-ring transition-all active:scale-[0.98] text-left">
+<span class="material-symbols-outlined" data-icon="tune">tune</span>
+<span class="font-body-lg text-body-lg">설정</span>
+</button>
+</nav>
+</main>
+<!-- Bottom Navigation (Mobile Only) -->
+<nav class="md:hidden fixed bottom-0 left-0 w-full flex justify-around items-center h-[80px] bg-surface-container-lowest border-t-3 border-outline-variant z-50">
+<a class="flex flex-col items-center justify-center bg-tertiary text-on-tertiary-fixed h-full w-full" href="#">
+<span class="material-symbols-outlined" data-icon="grid_4x4">grid_4x4</span>
+<span class="font-label-sm text-label-sm">Board</span>
+</a>
+<a class="flex flex-col items-center justify-center text-on-surface h-full w-full" href="#">
+<span class="material-symbols-outlined" data-icon="bar_chart">bar_chart</span>
+<span class="font-label-sm text-label-sm">Stats</span>
+</a>
+<a class="flex flex-col items-center justify-center text-on-surface h-full w-full" href="#">
+<span class="material-symbols-outlined" data-icon="build">build</span>
+<span class="font-label-sm text-label-sm">Tools</span>
+</a>
+<a class="flex flex-col items-center justify-center text-on-surface h-full w-full" href="#">
+<span class="material-symbols-outlined" data-icon="menu">menu</span>
+<span class="font-label-sm text-label-sm">Menu</span>
+</a>
+</nav>
+<!-- Visual Polish: Floating Stones -->
+<div class="fixed top-20 right-[-50px] opacity-20 pointer-events-none select-none -z-10 transform rotate-12">
+<div class="w-64 h-64 bg-white rounded-full stone-shadow border-4 border-[#3A3A48]"></div>
+</div>
+<div class="fixed bottom-[-50px] left-[-50px] opacity-10 pointer-events-none select-none -z-10 transform -rotate-12">
+<div class="w-96 h-96 bg-[#0D0D12] rounded-full stone-shadow border-4 border-white"></div>
+</div>
+<script>
+        // Simple interactive focus loop for keyboard users
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'Tab') {
+                document.body.classList.add('keyboard-nav');
+            }
+        });
+
+        // Click effects for buttons
+        const buttons = document.querySelectorAll('button');
+        buttons.forEach(btn => {
+            btn.addEventListener('click', () => {
+                const originalBg = btn.style.backgroundColor;
+                btn.classList.add('scale-95');
+                setTimeout(() => {
+                    btn.classList.remove('scale-95');
+                }, 100);
+            });
+        });
+    </script>
+</body></html>

@@ -1,0 +1,284 @@
+<!DOCTYPE html>
+
+<html class="dark" lang="ko"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=KyoboHandwriting2019:wght@100..900&display=swap" rel="stylesheet"/>
+<style>
+        @font-face {
+            font-family: 'KyoboHandwriting2019';
+            src: url('https://fastly.jsdelivr.net/gh/projectnoonnu/noonfonts_20-04@1.0/KyoboHandwriting2019.woff') format('woff');
+            font-weight: normal;
+            font-style: normal;
+        }
+        body {
+            background-color: #0D0D12;
+            color: #E4E1EB;
+            margin: 0;
+            padding: 0;
+            -webkit-tap-highlight-color: transparent;
+        }
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 48;
+        }
+        /* Focus styles for high accessibility */
+        .focus-ring:focus {
+            outline: none;
+            box-shadow: 0 0 0 3px #FFFF00;
+        }
+        /* Custom scrollbar for brutalist look */
+        ::-webkit-scrollbar {
+            width: 12px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #13131A;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #6B6B82;
+            border: 3px solid #13131A;
+        }
+    </style>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    "colors": {
+                        "primary-container": "#7ec8ff",
+                        "surface-bright": "#393840",
+                        "on-primary-fixed-variant": "#004b70",
+                        "on-primary-fixed": "#001e30",
+                        "on-primary-container": "#00537c",
+                        "on-tertiary-fixed-variant": "#494900",
+                        "on-secondary-fixed-variant": "#454749",
+                        "primary": "#bee1ff",
+                        "surface-container-highest": "#34343c",
+                        "on-secondary": "#2f3132",
+                        "on-surface": "#e4e1eb",
+                        "tertiary-container": "#c7c700",
+                        "on-background": "#e4e1eb",
+                        "surface-variant": "#34343c",
+                        "on-tertiary-container": "#515100",
+                        "secondary-fixed": "#e2e2e4",
+                        "outline": "#8a929a",
+                        "inverse-surface": "#e4e1eb",
+                        "on-tertiary-fixed": "#1d1d00",
+                        "surface-container-lowest": "#0d0e14",
+                        "surface-container": "#1f1f26",
+                        "surface-container-low": "#1b1b22",
+                        "tertiary": "#e4e400",
+                        "inverse-primary": "#006493",
+                        "on-primary": "#00344f",
+                        "secondary-fixed-dim": "#c6c6c8",
+                        "tertiary-fixed": "#eaea00",
+                        "secondary-container": "#454749",
+                        "outline-variant": "#40484f",
+                        "tertiary-fixed-dim": "#cdcd00",
+                        "on-secondary-container": "#b4b5b7",
+                        "surface-dim": "#13131a",
+                        "surface": "#13131a",
+                        "error-container": "#93000a",
+                        "secondary": "#c6c6c8",
+                        "on-secondary-fixed": "#1a1c1d",
+                        "surface-tint": "#8dcdff",
+                        "error": "#ffb4ab",
+                        "on-error": "#690005",
+                        "on-error-container": "#ffdad6",
+                        "primary-fixed": "#cae6ff",
+                        "background": "#13131a",
+                        "on-tertiary": "#323200",
+                        "surface-container-high": "#292931",
+                        "primary-fixed-dim": "#8dcdff",
+                        "inverse-on-surface": "#303037",
+                        "on-surface-variant": "#c0c7d0"
+                    },
+                    "borderRadius": {
+                        "DEFAULT": "0.25rem",
+                        "lg": "0.5rem",
+                        "xl": "0.75rem",
+                        "full": "9999px"
+                    },
+                    "spacing": {
+                        "gutter": "24px",
+                        "touch-target-min": "50px",
+                        "margin-mobile": "16px",
+                        "max-width": "1280px",
+                        "unit": "8px",
+                        "margin-desktop": "40px"
+                    },
+                    "fontFamily": {
+                        "body-lg": ["KyoboHandwriting2019"],
+                        "data-mono": ["Consolas", "monospace"],
+                        "display-lg": ["KyoboHandwriting2019"],
+                        "label-sm": ["Consolas", "monospace"],
+                        "body-md": ["KyoboHandwriting2019"],
+                        "headline-md": ["KyoboHandwriting2019"]
+                    },
+                    "fontSize": {
+                        "body-lg": ["24px", {"lineHeight": "1.8", "fontWeight": "400"}],
+                        "data-mono": ["20px", {"lineHeight": "1.2", "fontWeight": "400"}],
+                        "display-lg": ["48px", {"lineHeight": "1.5", "fontWeight": "400"}],
+                        "label-sm": ["16px", {"lineHeight": "1.2", "fontWeight": "400"}],
+                        "body-md": ["18px", {"lineHeight": "1.8", "fontWeight": "400"}],
+                        "headline-md": ["32px", {"lineHeight": "1.6", "fontWeight": "400"}]
+                    }
+                },
+            },
+        }
+    </script>
+</head>
+<body class="flex flex-col min-h-screen">
+<!-- TopAppBar -->
+<header class="bg-background dark:bg-background text-on-background dark:text-on-background border-b-3 border-outline-variant flex justify-between items-center w-full px-margin-desktop h-[70px] sticky top-0 z-50">
+<div class="flex items-center gap-unit">
+<button class="h-touch-target-min w-touch-target-min flex items-center justify-center hover:bg-surface-container-highest transition-colors rounded-full focus-ring">
+<span class="material-symbols-outlined text-[32px]">arrow_back</span>
+</button>
+<h1 class="font-headline-md text-headline-md font-bold text-primary">상대랑 두기</h1>
+</div>
+<div class="flex items-center gap-4">
+<button class="material-symbols-outlined text-on-surface-variant hover:bg-surface-container-highest p-2 rounded-full focus-ring" data-icon="help">help</button>
+<button class="material-symbols-outlined text-on-surface-variant hover:bg-surface-container-highest p-2 rounded-full focus-ring" data-icon="settings">settings</button>
+</div>
+</header>
+<main class="flex-1 w-full max-w-max-width mx-auto p-margin-desktop grid grid-cols-1 md:grid-cols-12 gap-gutter">
+<!-- Left Column: Identity & Connection -->
+<div class="md:col-span-5 flex flex-col gap-gutter">
+<!-- Room Identity Block -->
+<section class="bg-surface-container border-3 border-outline-variant p-gutter flex flex-col gap-4">
+<h2 class="font-headline-md text-headline-md text-on-surface">내 정보 및 초대</h2>
+<div class="flex flex-col gap-2">
+<label class="font-label-sm text-label-sm text-on-surface-variant">나의 접속 코드 (Peer ID)</label>
+<div class="flex gap-unit">
+<div class="flex-1 bg-surface-container-low border-3 border-outline-variant p-4 font-data-mono text-data-mono text-primary flex items-center">
+                            SVIL-BADUK-2024-X9
+                        </div>
+<button class="bg-[#F5F5F7] text-[#0D0D12] px-6 py-2 font-body-lg text-body-lg hover:bg-opacity-90 focus-ring h-full transition-all" onclick="copyId()">
+                            복사
+                        </button>
+</div>
+</div>
+<div class="flex flex-col items-center gap-4 mt-4 p-4 bg-white border-8 border-white">
+<div class="w-48 h-48 bg-white flex items-center justify-center">
+<div class="w-full h-full bg-contain" data-alt="A high-contrast, professional QR code generated for a digital application. The QR code is perfectly centered on a clean white background, surrounded by a thick, minimalist white border. The aesthetic is ultra-modern and brutalist, designed specifically for a dark-themed user interface to ensure maximum clarity and scanning reliability in low-vision settings." style="background-image: url('https://lh3.googleusercontent.com/aida-public/AB6AXuDSlq7Yc6nckbhhuodwP-JcuhQyq4S5PYrIZg44_BcuX2NIiqTMmGNId0PchTgsZ9pwf-2EXg-ccF1W_sz23yOaGEj2_j37APbypHSCoDXfm8zhEqdQ2gurTfxPpk-S-1PQtv0HpxBWli_B74yQi_Op7LM6vl76_L-zLq26DPoD_Kf3uIRh-9QkU2VCBBN-MZAOu9tBbv9l7YqRk0cwYl5t4dCgcJRpKP1kVuX8XzTu9MptI6qHxmsmVIpdVdlCCNly2GzT8n2eXwtQ')"></div>
+</div>
+<p class="font-label-sm text-label-sm text-[#0D0D12] text-center">QR 코드로 간편하게 초대하세요</p>
+</div>
+</section>
+<!-- Peer Connect Block -->
+<section class="bg-surface-container-high border-3 border-outline-variant p-gutter flex flex-col gap-4">
+<h2 class="font-headline-md text-headline-md text-on-surface">상대방 연결</h2>
+<div class="flex flex-col gap-2">
+<label class="font-label-sm text-label-sm text-on-surface-variant">상대방의 코드 붙여넣기</label>
+<input class="bg-[#1F1F2A] border-3 border-[#6B6B82] text-[#F5F5F7] p-4 font-body-lg text-body-lg focus-ring focus:border-tertiary transition-all" placeholder="코드 입력" type="text"/>
+</div>
+<button class="w-full border-3 border-[#C9C9D4] bg-[#0D0D12] text-[#F5F5F7] h-touch-target-min font-body-lg text-body-lg hover:bg-surface-container-highest focus-ring transition-all">
+                    연결하기
+                </button>
+</section>
+</div>
+<!-- Right Column: Host Options & Status -->
+<div class="md:col-span-7 flex flex-col gap-gutter">
+<!-- Game Options Block -->
+<section class="bg-surface-container border-3 border-outline-variant p-gutter flex flex-col gap-gutter">
+<h2 class="font-headline-md text-headline-md text-on-surface">대국 설정 (호스트 전용)</h2>
+<!-- Board Size Selector -->
+<div class="flex flex-col gap-4">
+<span class="font-label-sm text-label-sm text-on-surface-variant">바둑판 크기</span>
+<div class="grid grid-cols-3 gap-unit">
+<button class="bg-[#1F1F2A] border-3 border-tertiary text-on-tertiary-fixed font-bold p-4 text-headline-md font-headline-md hover:bg-surface-container-highest transition-all focus-ring" id="size-9" onclick="selectSize(9)">9x9</button>
+<button class="bg-[#1F1F2A] border-3 border-[#6B6B82] text-on-surface p-4 text-headline-md font-headline-md hover:bg-surface-container-highest transition-all focus-ring" id="size-13" onclick="selectSize(13)">13x13</button>
+<button class="bg-[#1F1F2A] border-3 border-[#6B6B82] text-on-surface p-4 text-headline-md font-headline-md hover:bg-surface-container-highest transition-all focus-ring" id="size-19" onclick="selectSize(19)">19x19</button>
+</div>
+</div>
+<!-- Color Selection -->
+<div class="flex flex-col gap-4">
+<span class="font-label-sm text-label-sm text-on-surface-variant">내 돌 색상</span>
+<div class="grid grid-cols-2 gap-unit">
+<button class="flex items-center justify-center gap-4 border-3 border-tertiary bg-tertiary text-on-tertiary-fixed p-4 focus-ring">
+<div class="w-8 h-8 rounded-full bg-black border-2 border-white"></div>
+<span class="font-body-lg text-body-lg font-bold">흑 (Black)</span>
+</button>
+<button class="flex items-center justify-center gap-4 border-3 border-[#6B6B82] bg-surface-container-low text-on-surface p-4 focus-ring">
+<div class="w-8 h-8 rounded-full bg-white"></div>
+<span class="font-body-lg text-body-lg">백 (White)</span>
+</button>
+</div>
+</div>
+</section>
+<!-- Status & Action Block -->
+<section class="bg-surface-container-low border-3 border-outline-variant p-gutter flex flex-col items-center justify-center gap-gutter flex-1 text-center min-h-[300px]">
+<div class="flex flex-col items-center gap-6" id="connection-status">
+<div class="relative w-24 h-24">
+<!-- Loading/Waiting Animation Overlay -->
+<div class="absolute inset-0 border-4 border-tertiary border-t-transparent rounded-full animate-spin"></div>
+<div class="absolute inset-2 bg-surface-container rounded-full flex items-center justify-center">
+<span class="material-symbols-outlined text-tertiary text-4xl">person_search</span>
+</div>
+</div>
+<div class="flex flex-col gap-2">
+<p class="font-headline-md text-headline-md text-on-surface">연결 대기 중...</p>
+<p class="font-body-md text-body-md text-on-surface-variant">상대방이 코드를 입력하기를 기다리고 있습니다.</p>
+</div>
+</div>
+<!-- Hidden until ready, shown for demo purpose in a muted state -->
+<div class="w-full pt-gutter mt-auto">
+<button class="w-full h-24 bg-surface-container-highest text-on-surface-variant opacity-50 cursor-not-allowed border-3 border-outline-variant font-headline-md text-headline-md flex items-center justify-center gap-4 transition-all" disabled="">
+<span class="material-symbols-outlined text-4xl">play_circle</span>
+                        대국 시작
+                    </button>
+<p class="font-label-sm text-label-sm mt-4 text-error">상대방이 아직 준비되지 않았습니다.</p>
+</div>
+</section>
+</div>
+</main>
+<!-- BottomNavBar (Mobile Only) -->
+<nav class="md:hidden fixed bottom-0 left-0 w-full flex justify-around items-center h-[80px] bg-surface-container-lowest dark:bg-surface-container-lowest border-t-3 border-outline-variant z-50">
+<button class="flex flex-col items-center justify-center text-on-surface h-full w-full hover:bg-surface-container-highest transition-all focus-ring">
+<span class="material-symbols-outlined" data-icon="grid_4x4">grid_4x4</span>
+<span class="font-label-sm text-label-sm">Board</span>
+</button>
+<button class="flex flex-col items-center justify-center text-on-surface h-full w-full hover:bg-surface-container-highest transition-all focus-ring">
+<span class="material-symbols-outlined" data-icon="bar_chart">bar_chart</span>
+<span class="font-label-sm text-label-sm">Stats</span>
+</button>
+<button class="flex flex-col items-center justify-center bg-tertiary text-on-tertiary-fixed rounded-none h-full w-full focus-ring">
+<span class="material-symbols-outlined" data-icon="build">build</span>
+<span class="font-label-sm text-label-sm">Tools</span>
+</button>
+<button class="flex flex-col items-center justify-center text-on-surface h-full w-full hover:bg-surface-container-highest transition-all focus-ring">
+<span class="material-symbols-outlined" data-icon="menu">menu</span>
+<span class="font-label-sm text-label-sm">Menu</span>
+</button>
+</nav>
+<script>
+        function selectSize(size) {
+            const sizes = [9, 13, 19];
+            sizes.forEach(s => {
+                const el = document.getElementById(`size-${s}`);
+                if (s === size) {
+                    el.classList.add('border-tertiary', 'text-on-tertiary-fixed', 'font-bold');
+                    el.classList.remove('border-[#6B6B82]', 'text-on-surface');
+                } else {
+                    el.classList.remove('border-tertiary', 'text-on-tertiary-fixed', 'font-bold');
+                    el.classList.add('border-[#6B6B82]', 'text-on-surface');
+                }
+            });
+        }
+
+        function copyId() {
+            // Simple visual feedback for copy
+            const btn = event.currentTarget;
+            const originalText = btn.innerText;
+            btn.innerText = "복사됨";
+            btn.classList.add('bg-tertiary');
+            setTimeout(() => {
+                btn.innerText = originalText;
+                btn.classList.remove('bg-tertiary');
+            }, 2000);
+        }
+    </script>
+</body></html>

@@ -1,0 +1,338 @@
+<!DOCTYPE html>
+
+<html class="dark" lang="ko"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" name="viewport"/>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Consolas:wght@100..900&family=KyoboHandwriting2019:wght@100..900&display=swap" rel="stylesheet"/>
+<style>
+        @font-face {
+            font-family: 'KyoboHandwriting2019';
+            src: url('https://cdn.jsdelivr.net/gh/projectnoonnu/noonfonts_20-04@1.0/KyoboHandwriting2019.woff') format('woff');
+            font-weight: normal;
+            font-style: normal;
+        }
+
+        body {
+            margin: 0;
+            padding: 0;
+            overflow: hidden;
+            background-color: #0D0D12;
+            color: #E4E1EB;
+            -webkit-font-smoothing: antialiased;
+        }
+
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 48;
+            vertical-align: middle;
+        }
+
+        /* High-Contrast Board Specifics */
+        .baduk-grid {
+            background-image: 
+                linear-gradient(#6B6B82 2px, transparent 2px),
+                linear-gradient(90deg, #6B6B82 2px, transparent 2px);
+            background-size: calc(100% / 18) calc(100% / 18);
+            border: 3px solid #6B6B82;
+        }
+
+        .stone-black {
+            background: #000000;
+            border: 2px solid #3A3A48;
+            box-shadow: inset 0 0 10px rgba(255,255,255,0.1);
+        }
+
+        .stone-white {
+            background: #F5F5F7;
+            border: 2px solid #000000;
+            box-shadow: inset 0 0 10px rgba(0,0,0,0.1);
+        }
+
+        .last-move-marker {
+            width: 14px;
+            height: 14px;
+            background-color: #FFFF00;
+            border-radius: 50%;
+            border: 2px solid #000;
+        }
+
+        .game-panel-height {
+            height: calc(100vh - 70px);
+        }
+
+        @media (max-width: 768px) {
+            .game-panel-height {
+                height: calc(100vh - 150px);
+            }
+        }
+    </style>
+<script id="tailwind-config">
+        tailwind.config = {
+          darkMode: "class",
+          theme: {
+            extend: {
+              "colors": {
+                      "primary-container": "#7ec8ff",
+                      "surface-bright": "#393840",
+                      "on-primary-fixed-variant": "#004b70",
+                      "on-primary-fixed": "#001e30",
+                      "on-primary-container": "#00537c",
+                      "on-tertiary-fixed-variant": "#494900",
+                      "on-secondary-fixed-variant": "#454749",
+                      "primary": "#bee1ff",
+                      "surface-container-highest": "#34343c",
+                      "on-secondary": "#2f3132",
+                      "on-surface": "#e4e1eb",
+                      "tertiary-container": "#c7c700",
+                      "on-background": "#e4e1eb",
+                      "surface-variant": "#34343c",
+                      "on-tertiary-container": "#515100",
+                      "secondary-fixed": "#e2e2e4",
+                      "outline": "#8a929a",
+                      "inverse-surface": "#e4e1eb",
+                      "on-tertiary-fixed": "#1d1d00",
+                      "surface-container-lowest": "#0d0e14",
+                      "surface-container": "#1f1f26",
+                      "surface-container-low": "#1b1b22",
+                      "tertiary": "#e4e400",
+                      "inverse-primary": "#006493",
+                      "on-primary": "#00344f",
+                      "secondary-fixed-dim": "#c6c6c8",
+                      "tertiary-fixed": "#eaea00",
+                      "secondary-container": "#454749",
+                      "outline-variant": "#40484f",
+                      "tertiary-fixed-dim": "#cdcd00",
+                      "on-secondary-container": "#b4b5b7",
+                      "surface-dim": "#13131a",
+                      "surface": "#13131a",
+                      "error-container": "#93000a",
+                      "secondary": "#c6c6c8",
+                      "on-secondary-fixed": "#1a1c1d",
+                      "surface-tint": "#8dcdff",
+                      "error": "#ffb4ab",
+                      "on-error": "#690005",
+                      "on-error-container": "#ffdad6",
+                      "primary-fixed": "#cae6ff",
+                      "background": "#13131a",
+                      "on-tertiary": "#323200",
+                      "surface-container-high": "#292931",
+                      "primary-fixed-dim": "#8dcdff",
+                      "inverse-on-surface": "#303037",
+                      "on-surface-variant": "#c0c7d0"
+              },
+              "borderRadius": {
+                      "DEFAULT": "0.25rem",
+                      "lg": "0.5rem",
+                      "xl": "0.75rem",
+                      "full": "9999px"
+              },
+              "spacing": {
+                      "gutter": "24px",
+                      "touch-target-min": "50px",
+                      "margin-mobile": "16px",
+                      "max-width": "1280px",
+                      "unit": "8px",
+                      "margin-desktop": "40px"
+              },
+              "fontFamily": {
+                      "body-lg": ["KyoboHandwriting2019"],
+                      "data-mono": ["Consolas"],
+                      "display-lg": ["KyoboHandwriting2019"],
+                      "label-sm": ["Consolas"],
+                      "body-md": ["KyoboHandwriting2019"],
+                      "headline-md": ["KyoboHandwriting2019"]
+              },
+              "fontSize": {
+                      "body-lg": ["24px", {"lineHeight": "1.8", "fontWeight": "400"}],
+                      "data-mono": ["20px", {"lineHeight": "1.2", "fontWeight": "400"}],
+                      "display-lg": ["48px", {"lineHeight": "1.5", "fontWeight": "400"}],
+                      "label-sm": ["16px", {"lineHeight": "1.2", "fontWeight": "400"}],
+                      "body-md": ["18px", {"lineHeight": "1.8", "fontWeight": "400"}],
+                      "headline-md": ["32px", {"lineHeight": "1.6", "fontWeight": "400"}]
+              }
+            },
+          },
+        }
+    </script>
+</head>
+<body class="bg-background text-on-background font-body-md overflow-hidden">
+<!-- TopAppBar -->
+<header class="flex justify-between items-center w-full px-margin-desktop h-[70px] bg-background border-b-3 border-outline-variant fixed top-0 z-50">
+<div class="flex items-center gap-4">
+<span class="font-headline-md text-headline-md font-bold text-primary">SVIL Baduk</span>
+<div class="hidden md:flex gap-6 ml-8">
+<a class="font-label-sm text-label-sm text-primary border-b-3 border-tertiary px-2" href="#">Play</a>
+<a class="font-label-sm text-label-sm text-on-surface-variant hover:bg-surface-container-highest transition-colors px-2" href="#">Analysis</a>
+<a class="font-label-sm text-label-sm text-on-surface-variant hover:bg-surface-container-highest transition-colors px-2" href="#">History</a>
+</div>
+</div>
+<div class="flex items-center gap-unit">
+<button class="material-symbols-outlined p-2 hover:bg-surface-container-highest rounded-full transition-colors focus:outline-none focus:ring-3 focus:ring-tertiary" data-icon="help">help</button>
+<button class="material-symbols-outlined p-2 hover:bg-surface-container-highest rounded-full transition-colors focus:outline-none focus:ring-3 focus:ring-tertiary" data-icon="settings">settings</button>
+</div>
+</header>
+<!-- Main Content: Game Area -->
+<main class="pt-[70px] flex flex-col md:flex-row h-screen w-full overflow-hidden">
+<!-- Game Board Column -->
+<section class="flex-grow flex items-center justify-center p-4 bg-surface-container-lowest overflow-hidden">
+<!-- 19x19 Grid (Simulated via CSS) -->
+<div class="relative aspect-square max-h-[870px] w-full max-w-[870px] bg-[#16161D] baduk-grid flex flex-wrap content-start">
+<!-- Coordinates markers (Sample) -->
+<div class="absolute -left-10 top-0 h-full flex flex-col justify-around font-data-mono text-on-surface-variant text-label-sm">
+<span>19</span><span>18</span><span>17</span><span>16</span><span>15</span><span>14</span><span>13</span><span>12</span><span>11</span><span>10</span><span>9</span><span>8</span><span>7</span><span>6</span><span>5</span><span>4</span><span>3</span><span>2</span><span>1</span>
+</div>
+<div class="absolute -bottom-10 left-0 w-full flex justify-around font-data-mono text-on-surface-variant text-label-sm">
+<span>A</span><span>B</span><span>C</span><span>D</span><span>E</span><span>F</span><span>G</span><span>H</span><span>J</span><span>K</span><span>L</span><span>M</span><span>N</span><span>P</span><span>Q</span><span>R</span><span>S</span><span>T</span><span>U</span>
+</div>
+<!-- Stones Placement (Simulated current board state) -->
+<div class="absolute inset-0 pointer-events-none">
+<!-- Black Stone (example) -->
+<div class="absolute w-[5%] h-[5%] stone-black rounded-full" style="top: 15%; left: 15%;"></div>
+<!-- White Stone (example) -->
+<div class="absolute w-[5%] h-[5%] stone-white rounded-full" style="top: 15%; left: 75%;"></div>
+<!-- Black Stone (example) -->
+<div class="absolute w-[5%] h-[5%] stone-black rounded-full" style="top: 75%; left: 75%;"></div>
+<!-- White Stone (Last Move) -->
+<div class="absolute w-[5%] h-[5%] stone-white rounded-full flex items-center justify-center" style="top: 75%; left: 15%;">
+<div class="last-move-marker"></div>
+</div>
+<!-- Star Points (Hoshi) -->
+<div class="absolute w-2 h-2 bg-[#6B6B82] rounded-full translate-x-[-50%] translate-y-[-50%]" style="top: 15.8%; left: 15.8%;"></div>
+<div class="absolute w-2 h-2 bg-[#6B6B82] rounded-full translate-x-[-50%] translate-y-[-50%]" style="top: 15.8%; left: 50%;"></div>
+<div class="absolute w-2 h-2 bg-[#6B6B82] rounded-full translate-x-[-50%] translate-y-[-50%]" style="top: 15.8%; left: 84.2%;"></div>
+<div class="absolute w-2 h-2 bg-[#6B6B82] rounded-full translate-x-[-50%] translate-y-[-50%]" style="top: 50%; left: 15.8%;"></div>
+<div class="absolute w-2 h-2 bg-[#6B6B82] rounded-full translate-x-[-50%] translate-y-[-50%]" style="top: 50%; left: 50%;"></div>
+<div class="absolute w-2 h-2 bg-[#6B6B82] rounded-full translate-x-[-50%] translate-y-[-50%]" style="top: 50%; left: 84.2%;"></div>
+<div class="absolute w-2 h-2 bg-[#6B6B82] rounded-full translate-x-[-50%] translate-y-[-50%]" style="top: 84.2%; left: 15.8%;"></div>
+<div class="absolute w-2 h-2 bg-[#8a929a] rounded-full translate-x-[-50%] translate-y-[-50%]" style="top: 84.2%; left: 50%;"></div>
+<div class="absolute w-2 h-2 bg-[#6B6B82] rounded-full translate-x-[-50%] translate-y-[-50%]" style="top: 84.2%; left: 84.2%;"></div>
+</div>
+<!-- Hover interactions area -->
+<div class="absolute inset-0 grid grid-cols-19 grid-rows-19 cursor-pointer">
+<!-- Interactive intersection zones -->
+<div class="hover:bg-primary/20 transition-colors"></div>
+<div class="hover:bg-primary/20 transition-colors"></div>
+<!-- ... repeated for grid ... -->
+</div>
+</div>
+</section>
+<!-- GamePanel (Right Sidebar) -->
+<aside class="w-full md:w-[320px] bg-surface-container border-l-3 border-outline-variant flex flex-col h-full">
+<!-- Error Banner Area (Hidden by default) -->
+<div class="bg-error-container text-on-error-container p-gutter flex items-center justify-between border-b-3 border-error hidden animate-pulse" id="error-banner">
+<div class="flex items-center gap-2">
+<span class="material-symbols-outlined" data-icon="warning">warning</span>
+<span class="font-bold">연결이 불안정합니다.</span>
+</div>
+<button class="bg-surface p-1 px-4 border-3 border-on-error-container font-bold text-on-error-container" onclick="location.reload()">로비로</button>
+</div>
+<!-- Status Section -->
+<div class="p-gutter flex flex-col gap-6">
+<!-- Player Black -->
+<div class="flex items-center justify-between p-4 bg-surface-container-high border-3 border-outline-variant rounded-lg">
+<div class="flex items-center gap-4">
+<div class="w-10 h-10 stone-black rounded-full flex-shrink-0"></div>
+<div>
+<p class="font-headline-md text-body-lg font-bold">Player 1</p>
+<p class="font-label-sm text-on-surface-variant">Rank: 2 Dan</p>
+</div>
+</div>
+<div class="text-right">
+<p class="font-data-mono text-headline-md text-primary">05:42</p>
+<p class="font-label-sm text-tertiary">Current Turn</p>
+</div>
+</div>
+<!-- Player White -->
+<div class="flex items-center justify-between p-4 bg-surface-container-lowest border-3 border-transparent rounded-lg opacity-60">
+<div class="flex items-center gap-4">
+<div class="w-10 h-10 stone-white rounded-full flex-shrink-0"></div>
+<div>
+<p class="font-headline-md text-body-lg font-bold">Player 2</p>
+<p class="font-label-sm text-on-surface-variant">Rank: 1 Dan</p>
+</div>
+</div>
+<div class="text-right">
+<p class="font-data-mono text-headline-md">10:00</p>
+<p class="font-label-sm">Waiting...</p>
+</div>
+</div>
+</div>
+<!-- Stats & History -->
+<div class="flex-grow p-gutter overflow-y-auto space-y-4">
+<div class="grid grid-cols-2 gap-unit">
+<div class="bg-surface-container-low p-4 rounded border-3 border-outline-variant text-center">
+<p class="font-label-sm text-on-surface-variant">Captures (B)</p>
+<p class="font-data-mono text-headline-md">12</p>
+</div>
+<div class="bg-surface-container-low p-4 rounded border-3 border-outline-variant text-center">
+<p class="font-label-sm text-on-surface-variant">Captures (W)</p>
+<p class="font-data-mono text-headline-md">4</p>
+</div>
+</div>
+<div class="bg-surface-container-low p-4 rounded border-3 border-outline-variant h-32 overflow-y-auto">
+<p class="font-label-sm text-on-surface-variant mb-2">Last Move</p>
+<div class="flex items-center gap-2">
+<span class="material-symbols-outlined text-tertiary" data-icon="history">history</span>
+<p class="font-data-mono text-body-md">W at Q-16 (Handicap)</p>
+</div>
+</div>
+</div>
+<!-- Actions -->
+<div class="p-gutter border-t-3 border-outline-variant bg-surface-container-highest space-y-unit">
+<div class="grid grid-cols-2 gap-unit">
+<button class="h-touch-target-min bg-surface border-3 border-on-surface text-on-surface font-bold text-body-md hover:bg-surface-container-high transition-transform active:scale-95 focus:ring-3 focus:ring-tertiary">Pass</button>
+<button class="h-touch-target-min bg-surface border-3 border-error text-error font-bold text-body-md hover:bg-error-container/20 transition-transform active:scale-95 focus:ring-3 focus:ring-error">Resign</button>
+</div>
+<button class="w-full h-touch-target-min bg-primary text-background font-bold text-body-md hover:bg-primary-container transition-transform active:scale-95 focus:ring-3 focus:ring-tertiary">Back to lobby</button>
+</div>
+</aside>
+</main>
+<!-- BottomNavBar (Mobile Only) -->
+<nav class="md:hidden fixed bottom-0 left-0 w-full flex justify-around items-center h-[80px] bg-surface-container-lowest border-t-3 border-outline-variant z-50">
+<button class="flex flex-col items-center justify-center text-on-surface h-full w-full active:scale-95 transition-transform">
+<span class="material-symbols-outlined" data-icon="grid_4x4">grid_4x4</span>
+<span class="font-label-sm text-label-sm">Board</span>
+</button>
+<button class="flex flex-col items-center justify-center text-on-surface h-full w-full active:scale-95 transition-transform">
+<span class="material-symbols-outlined" data-icon="bar_chart">bar_chart</span>
+<span class="font-label-sm text-label-sm">Stats</span>
+</button>
+<button class="flex flex-col items-center justify-center text-on-surface h-full w-full active:scale-95 transition-transform">
+<span class="material-symbols-outlined" data-icon="build">build</span>
+<span class="font-label-sm text-label-sm">Tools</span>
+</button>
+<button class="flex flex-col items-center justify-center text-on-surface h-full w-full active:scale-95 transition-transform">
+<span class="material-symbols-outlined" data-icon="menu">menu</span>
+<span class="font-label-sm text-label-sm">Menu</span>
+</button>
+</nav>
+<script>
+        // Simulate an error for demonstration (random chance on load or trigger)
+        function triggerError() {
+            const banner = document.getElementById('error-banner');
+            banner.classList.remove('hidden');
+        }
+
+        // Auto-size board logic or micro-interactions
+        document.querySelectorAll('.hover\\:bg-primary\\/20').forEach(cell => {
+            cell.addEventListener('click', () => {
+                console.log('Move attempted');
+                // Vibration feedback for accessibility
+                if (window.navigator.vibrate) {
+                    window.navigator.vibrate(50);
+                }
+            });
+        });
+
+        // Key bindings for Pass / Resign
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'p') console.log('Pass requested');
+            if (e.key === 'r') console.log('Resign requested');
+        });
+
+        // Show error after 3 seconds for UI demonstration
+        setTimeout(triggerError, 3000);
+    </script>
+</body></html>

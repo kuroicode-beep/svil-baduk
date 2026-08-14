@@ -13,6 +13,8 @@ import '../../application/opponent.dart';
 import '../../data/db/settings_store.dart';
 import '../../data/platform/katago_process.dart';
 import '../../data/platform/sgf_files.dart';
+import '../../domain/profile/profile.dart';
+import '../../application/app_container.dart' show ProfileController;
 import '../../domain/platform_caps.dart';
 import '../../domain/engine/scoring.dart';
 import '../../domain/engine/sgf.dart';
@@ -78,6 +80,7 @@ class SoloScreen extends StatefulWidget {
     required this.size,
     required this.caps,
     this.files = const DesktopSgfFileIo(),
+    this.profileCtrl,
     super.key,
   });
 
@@ -88,6 +91,9 @@ class SoloScreen extends StatefulWidget {
 
   /// 파일 입출력. 테스트가 가짜를 끼운다.
   final SgfFileIo files;
+
+  /// 전적 기록. null 이면 기록하지 않는다 (테스트·문제 풀이 등).
+  final ProfileController? profileCtrl;
 
   @override
   State<SoloScreen> createState() => _SoloScreenState();
@@ -103,6 +109,9 @@ class _SoloScreenState extends State<SoloScreen> {
   String _status = '';
 
   Opponent? _opponent;
+
+  /// 이 대국이 이미 전적에 반영됐는가 — 기권 후 계가 등 중복 기록 방지
+  bool _recorded = false;
 
   /// 계가 표시 중일 때의 집 소유. 착수하면 지운다 —
   /// 옛 계가 결과가 판에 남아 있으면 잘못 읽힌다.
@@ -180,6 +189,7 @@ class _SoloScreenState extends State<SoloScreen> {
       case GameEnded(:final String speech):
         _announcer.critical(speech);
         setState(() => _status = speech);
+        _recordResult();
         return true;
       case SpokeOnly(:final String speech):
         if (speech.isEmpty) return false;
@@ -254,6 +264,23 @@ class _SoloScreenState extends State<SoloScreen> {
       _announcer.critical(msg);
       setState(() => _status = msg);
     }
+  }
+
+  /// 대국이 끝나면 전적에 반영한다. 사람 vs 엔진일 때만, 한 판에 한 번만.
+  void _recordResult() {
+    final ProfileController? ctrl = widget.profileCtrl;
+    if (ctrl == null || !_vsEngine || _recorded) return;
+    _recorded = true;
+
+    final ScoreBreakdown score = _game.currentScore();
+    final GameRecordResult r = ctrl.record(GameRecordInput(
+      myColorWire: _humanSide.wire,
+      winnerWire: score.winner?.wire ?? 0,
+      myScore: score.blackTotal.round(),
+      rankId: widget.settings.rankId,
+    ));
+    // 얻은 경험치는 결과 낭독 뒤에 이어 말한다 — 조용히 쌓이면 모른다
+    _announcer.critical('${S.profileXp(_lang)} +${r.xpGained}');
   }
 
   /// 사람이 둔 뒤 상대에게 차례를 넘긴다.

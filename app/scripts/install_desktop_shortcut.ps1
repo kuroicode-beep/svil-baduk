@@ -21,6 +21,9 @@ $lnkPath = Join-Path $desktop 'SVIL Baduk.lnk'
 $wsh = New-Object -ComObject WScript.Shell
 $lnk = $wsh.CreateShortcut($lnkPath)
 $lnk.TargetPath       = $exe
+# 기존 .lnk 를 열면 설정하지 않은 필드가 보존된다 — Tauri 시절 인자가
+# 남아 있던 사고가 있어 인자를 명시적으로 비운다.
+$lnk.Arguments        = ''
 $lnk.WorkingDirectory = Split-Path $exe -Parent
 $lnk.Description      = "SVIL Baduk v$version - 저시력자를 위한 고대비 바둑"
 $lnk.Save()

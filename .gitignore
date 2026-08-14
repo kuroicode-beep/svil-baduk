@@ -31,7 +31,8 @@ dist-installer/
 app/android/.gradle/
 app/android/local.properties
 
-# 작업 중 임시 산출물 (KataGo 디버그 로그, 디자인 목업 등)
+# 작업 중 임시 산출물 (KataGo 디버그 로그 등).
+# 디자인 기획은 임시가 아니다 — 정본은 docs/design/ 에 승격돼 추적된다.
 tmp/
 
 # 실측 산출물 (사람이 돌릴 때마다 새로 생긴다)

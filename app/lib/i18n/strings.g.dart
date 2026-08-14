@@ -162,6 +162,17 @@ abstract final class S {
   static const LocString pass = LocString("패스", "Pass", "パス", "停着", "Bỏ lượt");
   static const LocString resign = LocString("기권", "Resign", "投了", "认输", "Bỏ cuộc");
   static const LocString scoreNow = LocString("계가", "Score", "計算", "点目", "Đếm điểm");
+  static const LocString menuMulti = LocString("상대랑 두기", "Play a person", "対人で打つ", "与人对弈", "Chơi với người");
+  static const LocString menuCharacter = LocString("캐릭터", "Character", "キャラクター", "角色", "Nhân vật");
+  static const LocString menuHelp = LocString("도움말", "Help", "ヘルプ", "帮助", "Trợ giúp");
+  static const LocString comingSoon = LocString("준비 중", "Coming soon", "準備中", "即将推出", "Sắp ra mắt");
+  static const LocString setupTitle = LocString("대국 설정", "Game setup", "対局設定", "对局设置", "Thiết lập ván cờ");
+  static const LocString gradeBeginner = LocString("입문", "Beginner", "入門", "入门", "Nhập môn");
+  static const LocString gradeKyuSuffix = LocString("급", " kyu", "級", "级", " kyu");
+  static const LocString gradeDanSuffix = LocString("단", " dan", "段", "段", " dan");
+  static const LocString winSuffix = LocString("승", "W", "勝", "胜", "T");
+  static const LocString lossSuffix = LocString("패", "L", "敗", "负", "B");
+  static const LocString drawSuffix = LocString("무", "D", "分", "和", "H");
   static const LocString learnNoProblem = LocString("문제가 없습니다", "No problem loaded", "問題がありません", "没有题目", "Chưa có bài tập");
   static const LocString learnWrongPoint = LocString("그 자리가 아닙니다", "Not that point", "その場所ではありません", "不是这个点", "Không phải điểm đó");
   static const LocString learnIllegal = LocString("규칙에 어긋납니다", "That move is illegal", "ルール違反です", "这一手违规", "Nước đi phạm luật");
@@ -320,7 +331,7 @@ abstract final class S {
 }
 
 /// 완전성 테스트용 — 생성된 문자열 개수
-const int generatedStringCount = 272;
+const int generatedStringCount = 283;
 
 /// 완전성 테스트용 — 키 이름과 값 목록
 const Map<String, LocString> allStrings = <String, LocString>{
@@ -441,6 +452,17 @@ const Map<String, LocString> allStrings = <String, LocString>{
   "pass": S.pass,
   "resign": S.resign,
   "scoreNow": S.scoreNow,
+  "menuMulti": S.menuMulti,
+  "menuCharacter": S.menuCharacter,
+  "menuHelp": S.menuHelp,
+  "comingSoon": S.comingSoon,
+  "setupTitle": S.setupTitle,
+  "gradeBeginner": S.gradeBeginner,
+  "gradeKyuSuffix": S.gradeKyuSuffix,
+  "gradeDanSuffix": S.gradeDanSuffix,
+  "winSuffix": S.winSuffix,
+  "lossSuffix": S.lossSuffix,
+  "drawSuffix": S.drawSuffix,
   "learnNoProblem": S.learnNoProblem,
   "learnWrongPoint": S.learnWrongPoint,
   "learnIllegal": S.learnIllegal,

@@ -18,10 +18,12 @@ import 'package:svil_baduk/domain/engine/types.dart';
 import 'package:svil_baduk/domain/learn/curriculum.dart';
 import 'package:svil_baduk/domain/platform_caps.dart';
 import 'package:svil_baduk/i18n/strings.g.dart';
+import 'package:svil_baduk/ui/screens/character_screen.dart';
 import 'package:svil_baduk/ui/screens/home_screen.dart';
 import 'package:svil_baduk/ui/screens/learn_screen.dart';
 import 'package:svil_baduk/ui/screens/settings_screen.dart';
 import 'package:svil_baduk/ui/screens/solo_screen.dart';
+import 'package:svil_baduk/ui/screens/solo_setup_screen.dart';
 import 'package:svil_baduk/ui/theme/svil_theme.dart';
 
 /// 체크리스트가 정한 조합
@@ -211,6 +213,26 @@ void main() {
           scale: 2.0,
         );
         expect(o, isEmpty, reason: '${lang.code}: ${o.join(' | ')}');
+      });
+    }
+  });
+
+  group('신규 화면 (0.17.0) — 배율 3배 · 좁은 폭에서 넘침 0', () {
+    for (final double scale in <double>[2.0, 3.0]) {
+      testWidgets('캐릭터 · 배율 $scale', (WidgetTester tester) async {
+        final AppContainer c = await boot(tester);
+        final List<String> o = await render(
+            tester, CharacterScreen(container: c),
+            width: 800, scale: scale);
+        expect(o, isEmpty, reason: o.join(' | '));
+      });
+
+      testWidgets('대국 설정 · 배율 $scale', (WidgetTester tester) async {
+        final AppContainer c = await boot(tester);
+        final List<String> o = await render(
+            tester, SoloSetupScreen(container: c),
+            width: 800, scale: scale);
+        expect(o, isEmpty, reason: o.join(' | '));
       });
     }
   });

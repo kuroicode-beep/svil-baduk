@@ -10,6 +10,7 @@ import 'package:flutter/services.dart' show rootBundle;
 import 'package:shared_preferences/shared_preferences.dart';
 
 import '../data/db/learn_progress_store.dart';
+import '../domain/profile/profile.dart';
 import '../data/db/settings_store.dart';
 import '../data/platform/current_platform.dart';
 import '../domain/learn/curriculum.dart';
@@ -75,6 +76,39 @@ class SettingsController extends ChangeNotifier {
       settingsFromString(prefs.getString(_key));
 }
 
+/// 플레이어 프로필 — 별명·급수·레벨·경험치·전적. 바뀌면 바로 저장한다.
+class ProfileController extends ChangeNotifier {
+  ProfileController(this._prefs, this._profile);
+
+  final SharedPreferences _prefs;
+  Profile _profile;
+
+  Profile get profile => _profile;
+
+  void update(Profile next) {
+    _profile = next;
+    unawaited(_prefs.setString(kProfileKey, encodeProfile(next)));
+    notifyListeners();
+  }
+
+  void setName(String name) {
+    update(_profile.copyWith(
+      name: name.trim(),
+      createdAt: _profile.createdAt ?? DateTime.now().toIso8601String(),
+    ));
+  }
+
+  /// 대국 결과 반영. 얼마나 얻었는지 돌려줘 화면이 낭독할 수 있게 한다.
+  GameRecordResult record(GameRecordInput input) {
+    final GameRecordResult r = recordSoloResult(_profile, input);
+    update(r.profile);
+    return r;
+  }
+
+  static Profile load(SharedPreferences prefs) =>
+      decodeProfile(prefs.getString(kProfileKey));
+}
+
 /// 배우기 진행. 문제를 풀 때마다 저장한다.
 class ProgressController extends ChangeNotifier {
   ProgressController(this._prefs, this._solved);
@@ -100,6 +134,7 @@ class AppContainer {
     required this.caps,
     required this.settings,
     required this.progress,
+    required this.profile,
     required this.curriculum,
   });
 
@@ -110,6 +145,7 @@ class AppContainer {
 
   final SettingsController settings;
   final ProgressController progress;
+  final ProfileController profile;
   final Curriculum curriculum;
 
   /// [prefs] 를 넘기면 그걸 쓴다. 테스트가 저장소를 직접 주고
@@ -130,6 +166,7 @@ class AppContainer {
       caps: caps,
       settings: SettingsController(store, loaded),
       progress: ProgressController(store, ProgressController.load(store)),
+      profile: ProfileController(store, ProfileController.load(store)),
       curriculum: Curriculum.parse(
           await rootBundle.loadString('assets/learn/curriculum.json')),
     );
@@ -139,5 +176,6 @@ class AppContainer {
     vision.dispose();
     settings.dispose();
     progress.dispose();
+    profile.dispose();
   }
 }

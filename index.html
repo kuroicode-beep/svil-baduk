@@ -9,6 +9,11 @@
 <meta name="description" content="A Windows Go (baduk) client for low-vision and screen-reader users: a coordinate command language, three contrast profiles, five board palettes, and layout that survives 3x text scaling.">
 <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'><circle cx='32' cy='32' r='28' fill='%2316161d' stroke='%23b3ddff' stroke-width='3'/></svg>">
 <style>
+  /* LINE Seed KR — 방문자 기기 설치 여부와 무관하게 표준 서체를 보장 */
+  @font-face { font-family: "LINESeedKR"; src: url("fonts/LINESeedKR-Th.woff2") format("woff2"); font-weight: 300; font-display: swap; }
+  @font-face { font-family: "LINESeedKR"; src: url("fonts/LINESeedKR-Rg.woff2") format("woff2"); font-weight: 400; font-display: swap; }
+  @font-face { font-family: "LINESeedKR"; src: url("fonts/LINESeedKR-Bd.woff2") format("woff2"); font-weight: 700; font-display: swap; }
+
   :root {
     --bg: #0d0d12;
     --surface: #16161d;

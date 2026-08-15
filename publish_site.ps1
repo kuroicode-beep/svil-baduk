@@ -26,8 +26,9 @@ if ($exists) {
 }
 
 try {
+    # app\ 은 React 웹 앱 배포(npm run deploy → /app/)가 관리한다 — 지우지 않는다.
     Get-ChildItem $work -Force |
-        Where-Object { $_.Name -ne ".git" } |
+        Where-Object { $_.Name -ne ".git" -and $_.Name -ne "app" } |
         Remove-Item -Recurse -Force
     Copy-Item (Join-Path $src "*") $work -Recurse -Force
     Remove-Item (Join-Path $work "README.md") -Force -ErrorAction SilentlyContinue

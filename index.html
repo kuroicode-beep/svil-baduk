@@ -1,14 +1,432 @@
-<!doctype html>
-<html lang="ko">
-  <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <meta name="color-scheme" content="dark" />
-    <title>SVIL Baduk — 고대비 바둑</title>
-    <script type="module" crossorigin src="/svil-baduk/assets/index-PPR7Ae7W.js"></script>
-    <link rel="stylesheet" crossorigin href="/svil-baduk/assets/index-BsqcP-Pu.css">
-  </head>
-  <body>
-    <div id="root"></div>
-  </body>
+<!DOCTYPE html>
+<!-- SVIL Baduk 배포 페이지 — 자체 완결형 단일 파일 (외부 CDN·폰트·스크립트 없음).
+     문구는 아래 I18N 사전(5개 언어)에서만 관리한다. HTML 에는 data-i18n 키만 둔다. -->
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>SVIL Baduk — A high-contrast Go client built for low vision</title>
+<meta name="description" content="A Windows Go (baduk) client for low-vision and screen-reader users: a coordinate command language, three contrast profiles, five board palettes, and layout that survives 3x text scaling.">
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'><circle cx='32' cy='32' r='28' fill='%2316161d' stroke='%23b3ddff' stroke-width='3'/></svg>">
+<style>
+  /* LINE Seed KR — 방문자 기기 설치 여부와 무관하게 표준 서체를 보장 */
+  @font-face { font-family: "LINESeedKR"; src: url("fonts/LINESeedKR-Th.woff2") format("woff2"); font-weight: 300; font-display: swap; }
+  @font-face { font-family: "LINESeedKR"; src: url("fonts/LINESeedKR-Rg.woff2") format("woff2"); font-weight: 400; font-display: swap; }
+  @font-face { font-family: "LINESeedKR"; src: url("fonts/LINESeedKR-Bd.woff2") format("woff2"); font-weight: 700; font-display: swap; }
+
+  :root {
+    --bg: #0d0d12;
+    --surface: #16161d;
+    --surface-2: #1f1f2a;
+    --border: #3a3a48;
+    --border-strong: #6b6b82;
+    --text: #f5f5f7;
+    --text-sub: #c9c9d4;
+    --accent: #7ec8ff;
+    --accent-strong: #b3ddff;
+    --accent-max: #d6ecff;
+    --positive: #7ee2a8;
+    --warning: #ffd479;
+    --focus: #ffd479;
+    /* 로컬 설치 폰트만 — CDN 금지. 없으면 시스템 산세리프로 폴백. */
+    --font-ui: "LINESeedKR", "Pretendard", "Malgun Gothic", "맑은 고딕",
+               system-ui, -apple-system, "Segoe UI", sans-serif;
+    --font-mono: "Consolas", "Cascadia Mono", ui-monospace, "Malgun Gothic", monospace;
+  }
+  * { box-sizing: border-box; }
+  html { scroll-behavior: smooth; }
+  @media (prefers-reduced-motion: reduce) {
+    html { scroll-behavior: auto; }
+    * { transition: none !important; animation: none !important; }
+  }
+  body {
+    margin: 0; background: var(--bg); color: var(--text);
+    font-family: var(--font-ui); font-size: 18px; line-height: 1.8;
+    letter-spacing: 0.02em; word-break: keep-all; overflow-wrap: break-word;
+  }
+  .wrap { max-width: 940px; margin: 0 auto; padding: 0 20px; }
+  a { color: var(--accent); }
+  a:hover { color: var(--accent-max); }
+  :focus-visible { outline: 3px solid var(--focus); outline-offset: 3px; border-radius: 4px; }
+  code, .mono, .ver { font-family: var(--font-mono); }
+
+  header { border-bottom: 1px solid var(--border); background: var(--surface); position: sticky; top: 0; z-index: 10; }
+  .bar { display: flex; align-items: center; gap: 16px; min-height: 68px; flex-wrap: wrap; }
+  .brand { display: flex; align-items: center; gap: 10px; margin-right: auto; }
+  .brand svg { width: 30px; height: 30px; flex: none; }
+  .brand b { font-weight: normal; font-size: 1.25rem; }
+  .ver { color: var(--accent); font-size: 0.85rem; }
+
+  /* 언어 스위처 — 색만이 아니라 밑줄로도 선택 상태 표시 */
+  .langs { display: flex; gap: 4px; flex-wrap: wrap; }
+  .langs button {
+    min-height: 40px; padding: 6px 12px; background: transparent; color: var(--text-sub);
+    border: 1.5px solid transparent; border-radius: 999px; font-family: inherit; font-size: 0.92rem;
+    cursor: pointer; border-bottom: 3px solid transparent;
+  }
+  .langs button:hover { color: var(--accent-strong); border-color: var(--border-strong); }
+  .langs button[aria-current="true"] { color: var(--accent-strong); border-bottom-color: var(--accent); background: var(--surface-2); }
+
+  .hero { padding: 72px 0 56px; text-align: center; }
+  .hero h1 { font-size: 2.2rem; margin: 0 0 12px; font-weight: normal; }
+  .tagline { font-size: 1.35rem; color: var(--text-sub); margin: 0 auto 36px; max-width: 34em; }
+  .cta { display: flex; gap: 14px; justify-content: center; flex-wrap: wrap; align-items: center; }
+  .btn {
+    display: inline-flex; align-items: center; justify-content: center; gap: 10px;
+    min-height: 56px; padding: 12px 28px; border-radius: 12px; border: 2px solid var(--border-strong);
+    background: var(--surface-2); color: var(--text); font-family: inherit; font-size: 1.05rem; text-decoration: none;
+  }
+  .btn:hover { border-color: var(--accent); color: var(--accent-strong); }
+  .btn-primary { background: var(--accent-strong); color: #000; border-color: var(--accent-strong); }
+  .btn-primary:hover { background: var(--accent-max); color: #000; border-color: var(--accent-max); }
+  .meta { margin-top: 18px; color: var(--text-sub); font-size: 0.95rem; }
+  .meta .mono { color: var(--text); }
+
+  section { padding: 44px 0; border-top: 1px solid var(--border); }
+  h2 { font-size: 1.7rem; font-weight: normal; margin: 0 0 8px; color: var(--accent-strong); }
+  .sub { color: var(--text-sub); margin: 0 0 28px; }
+
+  .grid { display: grid; gap: 18px; grid-template-columns: repeat(auto-fit, minmax(270px, 1fr)); }
+  .card { background: var(--surface); border: 1px solid var(--border); border-radius: 16px; padding: 22px 24px; }
+  .card h3 { font-size: 1.35rem; font-weight: normal; margin: 0 0 6px; }
+  .card p { margin: 0; color: var(--text-sub); font-size: 0.97rem; }
+
+  .links { display: grid; gap: 14px; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); }
+  .link-card {
+    display: flex; flex-direction: column; gap: 4px; min-height: 56px; padding: 20px 22px;
+    background: var(--surface); border: 2px solid var(--border-strong); border-radius: 12px;
+    text-decoration: none; color: var(--text);
+  }
+  .link-card:hover { border-color: var(--accent); color: var(--accent-strong); }
+  .link-card span { color: var(--text-sub); font-size: 0.9rem; overflow-wrap: anywhere; }
+
+  /* 후원 — svil-donation-section 스킬과 동일 규격 (QR 이미지만, 계좌 텍스트 금지) */
+  .support-card {
+    display: flex; gap: 26px; align-items: center; flex-wrap: wrap;
+    background: var(--surface); border: 1px solid var(--border); border-radius: 16px; padding: 24px;
+  }
+  .qr-frame { background: #fff; border-radius: 12px; padding: 14px; flex: none; line-height: 0; }
+  .qr-frame img { display: block; width: 216px; height: 216px; }
+  .qr-meta { display: flex; flex-direction: column; gap: 6px; min-width: 220px; flex: 1; }
+  .qr-meta b { font-weight: normal; font-size: 1.25rem; color: var(--accent-strong); }
+  .qr-meta span { color: var(--text-sub); font-size: 0.97rem; }
+  @media (max-width: 560px) { .support-card { justify-content: center; text-align: center; } .qr-meta { align-items: center; } }
+
+  footer { border-top: 1px solid var(--border); padding: 32px 0 48px; color: var(--text-sub); font-size: 0.9rem; text-align: center; }
+  /* 표준 푸터 링크 — 협업 문의·블로그·홈페이지(SVIL 공통 상수). 라벨만 번역, 값은 고정. */
+  .foot-links { display: flex; flex-direction: column; gap: 8px; align-items: center; margin: 0 0 20px; }
+  .foot-links .row { display: flex; gap: 10px; align-items: baseline; flex-wrap: wrap; justify-content: center; }
+  .foot-links .k { color: var(--text-sub); font-size: 0.85rem; min-width: 84px; text-align: right; }
+  @media (max-width: 560px) { .foot-links .k { min-width: 0; text-align: center; } }
+
+  @media (max-width: 640px) {
+    body { font-size: 17px; }
+    .hero { padding: 48px 0 40px; }
+    .hero h1 { font-size: 1.8rem; }
+    .tagline { font-size: 1.15rem; }
+    .btn { width: 100%; }
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="wrap bar">
+    <div class="brand">
+      <svg viewBox="0 0 64 64" aria-hidden="true"><circle cx="32" cy="32" r="28" fill="#16161d" stroke="#b3ddff" stroke-width="3"/></svg>
+      <b>SVIL Baduk</b>
+      <span class="ver">v0.20.0</span>
+    </div>
+    <nav class="langs" aria-label="Language">
+      <button type="button" data-lang="en" lang="en">English</button>
+      <button type="button" data-lang="ko" lang="ko">한국어</button>
+      <button type="button" data-lang="ja" lang="ja">日本語</button>
+      <button type="button" data-lang="zh" lang="zh">中文</button>
+      <button type="button" data-lang="vi" lang="vi">Tiếng Việt</button>
+    </nav>
+  </div>
+</header>
+
+<main>
+  <div class="wrap hero">
+    <h1 data-i18n="hero_title"></h1>
+    <p class="tagline" data-i18n="hero_tagline"></p>
+    <div class="cta">
+      <!-- 다운로드/설치가 없는 프로젝트면 이 버튼은 제거하거나 다른 1차 CTA로 교체 -->
+      <a class="btn btn-primary" href="https://github.com/kuroicode-beep/svil-baduk/releases"><span data-i18n="cta_primary"></span></a>
+      <a class="btn" href="https://github.com/kuroicode-beep/svil-baduk"><span data-i18n="cta_secondary"></span></a>
+    </div>
+    <p class="meta"><span data-i18n="meta_a"></span> · <span data-i18n="meta_b"></span> · <span class="mono">MIT</span></p>
+  </div>
+
+  <section>
+    <div class="wrap">
+      <h2 data-i18n="features_title"></h2>
+      <p class="sub" data-i18n="features_sub"></p>
+      <div class="grid">
+        <!-- 카드 개수는 자유. 각 카드 h3/p에 data-i18n 키를 붙이고 아래 사전에 5개 언어 모두 추가 -->
+        <div class="card"><h3 data-i18n="f1_t"></h3><p data-i18n="f1_d"></p></div>
+        <div class="card"><h3 data-i18n="f2_t"></h3><p data-i18n="f2_d"></p></div>
+        <div class="card"><h3 data-i18n="f3_t"></h3><p data-i18n="f3_d"></p></div>
+        <div class="card"><h3 data-i18n="f4_t"></h3><p data-i18n="f4_d"></p></div>
+        <div class="card"><h3 data-i18n="f5_t"></h3><p data-i18n="f5_d"></p></div>
+        <div class="card"><h3 data-i18n="f6_t"></h3><p data-i18n="f6_d"></p></div>
+        <div class="card"><h3 data-i18n="f7_t"></h3><p data-i18n="f7_d"></p></div>
+      </div>
+    </div>
+  </section>
+
+  <section>
+    <div class="wrap">
+      <h2 data-i18n="links_title"></h2>
+      <p class="sub" data-i18n="links_sub"></p>
+      <div class="links">
+        <a class="link-card" href="./app/"><b data-i18n="link_web"></b><span class="mono">svil-baduk/app</span></a>
+        <a class="link-card" href="https://github.com/kuroicode-beep/svil-baduk"><b data-i18n="link_gh"></b><span class="mono">kuroicode-beep/svil-baduk</span></a>
+        <a class="link-card" href="mailto:kuroicode@gmail.com"><b data-i18n="link_contact"></b><span class="mono">kuroicode@gmail.com</span></a>
+      </div>
+    </div>
+  </section>
+
+</main>
+
+<footer>
+  <div class="wrap">
+    <p class="svil-mission" data-i18n="svil_mission"></p>
+    <div class="foot-links">
+      <div class="row"><span class="k" data-i18n="foot_contact"></span><a href="mailto:kuroicode@gmail.com">kuroicode@gmail.com</a></div>
+      <div class="row"><span class="k" data-i18n="foot_blog"></span><a href="https://ghost-production-0ec2.up.railway.app/" target="_blank" rel="noopener">인블루의 로그 보관소</a></div>
+      <div class="row"><span class="k" data-i18n="foot_home"></span><a href="https://svil.dev/" target="_blank" rel="noopener">SVIL</a></div>
+      <div class="row"><span class="k" data-i18n="foot_youtube"></span><a href="https://www.youtube.com/@SVIL-LAB" target="_blank" rel="noopener">@SVIL-LAB</a></div>
+      <div class="row"><span class="k" data-i18n="foot_github"></span><a href="https://github.com/kuroicode-beep" target="_blank" rel="noopener">kuroicode-beep</a></div>
+    </div>
+    <p data-i18n="foot_license"></p>
+    <p class="copyright">© <span id="svil-year">2026</span> SVIL Singularity Visual Intelligence Lab.</p>
+  </div>
+</footer>
+<script>
+  // 저작권 연도는 렌더 시점 기준. HTML 값은 JS 비활성 환경용 폴백이다.
+  document.getElementById('svil-year').textContent = new Date().getFullYear();
+</script>
+
+<script>
+// 다국어 사전. 영어(en)가 디폴트/폴백. 모든 언어의 키 집합이 동일해야 한다(누락 시 en으로 폴백).
+// 사람/AI 이름·고유명사·코드·이메일은 번역하지 않는다.
+const I18N = {
+  en: {
+    _title: "SVIL Baduk — A high-contrast Go client built for low vision",
+    hero_title: "Go, playable without looking at the board",
+    hero_tagline: "A Windows Go client for low-vision and screen-reader users. Every position has a spoken name, every move can be typed, and nothing on screen depends on colour alone.",
+    cta_primary: "Download",
+    cta_secondary: "Source code",
+    meta_a: "Windows 10 / 11",
+    meta_b: "Free",
+    features_title: "What it does",
+    features_sub: "Built around one question: can you finish a game without seeing the board?",
+    f1_t: "Say where, not point where",
+    f1_d: "Type D16 and the stone goes there. Pass, resign, undo, score and hint all work as typed commands in five languages — the same standing as the arrow keys, not a fallback.",
+    f2_t: "The board speaks its position",
+    f2_d: "The board is one focusable control whose value is the cursor's coordinate, because Windows screen readers cannot read grid coordinates out of Flutter at all. The coordinate always comes first, so a cut-off phrase still tells you where you are.",
+    f3_t: "Three contrast profiles, five board palettes",
+    f3_d: "Windows high-contrast mode has no effect on this kind of app, so the contrast lives in the app itself. Every text and stone pairing is checked against WCAG ratios by an automated test, not by eye.",
+    f4_t: "Text at 3x still fits",
+    f4_d: "Large text usually breaks desktop layouts because they overflow instead of reflowing. Every screen is rendered at four text scales and three window widths on every build, and a single overflow fails the build.",
+    f5_t: "Ten levels, plus KataGo",
+    f5_d: "A built-in opponent covers ten difficulties with no setup. Point it at a KataGo install for a stronger game — and if that engine dies mid-game, play continues against the built-in one instead of stopping.",
+    f6_t: "Learn by playing, not by reading",
+    f6_d: "Nine stages, twenty-eight problems, each solvable by keyboard alone. A wrong answer says which kind of wrong it was: not that point, against the rules, or right point but the goal was not met.",
+    f7_t: "Play a friend, no server of yours",
+    f7_d: "Direct WebRTC between two copies of the app. The room ID is short, unambiguous, read out one character at a time, and shareable as a QR code. If the link drops, the board is restored from the host.",
+    links_title: "Links",
+    links_sub: "Questions, bugs, or just want to say hello.",
+    link_web: "Play in the browser (web version)",
+    link_gh: "GitHub repository",
+    link_contact: "Contact us",
+    svil_mission: "Singularity Visual Intelligence Lab: research and development to improve AI accessibility for people with low vision.",
+    foot_contact: "Contact",
+    foot_blog: "Blog",
+    foot_home: "Homepage",
+    foot_youtube: "YouTube",
+    foot_github: "GitHub",
+    foot_license: "Released under the MIT License.",
+  },
+  ko: {
+    _title: "SVIL Baduk — 저시력자를 위한 고대비 바둑",
+    hero_title: "판을 보지 않고도 두는 바둑",
+    hero_tagline: "저시력·스크린리더 사용자를 위한 Windows 바둑 클라이언트입니다. 모든 자리에 부르는 이름이 있고, 모든 수를 글자로 둘 수 있고, 화면의 어떤 것도 색만으로 구분되지 않습니다.",
+    cta_primary: "다운로드",
+    cta_secondary: "소스 코드",
+    meta_a: "Windows 10 / 11",
+    meta_b: "무료",
+    features_title: "무엇을 하나요",
+    features_sub: "질문 하나에서 출발했습니다 — 판을 보지 않고 한 판을 끝낼 수 있는가.",
+    f1_t: "가리키지 않고 말하기",
+    f1_d: "D16 이라고 치면 그 자리에 놓입니다. 패스·기권·무르기·계가·힌트 전부 5개 언어의 명령어로 됩니다. 화살표 조작의 대체재가 아니라 같은 자격의 경로입니다.",
+    f2_t: "판이 자기 위치를 말합니다",
+    f2_d: "판은 커서 좌표를 값으로 갖는 컨트롤 하나입니다. Windows 스크린리더가 Flutter 격자의 행·열을 읽을 방법이 아예 없기 때문입니다. 좌표는 항상 문장 맨 앞에 오므로, 발화가 끊겨도 어디인지는 전달됩니다.",
+    f3_t: "대비 3단계, 판 색 5종",
+    f3_d: "Windows 고대비 모드는 이런 앱에 아무 영향이 없어서, 대비를 앱이 직접 책임집니다. 글자와 돌의 모든 조합을 자동 테스트가 WCAG 기준으로 재고, 육안으로 넘기지 않습니다.",
+    f4_t: "글자 3배에서도 안 깨집니다",
+    f4_d: "글자를 키우면 데스크톱 레이아웃은 보통 줄바꿈 대신 넘칩니다. 빌드마다 배율 4종 × 창 너비 3종으로 전 화면을 그려 보고, 넘침이 하나라도 있으면 빌드를 실패시킵니다.",
+    f5_t: "10단계 상대, 그리고 KataGo",
+    f5_d: "내장 상대가 설정 없이 10단계를 커버합니다. KataGo 를 연결하면 더 강해지고, 대국 중 엔진이 죽어도 멈추지 않고 내장 상대로 이어 둡니다.",
+    f6_t: "읽지 말고 두면서 배우기",
+    f6_d: "9단계 28문제, 전부 키보드만으로 풀 수 있습니다. 틀리면 어떻게 틀렸는지 말해 줍니다 — 그 자리가 아닌지, 규칙에 어긋나는지, 자리는 맞지만 목표를 못 이뤘는지.",
+    f7_t: "상대랑 두기 — 서버 없이",
+    f7_d: "앱 두 대가 WebRTC로 직접 연결됩니다. 방 ID는 짧고 혼동 없는 글자로, 한 글자씩 낭독되고 QR로도 건넬 수 있습니다. 연결이 끊겨도 호스트 판에서 복원됩니다.",
+    links_title: "링크",
+    links_sub: "문의, 버그 제보, 그냥 인사도 좋습니다.",
+    link_web: "웹에서 바로 두기 (웹 판)",
+    link_gh: "GitHub 저장소",
+    link_contact: "문의하기",
+    svil_mission: "Singularity Visual Intelligence Lab: 저시력 시각장애인의 AI 접근성을 높이기 위한 연구와 개발을 합니다.",
+    foot_contact: "협업 문의",
+    foot_blog: "블로그",
+    foot_home: "홈페이지",
+    foot_youtube: "유튜브",
+    foot_github: "GitHub",
+    foot_license: "MIT 라이선스로 배포됩니다.",
+  },
+  ja: {
+    _title: "SVIL Baduk — ロービジョンのための高コントラスト囲碁",
+    hero_title: "盤を見なくても打てる囲碁",
+    hero_tagline: "ロービジョン・スクリーンリーダー利用者のための Windows 囲碁クライアントです。すべての場所に呼び名があり、すべての手を文字で打て、画面上のどれも色だけでは区別されません。",
+    cta_primary: "ダウンロード",
+    cta_secondary: "ソースコード",
+    meta_a: "Windows 10 / 11",
+    meta_b: "無料",
+    features_title: "できること",
+    features_sub: "ひとつの問いから始めました — 盤を見ずに一局を終えられるか。",
+    f1_t: "指すのではなく、言う",
+    f1_d: "D16 と打てばそこに置かれます。パス・投了・待った・計算・候補、すべて5言語のコマンドで動きます。矢印操作の代替ではなく、同格の経路です。",
+    f2_t: "盤が自分の位置を話す",
+    f2_d: "盤はカーソル座標を値に持つ単一のコントロールです。Windows のスクリーンリーダーは Flutter の格子の行・列を読む手段がまったくないからです。座標は必ず文頭に来るので、読み上げが途切れても位置は伝わります。",
+    f3_t: "コントラスト3段階、盤の配色5種",
+    f3_d: "Windows の高コントラストはこの種のアプリに影響しないため、コントラストはアプリ自身が担います。文字と石のすべての組み合わせを自動テストが WCAG 基準で測り、目視で済ませません。",
+    f4_t: "文字3倍でも崩れない",
+    f4_d: "文字を大きくするとデスクトップのレイアウトは折り返さずに溢れます。ビルドごとに倍率4種×ウィンドウ幅3種で全画面を描画し、溢れが1つでもあればビルドを失敗させます。",
+    f5_t: "10段階の相手、そして KataGo",
+    f5_d: "内蔵の相手が設定なしで10段階をカバーします。KataGo を接続すればより強くなり、対局中にエンジンが落ちても止まらず内蔵の相手で続けられます。",
+    f6_t: "読むのではなく打って学ぶ",
+    f6_d: "9ステージ28問、すべてキーボードだけで解けます。間違えたらどう間違えたかを伝えます — その場所ではないのか、ルール違反なのか、場所は合っているが目標未達なのか。",
+    f7_t: "友だちと対局 — サーバー不要",
+    f7_d: "2台のアプリがWebRTCで直接つながります。部屋IDは短く紛れのない文字で、一文字ずつ読み上げられ、QRでも渡せます。切断されてもホスト盤から復元します。",
+    links_title: "リンク",
+    links_sub: "お問い合わせ、バグ報告、ご挨拶もお気軽に。",
+    link_web: "ブラウザで対局（ウェブ版）",
+    link_gh: "GitHub リポジトリ",
+    link_contact: "お問い合わせ",
+    svil_mission: "Singularity Visual Intelligence Lab: ロービジョンの方のAIアクセシビリティを高めるための研究と開発をしています。",
+    foot_contact: "お問い合わせ",
+    foot_blog: "ブログ",
+    foot_home: "ホームページ",
+    foot_youtube: "YouTube",
+    foot_github: "GitHub",
+    foot_license: "MIT ライセンスで公開しています。",
+  },
+  zh: {
+    _title: "SVIL Baduk — 为低视力用户打造的高对比围棋",
+    hero_title: "不用看棋盘也能下的围棋",
+    hero_tagline: "面向低视力与读屏用户的 Windows 围棋客户端。每个位置都有可念出的名字，每一手都能用文字落子，屏幕上没有任何内容只靠颜色区分。",
+    cta_primary: "下载",
+    cta_secondary: "源代码",
+    meta_a: "Windows 10 / 11",
+    meta_b: "免费",
+    features_title: "它能做什么",
+    features_sub: "从一个问题出发 —— 不看棋盘能否下完一局。",
+    f1_t: "不用指，用说的",
+    f1_d: "输入 D16 棋子就落在那里。停着、认输、悔棋、点目、提示全都能用五种语言的命令完成。它不是方向键的替代品，而是同等的操作路径。",
+    f2_t: "棋盘会报出自己的位置",
+    f2_d: "棋盘是一个以光标坐标为值的单一控件，因为 Windows 读屏软件根本无法从 Flutter 的格子里读出行列。坐标始终排在句首，即使语音被打断，位置信息仍能传达。",
+    f3_t: "三档对比度，五种棋盘配色",
+    f3_d: "Windows 高对比模式对这类应用毫无作用，所以对比度由应用自己负责。文字与棋子的每一种搭配都由自动测试按 WCAG 标准测量，不靠肉眼判断。",
+    f4_t: "文字放大三倍也不散",
+    f4_d: "放大文字时桌面布局通常不会换行而是溢出。每次构建都会以四种缩放倍率乘三种窗口宽度渲染全部界面，只要有一处溢出就判定构建失败。",
+    f5_t: "十级对手，还有 KataGo",
+    f5_d: "内置对手无需配置即可覆盖十个难度。接入 KataGo 可以更强；即使对局中引擎崩溃，也不会中断，会改由内置对手继续。",
+    f6_t: "边下边学，而不是读教程",
+    f6_d: "九个阶段二十八道题，全部可以只用键盘解决。答错时会说明错在哪里 —— 是位置不对、违反规则，还是位置对了但没达成目标。",
+    f7_t: "与朋友对弈 — 无需服务器",
+    f7_d: "两台应用通过WebRTC直接连接。房间ID简短且无歧义，可逐字朗读，也可用二维码分享。断线后从房主棋盘恢复。",
+    links_title: "链接",
+    links_sub: "咨询、报告问题，或只是打个招呼。",
+    link_web: "在浏览器中对弈（网页版）",
+    link_gh: "GitHub 仓库",
+    link_contact: "联系我们",
+    svil_mission: "Singularity Visual Intelligence Lab：致力于提升低视力人群 AI 无障碍体验的研究与开发。",
+    foot_contact: "合作咨询",
+    foot_blog: "博客",
+    foot_home: "主页",
+    foot_youtube: "YouTube",
+    foot_github: "GitHub",
+    foot_license: "以 MIT 许可证发布。",
+  },
+  vi: {
+    _title: "SVIL Baduk — Cờ vây tương phản cao cho người thị lực kém",
+    hero_title: "Chơi cờ vây mà không cần nhìn bàn cờ",
+    hero_tagline: "Ứng dụng cờ vây trên Windows dành cho người thị lực kém và người dùng trình đọc màn hình. Mọi vị trí đều có tên để đọc, mọi nước đi đều gõ được, và không gì trên màn hình chỉ dựa vào màu sắc.",
+    cta_primary: "Tải xuống",
+    cta_secondary: "Mã nguồn",
+    meta_a: "Windows 10 / 11",
+    meta_b: "Miễn phí",
+    features_title: "Ứng dụng làm gì",
+    features_sub: "Bắt đầu từ một câu hỏi — có thể chơi hết một ván mà không nhìn bàn cờ không?",
+    f1_t: "Nói ra, không cần trỏ",
+    f1_d: "Gõ D16 là quân cờ nằm đúng chỗ đó. Bỏ lượt, bỏ cuộc, hoàn tác, đếm điểm và gợi ý đều hoạt động bằng lệnh gõ trong năm ngôn ngữ — ngang hàng với phím mũi tên, không phải phương án dự phòng.",
+    f2_t: "Bàn cờ tự đọc vị trí của nó",
+    f2_d: "Bàn cờ là một điều khiển duy nhất mang giá trị là tọa độ con trỏ, vì trình đọc màn hình trên Windows hoàn toàn không đọc được hàng và cột từ lưới của Flutter. Tọa độ luôn đứng đầu câu, nên dù lời đọc bị ngắt bạn vẫn biết mình đang ở đâu.",
+    f3_t: "Ba mức tương phản, năm bảng màu bàn cờ",
+    f3_d: "Chế độ tương phản cao của Windows không tác động gì đến loại ứng dụng này, nên chính ứng dụng phải lo phần đó. Mọi cặp chữ và quân cờ đều được kiểm bằng bài kiểm thử tự động theo chuẩn WCAG, không phán đoán bằng mắt.",
+    f4_t: "Chữ phóng to gấp ba vẫn vừa",
+    f4_d: "Khi phóng to chữ, bố cục máy tính thường tràn ra thay vì xuống dòng. Mỗi lần dựng bản, toàn bộ màn hình được vẽ lại ở bốn mức phóng và ba chiều rộng cửa sổ; chỉ cần một chỗ tràn là bản dựng thất bại.",
+    f5_t: "Mười cấp độ, và cả KataGo",
+    f5_d: "Đối thủ tích hợp bao trọn mười cấp độ mà không cần cài đặt gì. Kết nối KataGo để có ván cờ mạnh hơn — và nếu engine đó chết giữa ván, ván cờ vẫn tiếp tục với đối thủ tích hợp thay vì dừng lại.",
+    f6_t: "Học bằng cách chơi, không phải bằng cách đọc",
+    f6_d: "Chín chặng, hai mươi tám bài, đều giải được chỉ bằng bàn phím. Khi sai, ứng dụng nói rõ sai kiểu gì — không phải điểm đó, phạm luật, hay đúng điểm nhưng chưa đạt mục tiêu.",
+    f7_t: "Chơi với bạn — không cần máy chủ",
+    f7_d: "Hai bản ứng dụng kết nối trực tiếp qua WebRTC. ID phòng ngắn, không gây nhầm lẫn, đọc từng ký tự và chia sẻ được bằng QR. Mất kết nối sẽ khôi phục từ bàn của chủ phòng.",
+    links_title: "Liên kết",
+    links_sub: "Câu hỏi, báo lỗi, hoặc chỉ để chào một tiếng.",
+    link_web: "Chơi ngay trên trình duyệt (bản web)",
+    link_gh: "Kho GitHub",
+    link_contact: "Liên hệ",
+    svil_mission: "Singularity Visual Intelligence Lab: nghiên cứu và phát triển nhằm cải thiện khả năng tiếp cận AI cho người thị lực kém.",
+    foot_contact: "Liên hệ",
+    foot_blog: "Blog",
+    foot_home: "Trang chủ",
+    foot_youtube: "YouTube",
+    foot_github: "GitHub",
+    foot_license: "Phát hành theo Giấy phép MIT.",
+  },
+};
+
+const LANGS = ["en", "ko", "ja", "zh", "vi"];   // en = 디폴트/폴백
+
+function applyLang(code) {
+  const dict = I18N[code] || I18N.en;
+  document.documentElement.lang = code;
+  document.title = dict._title || I18N.en._title;
+  document.querySelectorAll("[data-i18n]").forEach(el => {
+    const val = dict[el.dataset.i18n] ?? I18N.en[el.dataset.i18n];   // 누락 키는 영어로 폴백
+    if (val) el.textContent = val;
+  });
+  document.querySelectorAll(".langs button").forEach(b => {
+    b.setAttribute("aria-current", String(b.dataset.lang === code));
+  });
+  try { localStorage.setItem("site-lang", code); } catch (e) {}
+}
+
+function initialLang() {
+  try { const s = localStorage.getItem("site-lang"); if (s && LANGS.includes(s)) return s; } catch (e) {}
+  for (const pref of navigator.languages || [navigator.language || "en"]) {
+    const base = String(pref).toLowerCase().split("-")[0];
+    if (LANGS.includes(base)) return base;
+  }
+  return "en";   // 디폴트 영어
+}
+
+document.querySelectorAll(".langs button").forEach(b => b.addEventListener("click", () => applyLang(b.dataset.lang)));
+applyLang(initialLang());
+</script>
+</body>
 </html>

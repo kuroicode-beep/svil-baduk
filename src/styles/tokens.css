@@ -52,7 +52,7 @@
      `html { font-size: var(--font-base) }` 와 짝이다.
      예전엔 rem 리터럴이 브라우저 기본 16px에 묶여 있어서
      글자 크기 설정(16/18/20)이 대부분의 UI 텍스트에 먹히지 않았다. */
-  --font-ui: "KyoboHandwriting2019", "Segoe UI", "Malgun Gothic", sans-serif;
+  --font-ui: "LINESeedKR", "KyoboHandwriting2019", "Segoe UI", "Malgun Gothic", sans-serif;
   --font-mono: Consolas, "Courier New", monospace;
   --font-base: 18px;
 

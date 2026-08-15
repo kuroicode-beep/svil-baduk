@@ -147,6 +147,7 @@ abstract final class S {
   static const LocString exportData = LocString("내 데이터 내보내기", "Export my data", "データを書き出す", "导出我的数据", "Xuất dữ liệu");
   static const LocString importData = LocString("데이터 가져오기", "Import data", "データを読み込む", "导入数据", "Nhập dữ liệu");
   static const LocString backupNote = LocString("설정·내 캐릭터·배우기 진행을 파일 하나로 저장합니다. 진행 중인 대국은 포함되지 않습니다.", "Saves settings, profile and learning progress to one file. Games in progress are not included.", "設定・キャラクター・学習の進行を1つのファイルに保存します。進行中の対局は含まれません。", "将设置、角色与学习进度保存为一个文件。进行中的对局不包含在内。", "Lưu cài đặt, hồ sơ và tiến trình học vào một tệp. Ván đang chơi không được bao gồm.");
+  static const LocString importDone = LocString("가져오기 완료 — 항목 {n}개를 되돌렸습니다.", "Import complete — {n} items restored.", "読み込み完了 — {n}件を復元しました。", "导入完成 — 已恢复 {n} 项。", "Nhập xong — đã khôi phục {n} mục.");
   static const LocString importFailedNotJson = LocString("가져오기 실패 — 파일을 읽을 수 없습니다.", "Import failed — the file could not be read.", "読み込み失敗 — ファイルを読めません。", "导入失败 — 无法读取文件。", "Nhập thất bại — không đọc được tệp.");
   static const LocString importFailedNotBackup = LocString("가져오기 실패 — SVIL Baduk 백업 파일이 아닙니다.", "Import failed — not an SVIL Baduk backup file.", "読み込み失敗 — SVIL Baduk のバックアップではありません。", "导入失败 — 不是 SVIL Baduk 备份文件。", "Nhập thất bại — không phải tệp sao lưu SVIL Baduk.");
   static const LocString importFailedVersion = LocString("가져오기 실패 — 더 새 버전에서 만든 백업입니다. 앱을 업데이트하세요.", "Import failed — the backup came from a newer version. Please update the app.", "読み込み失敗 — 新しいバージョンのバックアップです。アプリを更新してください。", "导入失败 — 该备份来自更新的版本，请先更新应用。", "Nhập thất bại — bản sao lưu từ phiên bản mới hơn. Hãy cập nhật ứng dụng.");
@@ -264,6 +265,7 @@ abstract final class S {
   static const LocString territory = LocString("집", "Territory", "地", "目", "Đất");
   static const LocString komi = LocString("덤", "Komi", "コミ", "贴目", "Komi");
   static const LocString goRules = LocString("룰", "Rules", "ルール", "规则", "Luật");
+  static const LocString settingsData = LocString("데이터", "Data", "データ", "数据", "Dữ liệu");
   static const LocString settingsVision = LocString("보기", "Vision", "表示", "显示", "Hiển thị");
   static const LocString settingsBoard = LocString("바둑판", "Board", "碁盤", "棋盘", "Bàn cờ");
   static const LocString settingsGame = LocString("대국", "Game", "対局", "对局", "Ván cờ");
@@ -340,7 +342,7 @@ abstract final class S {
 }
 
 /// 완전성 테스트용 — 생성된 문자열 개수
-const int generatedStringCount = 292;
+const int generatedStringCount = 294;
 
 /// 완전성 테스트용 — 키 이름과 값 목록
 const Map<String, LocString> allStrings = <String, LocString>{
@@ -446,6 +448,7 @@ const Map<String, LocString> allStrings = <String, LocString>{
   "exportData": S.exportData,
   "importData": S.importData,
   "backupNote": S.backupNote,
+  "importDone": S.importDone,
   "importFailedNotJson": S.importFailedNotJson,
   "importFailedNotBackup": S.importFailedNotBackup,
   "importFailedVersion": S.importFailedVersion,
@@ -563,6 +566,7 @@ const Map<String, LocString> allStrings = <String, LocString>{
   "territory": S.territory,
   "komi": S.komi,
   "goRules": S.goRules,
+  "settingsData": S.settingsData,
   "settingsVision": S.settingsVision,
   "settingsBoard": S.settingsBoard,
   "settingsGame": S.settingsGame,

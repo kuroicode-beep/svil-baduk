@@ -6,6 +6,27 @@
   font-display: swap;
 }
 
+/* SVIL 표준 서체 — 번들 제공 (2026-08-15). local() 만 있던 다른 서체들과
+   달리 방문자 기기 설치 여부와 무관하게 라인시드가 보인다. */
+@font-face {
+  font-family: "LINESeedKR";
+  src: url("/fonts/LINESeedKR-Th.woff2") format("woff2");
+  font-weight: 300;
+  font-display: swap;
+}
+@font-face {
+  font-family: "LINESeedKR";
+  src: url("/fonts/LINESeedKR-Rg.woff2") format("woff2");
+  font-weight: 400;
+  font-display: swap;
+}
+@font-face {
+  font-family: "LINESeedKR";
+  src: url("/fonts/LINESeedKR-Bd.woff2") format("woff2");
+  font-weight: 700;
+  font-display: swap;
+}
+
 *,
 *::before,
 *::after {

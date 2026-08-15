@@ -17,8 +17,11 @@ const src = readFileSync(join(root, 'src/i18n/dict.ts'), 'utf8')
 
 const LANGS = ['ko', 'en', 'ja', 'zh', 'vi']
 
-// key: { ko: '...', en: '...', ... }  블록을 잡는다
-const entryRe = /^\s{2}([A-Za-z][A-Za-z0-9]*)\s*:\s*\{([^}]*)\}\s*,?\s*$/gm
+// key: { ko: '...', en: '...', ... }  블록을 잡는다.
+// 값에 {n} 같은 플레이스홀더가 있으면 [^}]* 가 거기서 끊겨 항목이
+// 조용히 누락됐다(실사고 — importDone 이 Dart 로 안 넘어왔다).
+// 닫는 중괄호는 "줄 끝의 } " 만 인정한다.
+const entryRe = /^\s{2}([A-Za-z][A-Za-z0-9]*)\s*:\s*\{([\s\S]*?)\}\s*,?\s*$/gm
 const valueRe = /(ko|en|ja|zh|vi)\s*:\s*'((?:[^'\\]|\\.)*)'/g
 
 const entries = []

@@ -1,8 +1,8 @@
 // src/router/routes.ts — 화면 목록과 해시 문자열 변환
 //
-// 해시 라우팅을 쓰는 이유: GitHub Pages 는 SPA rewrite 가 없고 Tauri 는 커스텀
-// 프로토콜로 서빙한다. pushState 경로는 두 곳 모두 새로고침·딥링크에서 404 가 된다.
-// 해시는 Pages · file:// · Tauri 에서 설정 없이 똑같이 동작하고 뒤로가기도 공짜다.
+// 해시 라우팅을 쓰는 이유: GitHub Pages 는 SPA rewrite 가 없어 pushState 경로가
+// 새로고침·딥링크에서 404 가 된다. 해시는 Pages · file:// 에서 설정 없이
+// 똑같이 동작하고 뒤로가기도 공짜다.
 
 export const SCREENS = ['home', 'learn', 'solo', 'multi', 'settings', 'profile'] as const
 

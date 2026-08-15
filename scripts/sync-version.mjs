@@ -62,15 +62,8 @@ syncOptional('app/lib/version.dart', (s) =>
   s.replace(/(appVersion\s*=\s*')[^']+(')/, `$1${version}$2`),
 )
 
-/* Tauri 셸 — 여기가 빠져 있어서 0.9.x 와 0.8.0 이 갈라져 있었다.
-   설치본이 조용히 옛 버전으로 찍히던 버그의 원인. */
-syncOptional('src-tauri/tauri.conf.json', (s) =>
-  s.replace(/("version"\s*:\s*")[^"]+(")/, `$1${version}$2`),
-)
-
-syncOptional('src-tauri/Cargo.toml', (s) =>
-  s.replace(/^(version\s*=\s*")[^"]+(")/m, `$1${version}$2`),
-)
+/* Tauri 셸은 0.20.0 에서 제거됐다 (체크리스트 B10) —
+   데스크톱은 Flutter(app/), 웹은 Vite 가 맡는다. */
 
 if (checkOnly && drift.length > 0) {
   console.error(

@@ -692,6 +692,7 @@ const dict = {
   komi: { ko: '덤', en: 'Komi', ja: 'コミ', zh: '贴目', vi: 'Komi' },
   goRules: { ko: '룰', en: 'Rules', ja: 'ルール', zh: '规则', vi: 'Luật' },
   // 설정 화면 (Flutter)
+  settingsData: { ko: '데이터', en: 'Data', ja: 'データ', zh: '数据', vi: 'Dữ liệu' },
   settingsVision: { ko: '보기', en: 'Vision', ja: '表示', zh: '显示', vi: 'Hiển thị' },
   settingsBoard: { ko: '바둑판', en: 'Board', ja: '碁盤', zh: '棋盘', vi: 'Bàn cờ' },
   settingsGame: { ko: '대국', en: 'Game', ja: '対局', zh: '对局', vi: 'Ván cờ' },

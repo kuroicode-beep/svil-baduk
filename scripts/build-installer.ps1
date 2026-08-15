@@ -1,6 +1,6 @@
 ﻿# scripts/build-installer.ps1 — Flutter 릴리스 빌드 → Inno Setup → 코드서명
 #
-# Tauri 의 bundle.windows.signCommand 훅에 해당하는 것을 손으로 엮는다.
+# 릴리스 빌드 → Inno Setup → 서명을 한 줄로 엮는다.
 # Flutter 에는 번들러도 서명 훅도 없다.
 
 $ErrorActionPreference = 'Stop'

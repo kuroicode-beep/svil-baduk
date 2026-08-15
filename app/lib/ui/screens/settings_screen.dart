@@ -6,10 +6,13 @@
 // 항목마다 왜 그 선택지가 있는지 한 줄 설명을 붙인다. "고대비" 가 무엇을
 // 바꾸는지 모르면 저시력 사용자가 자기에게 맞는 값을 못 고른다.
 
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 
 import '../../application/app_container.dart';
 import '../../data/db/settings_store.dart';
+import '../../data/platform/sgf_files.dart';
 import '../../domain/ai/ranks.dart';
 import '../../domain/changelog.dart';
 import '../../domain/engine/types.dart';
@@ -19,9 +22,16 @@ import '../theme/svil_theme.dart';
 import '../../version.dart';
 
 class SettingsScreen extends StatelessWidget {
-  const SettingsScreen({required this.container, super.key});
+  const SettingsScreen({
+    required this.container,
+    this.files = const DesktopSgfFileIo(typeGroup: kJsonTypeGroup),
+    super.key,
+  });
 
   final AppContainer container;
+
+  /// 백업 파일 입출력. 테스트가 가짜를 끼운다.
+  final SgfFileIo files;
 
   AppSettings get _st => container.settings.settings;
   Lang get _lang => _st.lang;
@@ -217,6 +227,29 @@ class SettingsScreen extends StatelessWidget {
                   _set(_st.copyWith(verbosity: v)),
             ),
 
+            // 데이터 이전 (체크리스트 D5) — React 웹 백업과 형식이 같아
+            // 웹 ↔ 데스크톱 어느 방향이든 옮길 수 있다.
+            if (container.caps.hasFileDialog) ...<Widget>[
+              _section(context, S.settingsData(_lang)),
+              Text(S.backupNote(_lang),
+                  style: Theme.of(context).textTheme.bodySmall),
+              const SizedBox(height: 8),
+              Wrap(
+                spacing: 8,
+                runSpacing: 8,
+                children: <Widget>[
+                  OutlinedButton(
+                    onPressed: () => unawaited(_exportBackup(context)),
+                    child: Text(S.exportData(_lang)),
+                  ),
+                  OutlinedButton(
+                    onPressed: () => unawaited(_importBackup(context)),
+                    child: Text(S.importData(_lang)),
+                  ),
+                ],
+              ),
+            ],
+
             _section(context, S.history(_lang)),
             // 하우스 규칙: 설정에 버전별 업데이트 히스토리를 최신순으로
             for (final HistoryEntry h in changelog)
@@ -242,6 +275,43 @@ class SettingsScreen extends StatelessWidget {
         ),
       ),
     );
+  }
+
+  void _say(BuildContext context, String msg) {
+    if (msg.isEmpty) return;
+    ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(msg)));
+  }
+
+  Future<void> _exportBackup(BuildContext context) async {
+    final FileOutcome r = await files.save(
+      container.exportBackup(appVersion: appVersion),
+      suggestedName: 'svil-baduk-backup-$appVersion.json',
+    );
+    if (!context.mounted) return;
+    switch (r) {
+      case FileWritten():
+        _say(context, S.exportData(_lang));
+      case FileCancelled() || FileRead():
+        break;
+      case FileFailed(:final String reasonKey, :final String? detail):
+        final String why = allStrings[reasonKey]?.call(_lang) ?? reasonKey;
+        _say(context, detail == null ? why : '$why ($detail)');
+    }
+  }
+
+  Future<void> _importBackup(BuildContext context) async {
+    final FileOutcome r = await files.open();
+    if (!context.mounted) return;
+    if (r is! FileRead) {
+      if (r is FileFailed) {
+        _say(context, allStrings[r.reasonKey]?.call(_lang) ?? r.reasonKey);
+      }
+      return;
+    }
+    final (String resultKey, int n) = await container.importBackup(r.contents);
+    if (!context.mounted) return;
+    final String msg = allStrings[resultKey]?.call(_lang) ?? resultKey;
+    _say(context, msg.replaceAll('{n}', '$n'));
   }
 
   String _paletteName(BoardPaletteId p) => switch (p) {

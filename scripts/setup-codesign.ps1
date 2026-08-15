@@ -11,7 +11,7 @@ $existing = Get-ChildItem Cert:\CurrentUser\My -ErrorAction SilentlyContinue |
 if ($existing) {
   Write-Host "existing_thumbprint=$($existing.Thumbprint)"
   Write-Host "subject=$($existing.Subject)"
-  Write-Host "Set SVIL_CODESIGN_THUMBPRINT=$($existing.Thumbprint) before npm run tauri:build"
+  Write-Host "Set SVIL_CODESIGN_THUMBPRINT=$($existing.Thumbprint) before npm run app:installer"
   exit 0
 }
 
@@ -29,7 +29,7 @@ Write-Host "subject=$($cert.Subject)"
 Write-Host ""
 Write-Host "Usage:"
 Write-Host "  `$env:SVIL_CODESIGN_THUMBPRINT = '$($cert.Thumbprint)'"
-Write-Host "  npm run tauri:build"
+Write-Host "  npm run app:installer"
 Write-Host ""
 Write-Host "Optional (fail build if unsigned):"
 Write-Host "  `$env:SVIL_CODESIGN_REQUIRED = '1'"

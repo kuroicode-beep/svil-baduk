@@ -111,7 +111,7 @@ export function resolveReduceMotion(v: ReduceMotionSetting): boolean {
 
 export const defaultSettings = (): Settings => ({
   lang: 'ko',
-  font: 'kyobo',
+  font: 'lineseed',
   fontSize: 'medium',
   blinkIntersections: true,
   maxContrastBoard: true,

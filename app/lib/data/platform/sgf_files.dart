@@ -13,6 +13,12 @@ const XTypeGroup kSgfTypeGroup = XTypeGroup(
   extensions: <String>['sgf'],
 );
 
+/// 백업(JSON) 형식 필터 — 데이터 가져오기/내보내기 (체크리스트 D5)
+const XTypeGroup kJsonTypeGroup = XTypeGroup(
+  label: 'JSON',
+  extensions: <String>['json'],
+);
+
 /// 파일 작업의 결과. 취소와 실패를 구별한다 —
 /// 취소했는데 "실패했습니다" 가 낭독되면 사용자가 놀란다.
 sealed class FileOutcome {
@@ -49,7 +55,10 @@ abstract class SgfFileIo {
 }
 
 class DesktopSgfFileIo implements SgfFileIo {
-  const DesktopSgfFileIo();
+  const DesktopSgfFileIo({this.typeGroup = kSgfTypeGroup});
+
+  /// 대화상자 파일 필터. 기본은 SGF, 백업은 [kJsonTypeGroup] 을 끼운다.
+  final XTypeGroup typeGroup;
 
   @override
   Future<FileOutcome> save(String contents,
@@ -57,7 +66,7 @@ class DesktopSgfFileIo implements SgfFileIo {
     try {
       final FileSaveLocation? loc = await getSaveLocation(
         suggestedName: suggestedName,
-        acceptedTypeGroups: const <XTypeGroup>[kSgfTypeGroup],
+        acceptedTypeGroups: <XTypeGroup>[typeGroup],
       );
       if (loc == null) return const FileCancelled();
       await File(loc.path).writeAsString(contents);
@@ -71,7 +80,7 @@ class DesktopSgfFileIo implements SgfFileIo {
   Future<FileOutcome> open() async {
     try {
       final XFile? f =
-          await openFile(acceptedTypeGroups: const <XTypeGroup>[kSgfTypeGroup]);
+          await openFile(acceptedTypeGroups: <XTypeGroup>[typeGroup]);
       if (f == null) return const FileCancelled();
       return FileRead(await f.readAsString(), f.path);
     } on FileSystemException catch (e) {

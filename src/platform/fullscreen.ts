@@ -1,19 +1,8 @@
-/** Browser Fullscreen API + Tauri window fullscreen. */
-
-function isTauri(): boolean {
-  return typeof window !== 'undefined' && '__TAURI_INTERNALS__' in window
-}
+/** Browser Fullscreen API.
+ *  Tauri 분기는 0.20.0 에서 제거 — 데스크톱은 Flutter(app/)가 맡고
+ *  이 코드는 웹 타깃 전용이다 (체크리스트 B10). */
 
 export async function enterFullscreen(): Promise<void> {
-  try {
-    if (isTauri()) {
-      const { getCurrentWindow } = await import('@tauri-apps/api/window')
-      await getCurrentWindow().setFullscreen(true)
-      return
-    }
-  } catch {
-    /* fall through to browser API */
-  }
   try {
     if (!document.fullscreenElement) {
       await document.documentElement.requestFullscreen?.()
@@ -24,15 +13,6 @@ export async function enterFullscreen(): Promise<void> {
 }
 
 export async function exitFullscreen(): Promise<void> {
-  try {
-    if (isTauri()) {
-      const { getCurrentWindow } = await import('@tauri-apps/api/window')
-      await getCurrentWindow().setFullscreen(false)
-      return
-    }
-  } catch {
-    /* fall through */
-  }
   try {
     if (document.fullscreenElement) {
       await document.exitFullscreen?.()

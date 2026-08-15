@@ -10,6 +10,7 @@ import 'package:flutter/services.dart' show rootBundle;
 import 'package:shared_preferences/shared_preferences.dart';
 
 import '../data/db/learn_progress_store.dart';
+import '../domain/backup.dart';
 import '../domain/profile/profile.dart';
 import '../data/db/settings_store.dart';
 import '../data/p2p/webrtc_endpoint.dart';
@@ -139,7 +140,11 @@ class AppContainer {
     required this.profile,
     required this.curriculum,
     required this.makeEndpoint,
+    required this.prefs,
   });
+
+  /// 백업 가져오기/내보내기가 저장소 원문을 직접 읽고 쓴다
+  final SharedPreferences prefs;
 
   final VisionController vision;
 
@@ -180,6 +185,44 @@ class AppContainer {
       curriculum: Curriculum.parse(
           await rootBundle.loadString('assets/learn/curriculum.json')),
       makeEndpoint: makeEndpoint ?? WebRtcEndpoint.new,
+      prefs: store,
+    );
+  }
+
+  /// React 판(또는 다른 기기의 Flutter 판) 백업을 복원한다 (체크리스트 D5).
+  /// 성공 시 컨트롤러들이 새 값으로 갱신돼 화면에 즉시 반영된다.
+  /// 반환: (i18n 키, 되돌린 항목 수) — 키의 {n} 을 화면이 채운다.
+  Future<(String, int)> importBackup(String text) async {
+    final BackupResult r = decodeBackup(text);
+    if (r is BackupFail) return (r.reasonKey, 0);
+    final BackupOk ok = r as BackupOk;
+
+    for (final MapEntry<String, String> e in ok.values.entries) {
+      await prefs.setString(e.key, e.value);
+    }
+    // 각 로더가 검증·마이그레이션한다 — 백업 형식 자체는 신뢰하지 않는다
+    final AppSettings loaded = SettingsController.load(prefs);
+    settings.update(loaded);
+    vision
+      ..update(loaded.toVision(systemReduceMotion: false))
+      ..setPalette(loaded.palette)
+      ..setVerbosity(loaded.verbosity);
+    profile.update(ProfileController.load(prefs));
+    progress.save(ProgressController.load(prefs));
+    return ('importDone', ok.values.length);
+  }
+
+  /// 현재 데이터를 React restoreBackup 이 읽을 수 있는 형식으로 만든다
+  String exportBackup({required String appVersion}) {
+    final Map<String, String> stored = <String, String>{};
+    for (final String key in kBackupKeys) {
+      final String? v = prefs.getString(key);
+      if (v != null) stored[key] = v;
+    }
+    return encodeBackup(
+      appVersion: appVersion,
+      savedAt: DateTime.now().toIso8601String(),
+      storedValues: stored,
     );
   }
 

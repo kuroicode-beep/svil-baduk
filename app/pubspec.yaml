@@ -16,7 +16,7 @@ publish_to: 'none' # Remove this line if you wish to publish to pub.dev
 # https://developer.apple.com/library/archive/documentation/General/Reference/InfoPlistKeyReference/Articles/CoreFoundationKeys.html
 # In Windows, build-name is used as the major, minor, and patch parts
 # of the product and file versions while build-number is used as the build suffix.
-version: 0.18.0+1
+version: 0.19.0+1
 
 environment:
   sdk: ^3.10.4
@@ -74,6 +74,16 @@ flutter:
 
   assets:
     - assets/learn/
+
+  # SVIL 표준 서체 — 시스템 설치 여부에 기대지 않고 번들한다.
+  # (이전 KyoboHandwriting2019 는 미설치 기기에서 조용히 맑은 고딕으로 떨어졌다)
+  # Regular 만 싣는다: 이 앱은 합성 볼드 금지 규칙으로 위계를 크기·색으로만
+  # 만들어 다른 굵기를 쓰지 않는다 (Th·Bd 를 실으면 설치 용량 +6.8MB).
+  fonts:
+    - family: LINESeedKR
+      fonts:
+        - asset: assets/fonts/LINESeedKR-Rg.ttf
+          weight: 400
 
   # To add assets to your application, add an assets section, like this:
   # assets:

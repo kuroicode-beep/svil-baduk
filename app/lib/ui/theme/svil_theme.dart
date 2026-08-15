@@ -34,7 +34,10 @@ abstract final class SvilColors {
   static const focusPure = Color(0xFFFFFF00);
 }
 
-const String kFontFamily = 'KyoboHandwriting2019';
+/// SVIL 표준 서체 — 라인시드 (2026-08-15 교체, 사용자 지정).
+/// pubspec 에 3굵기를 번들해서 시스템 폰트 설치 여부에 기대지 않는다
+/// (이전 KyoboHandwriting2019 는 미설치 기기에서 조용히 맑은 고딕이 됐다).
+const String kFontFamily = 'LINESeedKR';
 const List<String> kFontFallback = <String>['Malgun Gothic', 'sans-serif'];
 
 /// 숫자·좌표·타임스탬프·버전 — Consolas 모노스페이스.

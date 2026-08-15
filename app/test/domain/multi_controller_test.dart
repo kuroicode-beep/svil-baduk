@@ -185,6 +185,50 @@ void main() {
     );
   });
 
+  test('대국 중 끊기면 게스트가 같은 방으로 자동 재접속하고 판이 복원된다',
+      () async {
+    await connectPair();
+    guest.reconnectDelays = const <Duration>[Duration.zero, Duration.zero];
+    host.placeAt(4, 4);
+    await pumpEventQueue();
+
+    // 네트워크 단절 시뮬레이션 — 전송 쌍이 죽는다
+    await guestEp.transports.single.close();
+    await pumpEventQueue();
+
+    expect(
+      guestEvents.whereType<MultiTrouble>().any(
+          (MultiTrouble t) => t.reasonKey == 'reconnecting'),
+      isTrue,
+      reason: '재접속 시도를 알려야 한다 — 침묵 금지',
+    );
+    expect(guest.connected, isTrue, reason: '자동 재접속이 이어져야 한다');
+    expect(host.connected, isTrue);
+    expect(guest.game.state.zobrist, host.game.state.zobrist,
+        reason: '호스트 권위 판으로 복원돼야 한다');
+    expect(guest.game.state.history.length, 1);
+    // 재접속 성공도 낭독된다 (MultiStarted 재발화)
+    expect(guestEvents.whereType<MultiStarted>().length, greaterThan(1));
+
+    // 복원된 채널로 대국이 이어진다
+    expect(guest.myTurn, isTrue);
+    guest.placeAt(2, 2);
+    await pumpEventQueue();
+    expect(host.game.state.history.length, 2);
+  });
+
+  test('로비로 나가기는 재접속하지 않는다', () async {
+    await connectPair();
+    guest.reconnectDelays = const <Duration>[Duration.zero];
+    final int before = guestEp.transports.length;
+    await guest.leaveGame();
+    await pumpEventQueue();
+    expect(guest.connected, isFalse);
+    expect(guest.phase, MultiScreenPhase.lobby);
+    expect(guestEp.transports.length, before,
+        reason: '사용자가 나갔는데 몰래 다시 붙으면 안 된다');
+  });
+
   test('늦게 온 두 번째 손님은 받지 않는다', () async {
     await connectPair();
     final MultiController third = MultiController(

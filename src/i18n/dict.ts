@@ -665,6 +665,13 @@ const dict = {
     vi: 'Phiên bản ứng dụng khác nhau. Hãy cập nhật cả hai bên.',
   },
   idCopied: { ko: '복사했습니다', en: 'Copied', ja: 'コピーしました', zh: '已复制', vi: 'Đã sao chép' },
+  reconnecting: {
+    ko: '연결이 끊겨 다시 연결하는 중…',
+    en: 'Connection lost — reconnecting…',
+    ja: '切断されました。再接続中…',
+    zh: '连接中断，正在重新连接…',
+    vi: 'Mất kết nối — đang kết nối lại…',
+  },
   roomQrLabel: {
     ko: '방 ID QR — 상대가 휴대폰으로 찍어 옮길 수 있습니다',
     en: 'Room ID QR — your friend can scan it with a phone',

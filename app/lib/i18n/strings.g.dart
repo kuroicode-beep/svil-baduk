@@ -256,6 +256,7 @@ abstract final class S {
   static const LocString multiNoUndo = LocString("함께 두기에서는 무르기·힌트를 쓸 수 없습니다", "Undo and hints are not available in online games", "オンライン対局では待ったとヒントは使えません", "联机对弈不能悔棋或提示", "Không thể hoàn tác hay gợi ý khi chơi online");
   static const LocString protocolMismatch = LocString("앱 버전이 서로 다릅니다. 양쪽 모두 최신 버전으로 업데이트하세요.", "App versions differ. Update both sides to the latest version.", "アプリのバージョンが異なります。両方とも最新に更新してください。", "双方应用版本不同，请都更新到最新版本。", "Phiên bản ứng dụng khác nhau. Hãy cập nhật cả hai bên.");
   static const LocString idCopied = LocString("복사했습니다", "Copied", "コピーしました", "已复制", "Đã sao chép");
+  static const LocString reconnecting = LocString("연결이 끊겨 다시 연결하는 중…", "Connection lost — reconnecting…", "切断されました。再接続中…", "连接中断，正在重新连接…", "Mất kết nối — đang kết nối lại…");
   static const LocString roomQrLabel = LocString("방 ID QR — 상대가 휴대폰으로 찍어 옮길 수 있습니다", "Room ID QR — your friend can scan it with a phone", "部屋ID QR — 相手がスマホで読み取れます", "房间ID二维码 — 对方可用手机扫描", "Mã QR ID phòng — bạn có thể quét bằng điện thoại");
   static const LocString crossPlayNote = LocString("웹 판과는 서로 연결되지 않습니다", "Not compatible with the web version", "ウェブ版とは接続できません", "与网页版不互通", "Không tương thích với bản web");
   static const LocString hostLabel = LocString("호스트", "Host", "ホスト", "房主", "Chủ phòng");
@@ -339,7 +340,7 @@ abstract final class S {
 }
 
 /// 완전성 테스트용 — 생성된 문자열 개수
-const int generatedStringCount = 291;
+const int generatedStringCount = 292;
 
 /// 완전성 테스트용 — 키 이름과 값 목록
 const Map<String, LocString> allStrings = <String, LocString>{
@@ -554,6 +555,7 @@ const Map<String, LocString> allStrings = <String, LocString>{
   "multiNoUndo": S.multiNoUndo,
   "protocolMismatch": S.protocolMismatch,
   "idCopied": S.idCopied,
+  "reconnecting": S.reconnecting,
   "roomQrLabel": S.roomQrLabel,
   "crossPlayNote": S.crossPlayNote,
   "hostLabel": S.hostLabel,

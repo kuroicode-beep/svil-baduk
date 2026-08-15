@@ -82,6 +82,18 @@ class MultiController extends ChangeNotifier {
   StreamSubscription<P2PTransport>? _incomingSub;
   bool _disposed = false;
 
+  /// 게스트가 마지막으로 들어간 방 — 끊기면 여기로 자동 재접속한다
+  String _lastJoinedId = '';
+  bool _leaving = false;
+  bool _reconnecting = false;
+
+  /// 자동 재접속 대기 간격. 테스트가 0 으로 줄인다.
+  List<Duration> reconnectDelays = const <Duration>[
+    Duration(seconds: 2),
+    Duration(seconds: 4),
+    Duration(seconds: 8),
+  ];
+
   bool get myTurn =>
       phase == MultiScreenPhase.play &&
       connected &&
@@ -118,6 +130,7 @@ class MultiController extends ChangeNotifier {
     notifyListeners();
     try {
       final P2PTransport t = await _endpoint.connect(remoteId);
+      _lastJoinedId = remoteId.trim();
       _attach(t, asHost: false);
       // 매 접속마다 전체 상태를 요청한다 — 첫 접속이든 재접속이든
       // 호스트의 Hello + StateMsg 가 대국을 세운다.
@@ -137,8 +150,11 @@ class MultiController extends ChangeNotifier {
     if (asHost) {
       myColor = hostColor;
     }
+    final bool rejoined = phase == MultiScreenPhase.play && !connected;
     connected = true;
     _transportSub = t.events.listen(_onTransportEvent);
+    // 대국 중 재접속이면 다시 이어졌음을 알린다 — 침묵하면 모른다
+    if (rejoined) onSession?.call(const MultiStarted());
     notifyListeners();
   }
 
@@ -155,7 +171,16 @@ class MultiController extends ChangeNotifier {
         if (phase == MultiScreenPhase.connecting) {
           phase = MultiScreenPhase.lobby;
         }
-        onSession?.call(MultiTrouble(reasonKey, detail: detail));
+        // 대국 중 끊긴 게스트는 같은 방으로 자동 재접속한다.
+        // 호스트는 방을 열어 둔 채 기다린다 (재접속은 게스트가 시작한다).
+        final bool willRetry = !_leaving &&
+            !amHost &&
+            phase == MultiScreenPhase.play &&
+            !game.state.ended &&
+            _lastJoinedId.isNotEmpty;
+        onSession?.call(MultiTrouble(willRetry ? 'reconnecting' : reasonKey,
+            detail: detail));
+        if (willRetry) unawaited(_autoReconnect());
         if (!_disposed) notifyListeners();
     }
   }
@@ -318,22 +343,54 @@ class MultiController extends ChangeNotifier {
     return parsed is CoordCommand && parsed.command == BoardCommand.resign;
   }
 
+  /// 끊긴 대국을 같은 방으로 다시 잇는다. 성공하면 StateRequest 가
+  /// 호스트의 권위 판을 가져와 국면이 복원된다.
+  Future<void> _autoReconnect() async {
+    if (_reconnecting) return;
+    _reconnecting = true;
+    try {
+      for (final Duration delay in reconnectDelays) {
+        await Future<void>.delayed(delay);
+        if (_disposed || _leaving || connected || game.state.ended) return;
+        try {
+          final P2PTransport t = await _endpoint.connect(_lastJoinedId);
+          _attach(t, asHost: false);
+          t.send(const StateRequest().encode());
+          return;
+        } on P2PException catch (_) {
+          // 다음 간격으로 재시도
+        }
+      }
+      // 전부 실패 — 조용히 멈추지 않고 최종 상태를 알린다
+      if (!_disposed && !_leaving && !connected) {
+        onSession?.call(const MultiTrouble('disconnected'));
+        notifyListeners();
+      }
+    } finally {
+      _reconnecting = false;
+    }
+  }
+
   /// 로비로 되돌아간다 (연결 종료 포함)
   Future<void> leaveGame() async {
+    _leaving = true;
     await _transportSub?.cancel();
     _transportSub = null;
     await _transport?.close();
     _transport = null;
     connected = false;
     phase = MultiScreenPhase.lobby;
+    _lastJoinedId = '';
     game.dispose();
     game = _makeGame(size);
+    _leaving = false;
     if (!_disposed) notifyListeners();
   }
 
   @override
   void dispose() {
     _disposed = true;
+    _leaving = true;
     unawaited(_transportSub?.cancel());
     unawaited(_incomingSub?.cancel());
     unawaited(_transport?.close());

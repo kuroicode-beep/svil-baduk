@@ -3,7 +3,7 @@
 저시력자를 위한 **고대비 바둑**.
 
 - 저장소: https://github.com/kuroicode-beep/svil-baduk
-- 버전: `VERSION` 파일 / 앱 홈 배지 (현재 0.18.0)
+- 버전: `VERSION` 파일 / 앱 홈 배지 (현재 0.19.0)
 - Pages: `npm run deploy` 후 `/svil-baduk/`
 - 데스크톱: Tauri 2 (`npm run tauri:dev` / `tauri:build`)
 
